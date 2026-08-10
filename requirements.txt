@@ -1,0 +1,14 @@
+# Core
+anthropic>=0.69.0
+PyYAML>=6.0
+
+# YouTube publishing (optional until autonomy.mode leaves "manual")
+google-api-python-client>=2.120.0
+google-auth-oauthlib>=1.2.0
+
+# Transcription fallback for the rare stream without auto-captions (optional)
+# faster-whisper>=1.0.0
+
+# External binaries, not pip-installable — see README:
+#   yt-dlp   (keep current; YouTube extraction breaks on old versions)
+#   ffmpeg / ffprobe

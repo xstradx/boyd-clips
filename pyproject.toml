@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boyd-clips"
+version = "1.0.0"
+description = "Automated daily clipping of Judge Stephanie Boyd's public court livestream"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.69.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+publish = [
+    "google-api-python-client>=2.120.0",
+    "google-auth-oauthlib>=1.2.0",
+]
+whisper = ["faster-whisper>=1.0.0"]
+
+[project.scripts]
+boyd = "boydclips.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

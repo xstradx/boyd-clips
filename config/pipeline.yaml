@@ -1,0 +1,202 @@
+# ============================================================================
+#  BOYD CLIPS — PIPELINE CONFIGURATION
+#  Single source of truth for every knob in the system.
+#  Nothing in src/ hardcodes a value that belongs here.
+# ============================================================================
+
+source:
+  # The court's YouTube channel. /streams is the reliable listing tab —
+  # the /videos tab returns duplicate entries under some yt-dlp versions.
+  channel_url: "https://www.youtube.com/@judgestephanieboyd4233/streams"
+  channel_name: "Judge Stephanie Boyd"
+  court: "187th District Court, Bexar County, Texas"
+
+  # How many recent streams to examine on each discovery run.
+  scan_depth: 8
+
+  # Ignore streams shorter than this (test streams, aborted sessions).
+  min_duration_s: 900
+
+  # Ignore streams older than this many days on a discovery run.
+  max_age_days: 4
+
+autonomy:
+  # manual   -> render everything, publish nothing. Files land in out/review/.
+  # assisted -> upload as PRIVATE/draft on each platform; you flip to public.
+  # auto     -> publish public with no human in the loop.
+  #
+  # PROMOTION PATH: do not move to "auto" on a hunch. state/ledger tracks
+  # approve/reject per clip. `boyd stats` prints the approval rate. The
+  # documented gate is >= 30 consecutive approvals with zero safety rejects.
+  mode: manual
+
+  promotion_gate:
+    min_consecutive_approvals: 30
+    max_safety_rejects: 0
+
+output:
+  # ---- The daily funnel -------------------------------------------------
+  # One long-form video (the full case) + one short (hook clip) that points
+  # back at it. The long-form MUST publish first so its URL can be baked
+  # into the short's description. This ordering is enforced in publish.py.
+  clips_per_day: 1
+  bank_extras: true          # qualifying runners-up go to out/bank/ for slow days
+
+  longform:
+    # The full case, trimmed. Horizontal, source aspect preserved.
+    min_duration_s: 120
+    max_duration_s: 1200
+    pad_before_s: 4.0        # start slightly before the first word
+    pad_after_s: 3.0
+    resolution: [1920, 1080]
+    fps: 30
+    crf: 20
+    audio_bitrate: "192k"
+
+  short:
+    # The hook clip, cut from *inside* the long-form range.
+    min_duration_s: 25
+    max_duration_s: 59       # stay under 60s for Shorts/Reels/TikTok
+    target_duration_s: 45
+    resolution: [1080, 1920]
+    fps: 30
+    crf: 20
+    audio_bitrate: "160k"
+
+    # Zoom court is 16:9 with multiple participants, and the court's encoder
+    # bakes black bars into its own frame. Cropping to 9:16 cuts people out;
+    # naively letterboxing leaves them tiny.
+    #
+    #   auto        detect the real content rectangle, then pick:
+    #                 side-by-side 2-up  -> split the tiles and stack them
+    #                 anything else      -> blurred-fill letterbox
+    #   split_stack force tile stacking
+    #   blur_pad    force blurred-fill letterbox
+    #   center_crop force a hard 9:16 crop (will cut participants off)
+    vertical_mode: auto
+    autocrop: true            # strip the source's baked-in letterbox first
+    blur_sigma: 28
+    blur_darken: 0.55
+
+    # Burned-in captions, driven by word-level timings from the transcript.
+    captions:
+      enabled: true
+      font: "Arial Black"
+      font_size: 74
+      primary_color: "&H00FFFFFF"    # ASS BGR order: white
+      highlight_color: "&H0000D7FF"  # amber, applied to the active word
+      outline_color: "&H00000000"
+      outline: 5
+      shadow: 2
+      margin_v: 420                  # px from bottom of the 1920px canvas
+      max_chars_per_line: 22
+      max_lines: 2
+      uppercase: true
+
+transcription:
+  # YouTube auto-captions are free and available on this channel. Whisper is
+  # only a fallback for the rare stream published without them.
+  source: auto_captions        # auto_captions | whisper | auto_captions_then_whisper
+  language: "en"
+  whisper_fallback: true
+  whisper_model: "medium"      # only used if the fallback fires
+
+analysis:
+  # See prompts/ for the actual instructions and spec/CONTENT_SPEC.md for the
+  # format contract. Model IDs live here so you can swap tiers without edits.
+  model: "claude-opus-5"
+  effort: "high"
+  max_tokens: 32000
+
+  # A case must clear ALL of these to be eligible. Hard gates, not weights.
+  gates:
+    min_total_score: 70
+    safety_must_pass: true
+    min_audio_quality: 3       # 1-5, judged from transcript coherence
+    requires_self_contained: true
+
+  # Weighted rubric. Must sum to 100. Mirrored in prompts/score_cases.md —
+  # if you change a weight here, change it there too or scoring drifts.
+  rubric_weights:
+    human_stakes: 25           # real consequence for a real person
+    dramatic_turn: 25          # something actually changes on camera
+    judge_moment: 20           # Boyd says something decisive or memorable
+    self_contained: 15         # comprehensible with zero outside context
+    hook_strength: 15          # is there a line that works at second 0
+
+packaging:
+  # Title/description/hashtag templates. {placeholders} are filled by the LLM
+  # packaging step against the schema in prompts/package_post.md.
+  longform:
+    title_template: "{hook_line} | Judge Boyd, {court_short}"
+    title_max_chars: 100
+    description_template: |
+      {summary}
+
+      {proceeding_type} before Judge Stephanie Boyd, {court}.
+      Recorded from the court's public livestream on {docket_date}.
+
+      This is a public court proceeding. Nothing here is a statement of guilt —
+      charges are accusations, and every person appearing is presumed innocent
+      unless and until convicted.
+
+      Source: {source_url}
+      Timestamp in original stream: {start_timestamp}
+
+      #judgeboyd #courtroom #bexarcounty
+    tags:
+      - judge boyd
+      - judge stephanie boyd
+      - 187th district court
+      - bexar county
+      - courtroom
+      - zoom court
+
+  short:
+    title_template: "{hook_line}"
+    title_max_chars: 90
+    # {longform_url} is injected AFTER the long-form publishes. This is the
+    # funnel — the short exists to route viewers to the full case.
+    description_template: |
+      {hook_line}
+
+      ▶ FULL CASE: {longform_url}
+
+      Public proceeding before Judge Stephanie Boyd, {court}.
+      Charges are accusations only.
+
+      {hashtags}
+    hashtags: "#judgeboyd #courtroom #court #bexarcounty #fyp"
+    end_card:
+      enabled: true
+      text: "FULL CASE IN DESCRIPTION"
+      duration_s: 2.0
+
+publish:
+  # Per-platform switches. Credentials come from config/.env — never here.
+  youtube:
+    enabled: true
+    privacy_manual: "private"
+    privacy_assisted: "private"
+    privacy_auto: "public"
+    category_id: "25"          # News & Politics
+    made_for_kids: false
+  tiktok:
+    enabled: false             # flip on once the Content Posting API is approved
+    privacy_manual: "SELF_ONLY"
+    privacy_auto: "PUBLIC_TO_EVERYONE"
+  instagram:
+    enabled: false             # needs Business account + linked FB Page
+    share_to_feed: true
+
+paths:
+  work: "work"                 # per-run scratch, safe to delete
+  out: "out"
+  state_db: "state/pipeline.db"
+  logs: "logs"
+
+retention:
+  # Housekeeping so a daily job doesn't fill the disk.
+  work_days: 3
+  posted_days: 90
+  keep_transcripts_days: 365   # transcripts are tiny and useful for backfill

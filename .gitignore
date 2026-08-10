@@ -1,0 +1,19 @@
+# Secrets
+config/.env
+config/youtube_token.json
+config/youtube_client_secret.json
+
+# Generated
+work/
+out/
+logs/
+state/
+*.mp4
+*.m4a
+*.json3
+*.ass
+
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
