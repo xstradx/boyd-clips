@@ -330,6 +330,22 @@ class Pipeline:
                     )
                     continue
 
+                # Last gate before anything is downloaded. Batch scoring sees a
+                # narrowed transcript; this re-checks the pick against all of
+                # it, because safety judgements have been observed to move
+                # between runs and this is the point where being wrong costs
+                # the most.
+                if self.cfg.get("analysis.gates.recheck_selection", True):
+                    transcript = get_transcript(docket.video_id, self.work / docket.video_id)
+                    meta = {"title": docket.title, "docket_date": docket.docket_date,
+                            "url": docket.url}
+                    confirmed, why = self.analyzer.confirm_selection(transcript, case, meta)
+                    if not confirmed:
+                        log.warning("  selection dropped on re-check: %s", why)
+                        self.store.save_case(docket.video_id, case, None)
+                        continue
+                    log.info("  re-check passed (score %.1f)", case["total_score"])
+
                 produced_this_docket = True
 
                 try:

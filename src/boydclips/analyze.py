@@ -227,8 +227,46 @@ class Analyzer:
 
     # ---------------------------------------------------------------- stage 2
 
+    def confirm_selection(
+        self, transcript: Transcript, case: dict[str, Any], meta: dict[str, Any]
+    ) -> tuple[bool, str]:
+        """Re-run the gate on one selected case against the full transcript.
+
+        Batch scoring shows each batch only its own cases' transcript span,
+        which bounds cost but measurably shifts safety judgements between runs
+        — R7 in particular ("would a viewer be misled?") is a question about
+        context, so narrowing the context changes the answer. Observed: three
+        of six cases that passed the gate on one run were rejected on another.
+
+        Re-checking only the day's pick, with everything the model can see, is
+        cheap (one case, one call) and lands exactly where the cost of a wrong
+        answer is highest — immediately before anything is downloaded,
+        rendered, or published.
+        """
+        rechecked = self.score(transcript, [case], meta, full_context=True)
+        if not rechecked:
+            return False, "re-check returned no result for the selected case"
+
+        confirmed = rechecked[0]
+        if not confirmed["safety"]["safety_pass"]:
+            rules = ", ".join(confirmed["safety"]["safety_rule_violations"]) or "unspecified"
+            return False, f"failed safety re-check ({rules})"
+        if not confirmed["eligible"]:
+            return False, f"failed re-check: {confirmed['ineligible_reason']}"
+
+        # Carry the fuller judgement forward — it saw more than the batch did.
+        case["safety"] = confirmed["safety"]
+        case["scores"] = confirmed["scores"]
+        case["total_score"] = confirmed["total_score"]
+        case["recheck_score"] = confirmed["total_score"]
+        return True, ""
+
     def score(
-        self, transcript: Transcript, cases: list[dict[str, Any]], meta: dict[str, Any]
+        self,
+        transcript: Transcript,
+        cases: list[dict[str, Any]],
+        meta: dict[str, Any],
+        full_context: bool = False,
     ) -> list[dict[str, Any]]:
         """Score in batches.
 
@@ -254,7 +292,10 @@ class Analyzer:
                 docket_date=meta.get("docket_date", "unknown"),
                 source_url=meta["url"],
                 cases_json=json.dumps(batch, ensure_ascii=False, indent=2),
-                transcript=_excerpt_for(transcript, batch),
+                transcript=(
+                    transcript.render_for_llm() if full_context
+                    else _excerpt_for(transcript, batch)
+                ),
             )
             result = self._call("score_cases", user, SCORE_SCHEMA)
             raw_cases.extend(result["cases"])
