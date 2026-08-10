@@ -80,7 +80,11 @@ SAFETY_RULE_IDS = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"]
 _SEGMENT_REF = {
     "type": "object",
     "properties": {
-        "beat": {"type": "string", "enum": ["hook", "stakes", "turn", "button"]},
+        "beat": {
+            "type": "string",
+            # "moment" is the Form B single-segment short (CONTENT_SPEC §3).
+            "enum": ["hook", "stakes", "turn", "button", "moment"],
+        },
         "start_s": {"type": "number"},
         "end_s": {"type": "number"},
         "quote": {"type": "string"},
@@ -150,6 +154,10 @@ SCORE_SCHEMA: dict[str, Any] = {
                     "hook_quote": {"type": "string"},
                     "hook_start_s": {"type": "number"},
                     "shortable": {"type": "boolean"},
+                    "short_form": {
+                        "type": "string",
+                        "enum": ["four_beat", "single_moment", "none"],
+                    },
                     "shortable_reasoning": {"type": "string"},
                     "short_segments": {"type": "array", "items": _SEGMENT_REF},
                     "summary": {"type": "string"},
@@ -158,7 +166,7 @@ SCORE_SCHEMA: dict[str, Any] = {
                     "start_s", "end_s", "defendant_name", "cause_number",
                     "proceeding_type", "guilt_posture", "safety", "scores",
                     "audio_quality", "hook_quote", "hook_start_s", "shortable",
-                    "shortable_reasoning", "short_segments", "summary",
+                    "short_form", "shortable_reasoning", "short_segments", "summary",
                 ],
                 "additionalProperties": False,
             },
@@ -189,6 +197,7 @@ PACKAGE_SCHEMA: dict[str, Any] = {
 class Analyzer:
     def __init__(self, cfg: Config, log=None):
         self.cfg = cfg
+        self.log = log
         self.backend = build_backend(cfg, log=log)
         self.prompt_versions: dict[str, str] = {}
 
@@ -221,21 +230,41 @@ class Analyzer:
     def score(
         self, transcript: Transcript, cases: list[dict[str, Any]], meta: dict[str, Any]
     ) -> list[dict[str, Any]]:
-        _, _, template = prompt_text("score_cases")
-        user = template.format(
-            video_title=meta["title"],
-            docket_date=meta.get("docket_date", "unknown"),
-            source_url=meta["url"],
-            cases_json=json.dumps(cases, ensure_ascii=False, indent=2),
-            transcript=transcript.render_for_llm(),
-        )
-        result = self._call("score_cases", user, SCORE_SCHEMA)
+        """Score in batches.
 
+        A single call cannot carry a full docket: each scored case emits five
+        justifications, safety reasoning, a summary, and segment ranges, so a
+        20-case docket overflows the model's output limit and comes back as
+        truncated JSON that no amount of retrying repairs. Batching bounds the
+        response, and passing only each batch's own transcript span bounds the
+        input too.
+        """
+        _, _, template = prompt_text("score_cases")
+        batch_size = max(1, self.cfg.get("analysis.score_batch_size", 6))
         weights = self.cfg.require("analysis.rubric_weights")
         gates = self.cfg.require("analysis.gates")
 
+        raw_cases: list[dict[str, Any]] = []
+        batches = [cases[i:i + batch_size] for i in range(0, len(cases), batch_size)]
+
+        for n, batch in enumerate(batches, start=1):
+            label = f"batch {n}/{len(batches)}"
+            user = template.format(
+                video_title=meta["title"],
+                docket_date=meta.get("docket_date", "unknown"),
+                source_url=meta["url"],
+                cases_json=json.dumps(batch, ensure_ascii=False, indent=2),
+                transcript=_excerpt_for(transcript, batch),
+            )
+            result = self._call("score_cases", user, SCORE_SCHEMA)
+            raw_cases.extend(result["cases"])
+            if self.log:
+                self.log.info(
+                    "    scored %s (%d case(s))", label, len(result["cases"])
+                )
+
         scored: list[dict[str, Any]] = []
-        for case in result["cases"]:
+        for case in raw_cases:
             if not _valid_span(case, transcript.duration_s):
                 continue
 
@@ -287,6 +316,34 @@ class Analyzer:
 # --------------------------------------------------------------------- utils
 
 
+def _excerpt_for(transcript: Transcript, batch: list[dict[str, Any]], pad_s: float = 45.0) -> str:
+    """Transcript covering only this batch's cases, with a little lead-in.
+
+    Sending the whole docket to every batch would multiply input tokens by the
+    batch count for no benefit — a case is scored on its own content, and the
+    surrounding two hours are not evidence about it.
+    """
+    spans = sorted(
+        (max(0.0, c["start_s"] - pad_s), c["end_s"] + pad_s) for c in batch
+    )
+
+    merged: list[list[float]] = []
+    for start, end in spans:
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+
+    chunks = []
+    for start, end in merged:
+        words = transcript.slice(start, end)
+        if not words:
+            continue
+        body = Transcript(transcript.video_id, words).render_for_llm()
+        chunks.append(f"--- {hhmmss(start)} to {hhmmss(end)} ---\n{body}")
+    return "\n\n".join(chunks)
+
+
 def _valid_span(case: dict[str, Any], duration_s: float) -> bool:
     start, end = case.get("start_s"), case.get("end_s")
     if start is None or end is None:
@@ -304,6 +361,11 @@ def _check_gates(case: dict[str, Any], gates: dict[str, Any]) -> tuple[bool, str
         return False, f"audio quality {case['audio_quality']} below minimum"
     if gates.get("requires_self_contained") and case["scores"]["self_contained"]["score"] < 60:
         return False, "not self-contained without outside context"
+    if gates.get("requires_shortable") and not case.get("shortable"):
+        # Not a quality judgement — the case is banked, not discarded. It just
+        # cannot carry a publishing day on its own, because the short is what
+        # brings anyone to the long-form.
+        return False, "no short can be built from it (banked for later)"
     return True, ""
 
 

@@ -4,7 +4,8 @@
 it. If output starts drifting, the fix belongs here, not in a one-off prompt
 tweak. Version this file; the version is stamped into every clip's manifest.
 
-**Spec version: 1.0.0**
+**Spec version: 1.1.0** — §3 gained the Form B single-moment short after Form A
+measured 0/10 against real dockets.
 
 ---
 
@@ -54,8 +55,9 @@ Rules:
 
 ## 3. Short structure
 
-The short follows a fixed four-beat shape. This is what makes the output
-consistent — the model fills the beats, it does not invent new ones.
+There are two permitted forms. Try the first; fall back to the second.
+
+### Form A — four beats (preferred)
 
 ```
 0.0 – 3.0s    HOOK      The single most arresting line in the case.
@@ -66,14 +68,37 @@ X – end       BUTTON    The judge's ruling or the last decisive line.
 +2.0s         END CARD  "FULL CASE IN DESCRIPTION"
 ```
 
-Rules:
+### Form B — single moment (fallback)
 
-- The hook is the **first frame**. Not a title card, not a countdown.
-- The four beats must appear in **chronological order as they occurred**. The
-  short is a compression of the case, never a rearrangement of it.
-- If the four beats cannot be assembled from a contiguous or
-  chronologically-ordered set of segments, the case is **not shortable** —
-  render the long-form only and bank it.
+One contiguous 25–59s stretch. No arc, no assembly, no beats.
+
+```
+0.0 – end     MOMENT    The strongest continuous stretch of the case.
++2.0s         END CARD  "FULL CASE IN DESCRIPTION"
+```
+
+**Why this exists.** Form A was originally the only permitted structure, and
+measured against real dockets it fitted **zero of ten** safety-passing cases.
+That is not a defect in the footage — a pretrial docket is mostly continuances,
+resets and counsel substitutions, and a fifty-five-second continuance request
+genuinely has no "turn". Requiring a narrative arc from proceedings that have
+none produced a system that could never publish. Form B matches what the
+material actually is.
+
+Do not treat Form B as a failure state. A single unbroken exchange is often the
+stronger clip precisely because nothing was assembled.
+
+Rules for both forms:
+
+- The hook — or the moment's first word — is the **first frame**. Not a title
+  card, not a countdown.
+- Segments appear in **chronological order as they occurred**. A short is a
+  compression of the case, never a rearrangement of it.
+- Prefer Form A when all four beats genuinely exist. Never manufacture a beat
+  by splicing unrelated material to fill the shape — that is precisely the
+  R8 violation the structure is meant to prevent.
+- If neither form can be built (no 25s of usable continuous audio), the case is
+  **not shortable** — render the long-form only and bank it.
 - Target 45s. Hard ceiling 59s.
 
 ---

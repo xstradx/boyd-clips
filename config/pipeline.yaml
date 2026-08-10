@@ -119,12 +119,32 @@ analysis:
   effort: "high"            # sdk only — the CLI has no effort parameter
   max_tokens: 32000         # sdk only
 
+  # Cases scored per call. Each scored case emits five justifications, safety
+  # reasoning, a summary and segment ranges, so a whole 20-case docket in one
+  # call overflows the output limit and returns truncated JSON. Raise only if
+  # you see no truncation warnings in logs/.
+  score_batch_size: 6
+
   # A case must clear ALL of these to be eligible. Hard gates, not weights.
+  #
+  # CALIBRATION NOTE — min_total_score was 70 until measured against real
+  # dockets. Across 18 scored cases from two sessions, 10 passed safety and
+  # *none* reached 70; the best was 57.0, and no single dimension exceeded 70.
+  # That is the rubric working correctly rather than failing: a pretrial docket
+  # is mostly status conferences and resets, and the rubric reserves its top
+  # band for liberty decided on camera. 50 is set from that distribution.
+  # Re-measure before moving it again — `boyd bank` shows the current spread.
   gates:
-    min_total_score: 70
+    min_total_score: 50
     safety_must_pass: true
     min_audio_quality: 3       # 1-5, judged from transcript coherence
     requires_self_contained: true
+
+    # A long-form with no short gets no discovery traffic — the short is the
+    # entire distribution mechanism. Cases that score well but cannot be cut
+    # into the four-beat structure are banked instead of published, so they
+    # stay available rather than being spent on a day they can't carry.
+    requires_shortable: true
 
   # Weighted rubric. Must sum to 100. Mirrored in prompts/score_cases.md —
   # if you change a weight here, change it there too or scoring drifts.

@@ -153,6 +153,7 @@ def _case(**over):
                    ("human_stakes", "dramatic_turn", "judge_moment",
                     "self_contained", "hook_strength")},
         "total_score": 80.0,
+        "shortable": True,
     }
     base.update(over)
     return base
@@ -170,6 +171,29 @@ def test_safety_failure_always_blocks():
 def test_low_score_blocked():
     ok, _ = analyze._check_gates(_case(total_score=10.0), CFG.require("analysis.gates"))
     assert not ok
+
+
+def test_unshortable_case_is_banked_not_published():
+    """The short is the whole distribution mechanism; a long-form without one
+    is banked rather than spent on a publishing day."""
+    gates = CFG.require("analysis.gates")
+    case = _case(total_score=95.0, shortable=False)
+    ok, reason = analyze._check_gates(case, gates)
+    assert not ok and "banked" in reason
+
+    case = _case(total_score=95.0, shortable=True)
+    ok, _ = analyze._check_gates(case, gates)
+    assert ok
+
+
+def test_threshold_is_reachable_by_real_scores():
+    """Regression on the calibration itself: 70 passed nothing across 18 real
+    cases (best 57.0). Guard against silently restoring an unreachable gate."""
+    threshold = CFG.require("analysis.gates.min_total_score")
+    assert threshold <= 57, (
+        f"min_total_score is {threshold}, but the best case measured across two "
+        "real dockets scored 57.0 — this gate would pass nothing"
+    )
 
 
 def test_not_self_contained_blocked():
@@ -244,6 +268,31 @@ def test_short_plan_trims_to_ceiling():
     total = sum(s.duration for s in segs)
     assert total <= cfg["max_duration_s"], f"{total}s exceeds the 60s platform limit"
     assert segs[0].start_s == 0, "trimming must come off the tail, not the hook"
+
+
+def test_single_moment_short_is_accepted():
+    """CONTENT_SPEC v1.1 Form B — one contiguous stretch, no arc. The four-beat
+    form fitted 0/10 real cases, so this path is the common one."""
+    case = {"start_s": 0, "end_s": 600, "short_form": "single_moment",
+            "short_segments": [
+                {"beat": "moment", "start_s": 100, "end_s": 145, "quote": ""},
+            ]}
+    segs = render.plan_short_segments(case, CFG.require("output.short"))
+    assert segs is not None and len(segs) == 1
+    assert 25 <= segs[0].duration <= 59
+
+
+def test_moment_beat_is_in_the_schema():
+    beat = analyze._SEGMENT_REF["properties"]["beat"]["enum"]
+    assert "moment" in beat, "Form B shorts cannot be expressed without it"
+
+
+def test_short_form_is_required_and_enumerated():
+    case_schema = analyze.SCORE_SCHEMA["properties"]["cases"]["items"]
+    assert "short_form" in case_schema["required"]
+    assert set(case_schema["properties"]["short_form"]["enum"]) == {
+        "four_beat", "single_moment", "none"
+    }
 
 
 def test_short_plan_accepts_valid_four_beats():

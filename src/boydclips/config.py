@@ -12,7 +12,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "config" / "pipeline.yaml"
 ENV_PATH = ROOT / "config" / ".env"
-SPEC_VERSION = "1.0.0"
+SPEC_VERSION = "1.1.0"
 
 # Must match the `scores` object in analyze.SCORE_SCHEMA.
 RUBRIC_DIMENSIONS = frozenset(

@@ -1,6 +1,6 @@
 ---
 id: score_cases
-version: 1.0.0
+version: 1.1.0
 stage: 2
 ---
 
@@ -127,8 +127,11 @@ to be explained before it lands has no short.
 
 ## PART 3 — SHORTABILITY
 
-For each passing case, decide whether a 25–59 second vertical short can be
-assembled from it, following the four-beat structure:
+For each passing case, decide whether a 25–59 second vertical short can be cut
+from it. There are two acceptable forms. **Try Form A. If it does not genuinely
+fit, use Form B.**
+
+### Form A — four beats (`short_form: "four_beat"`)
 
 ```
 HOOK    (0–3s)   the arresting line, no setup
@@ -137,16 +140,33 @@ TURN    (8s–X)   the moment something changes
 BUTTON  (X–end)  the ruling or last decisive line
 ```
 
-Segments must be in **chronological order as they occurred**. You may drop
-material between beats. You may never reorder it — two statements spliced out
-of sequence can manufacture an exchange that never happened.
+Use this only when all four beats genuinely exist in the case. Most routine
+docket items — continuances, resets, counsel substitutions — have no "turn",
+and that is expected.
 
-If the four beats cannot be assembled chronologically within 59 seconds, set
-`shortable: false` and explain why. The long-form still gets rendered; it just
-has no short that day.
+### Form B — single moment (`short_form: "single_moment"`)
 
-For shortable cases, return the exact segment ranges in source seconds. They
-must all fall inside the case's own boundaries.
+One contiguous stretch of 25–59 seconds: the strongest continuous run of the
+case. One segment, `beat: "moment"`. No arc required.
+
+**Form B is not a failure state.** A single unbroken exchange is frequently the
+better clip, because nothing was assembled and nothing can be misread. Reach
+for it whenever Form A would require forcing material into a shape it does not
+have.
+
+### Rules for both
+
+- Segments must be in **chronological order as they occurred**. You may drop
+  material between beats. You may never reorder it — two statements spliced out
+  of sequence can manufacture an exchange that never happened.
+- **Never invent a beat to complete Form A.** If the "turn" would have to come
+  from unrelated material, that is Form B, not a four-beat short.
+- Segment ranges are in source seconds and must fall inside the case's own
+  boundaries.
+- If neither form fits — no 25 seconds of usable continuous audio, or the only
+  strong line sits too close to the end to build around — set
+  `shortable: false`, `short_form: "none"`, and explain why. The long-form is
+  still rendered and banked.
 
 ---
 
