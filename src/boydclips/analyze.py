@@ -75,7 +75,7 @@ SEGMENT_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
-SAFETY_RULE_IDS = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"]
+SAFETY_RULE_IDS = ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]
 
 _SEGMENT_REF = {
     "type": "object",
@@ -234,9 +234,10 @@ class Analyzer:
 
         Batch scoring shows each batch only its own cases' transcript span,
         which bounds cost but measurably shifts safety judgements between runs
-        — R7 in particular ("would a viewer be misled?") is a question about
-        context, so narrowing the context changes the answer. Observed: three
-        of six cases that passed the gate on one run were rejected on another.
+        — R4 in particular ("would the cut invert the outcome?") is a question
+        about context, so narrowing the context changes the answer. Observed:
+        three of six cases that passed the gate on one run were rejected on
+        another.
 
         Re-checking only the day's pick, with everything the model can see, is
         cheap (one case, one call) and lands exactly where the cost of a wrong

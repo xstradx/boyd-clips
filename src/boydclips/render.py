@@ -490,7 +490,7 @@ def plan_short_segments(
 ) -> list[Segment] | None:
     """Turn the model's four-beat plan into cut points.
 
-    CONTENT_SPEC §3 and SAFETY_RULES R8: segments may drop material but must
+    CONTENT_SPEC §3 and SAFETY_RULES R5: segments may drop material but must
     stay in the order they occurred. A plan that is out of order is rejected
     outright rather than silently sorted — out-of-order beats mean the model
     tried to build an exchange that did not happen.

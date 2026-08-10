@@ -409,7 +409,7 @@ class Pipeline:
         pkg: dict[str, Any],
         result: dict[str, Any],
     ) -> None:
-        """SAFETY_RULES R10: every clip must be reconstructible from its record."""
+        """SAFETY_RULES R7: every clip must be reconstructible from its record."""
         manifest = {
             "spec_version": SPEC_VERSION,
             "generated_at": _now(),

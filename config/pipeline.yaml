@@ -120,10 +120,19 @@ analysis:
   max_tokens: 32000         # sdk only
 
   # Cases scored per call. Each scored case emits five justifications, safety
-  # reasoning, a summary and segment ranges, so a whole 20-case docket in one
-  # call overflows the output limit and returns truncated JSON. Raise only if
-  # you see no truncation warnings in logs/.
-  score_batch_size: 6
+  # reasoning, a summary and segment ranges.
+  #
+  # CORRECTION 2026-08-10 — the earlier note here blamed truncation. That was
+  # wrong. stop_reason never came back as max_tokens, and the saved responses in
+  # logs/rejected/ close cleanly at the end. The real failures were malformed
+  # JSON mid-response: `undefined` in value position, `\'` escapes, invented
+  # `*_note` fields, and on one occasion a dropped closing brace. The first
+  # three are now repaired in llm.repair_json(); a dropped brace is not safely
+  # repairable and must retry. Smaller batches shrink the response and with it
+  # the chance of a structural break — 6 -> 4 on that basis, not on truncation.
+  # Trade-off: smaller batches show the model less context per call, which
+  # analyze.confirm_selection() exists to compensate for.
+  score_batch_size: 4
 
   # A case must clear ALL of these to be eligible. Hard gates, not weights.
   #

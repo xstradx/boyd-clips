@@ -11,6 +11,7 @@ Run:  python tests/test_pipeline.py       (no pytest needed)
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -635,6 +636,62 @@ def _expect_raises(fn, label):
 
 
 # ---------------------------------------------------------------- runner
+
+
+def test_repair_json_recovers_observed_malformations():
+    """The exact failures that killed dockets on 2026-08-09.
+
+    Each case was taken from logs/rejected/. `undefined` in value position is
+    the one that mattered most: prune_unknown() would have dropped the invented
+    field a moment later, but the parse died first and took the whole run.
+    """
+    from boydclips.llm import extract_json
+
+    cases = {
+        "js undefined":
+            '{"cases":[{"safety_rule_violations_note":undefined,"score":58}]}',
+        "invalid apostrophe escape":
+            r'{"cases":[{"reasoning":"stays at \'charged with\' throughout"}]}',
+        "trailing comma":
+            '{"cases":[{"score":58},]}',
+        "all three at once":
+            '{"cases":[{"note":undefined,"r":"say \'accused\'",},]}',
+    }
+    for label, payload in cases.items():
+        parsed = extract_json(payload)
+        assert isinstance(parsed, dict) and "cases" in parsed, \
+            f"{label}: did not recover"
+
+    # A dropped closing brace must NOT be silently guessed at — a wrong repair
+    # could attach one case's safety verdict to another. It has to fail.
+    try:
+        extract_json('{"cases":[{"a":{"b":1},{"c":2}]}')
+    except Exception:
+        pass
+    else:
+        raise AssertionError("structurally broken JSON was silently 'repaired'")
+
+
+def test_repair_json_leaves_valid_json_untouched():
+    """Repair must never alter a response that already parses."""
+    from boydclips.llm import repair_json
+
+    good = json.dumps({
+        "cases": [{"summary": "he said 'one time' about his attorney",
+                   "path": "a/b", "score": 60.4, "ok": None}]
+    })
+    assert json.loads(repair_json(good)) == json.loads(good)
+
+
+def test_safety_rule_ids_match_the_spec():
+    """SAFETY_RULE_IDS drifting from SAFETY_RULES.md silently breaks the gate:
+    the model cites a rule the validator rejects as an unknown enum value."""
+    spec = (ROOT / "spec" / "SAFETY_RULES.md").read_text(encoding="utf-8")
+    documented = set(re.findall(r"^## (R\d+)\b", spec, re.MULTILINE))
+    assert documented == set(analyze.SAFETY_RULE_IDS), (
+        f"SAFETY_RULES.md defines {sorted(documented)} but analyze.py declares "
+        f"{sorted(analyze.SAFETY_RULE_IDS)}"
+    )
 
 
 def main() -> int:

@@ -155,15 +155,38 @@ def prune_unknown(value: Any, schema: dict[str, Any]) -> Any:
 
 _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.MULTILINE)
 
+# JavaScript literals in value position. Models reach for `undefined` when they
+# invent an optional field they have nothing to put in — observed in the wild as
+# `"safety_rule_violations_note":undefined`, which fails the whole docket even
+# though prune_unknown() would have dropped that key a moment later.
+_JS_LITERAL = re.compile(r"(:\s*)(undefined|NaN|-?Infinity)(\s*[,}\]])")
+# \' is never a valid JSON escape; models emit it when quoting inside a string.
+_BAD_ESCAPE = re.compile(r"\\(['`])")
+_TRAILING_COMMA = re.compile(r",(\s*[}\]])")
+
+
+def repair_json(text: str) -> str:
+    """Fix malformations models produce that carry no semantic content.
+
+    Deliberately conservative: only value-position JS literals, invalid escapes
+    and trailing commas. Anything that could change the meaning of valid JSON is
+    left alone — a response we cannot repair honestly should fail and retry
+    rather than be silently reinterpreted.
+    """
+    text = _JS_LITERAL.sub(r"\1null\3", text)
+    text = _BAD_ESCAPE.sub(r"\1", text)
+    text = _TRAILING_COMMA.sub(r"\1", text)
+    return text
+
 
 def extract_json(text: str) -> dict[str, Any]:
     """Pull a JSON object out of a model response.
 
-    Tries the whole string first, then strips markdown fences, then falls back
-    to the outermost braced span — models sometimes prepend a sentence despite
-    being told not to.
+    Tries the whole string first, then strips markdown fences, then repairs
+    known-benign malformations, then falls back to the outermost braced span —
+    models sometimes prepend a sentence despite being told not to.
     """
-    for candidate in (text, _FENCE.sub("", text)):
+    for candidate in (text, _FENCE.sub("", text), repair_json(_FENCE.sub("", text))):
         candidate = candidate.strip()
         if not candidate:
             continue
@@ -174,8 +197,10 @@ def extract_json(text: str) -> dict[str, Any]:
         except json.JSONDecodeError:
             pass
 
-    start, end = text.find("{"), text.rfind("}")
+    repaired = repair_json(text)
+    start, end = repaired.find("{"), repaired.rfind("}")
     if start != -1 and end > start:
+        text = repaired
         # Must not let a JSONDecodeError escape: complete() catches
         # BackendError to drive its retry, so a raw decode error here would
         # bypass the retry loop entirely and abort the run.
@@ -265,7 +290,18 @@ class ClaudeCliBackend:
             "Return the corrected JSON object and nothing else. The schema "
             "describes the shape your output must take — do not copy schema "
             "keywords such as \"required\", \"type\", \"properties\" or "
-            "\"enum\" into the output itself. Emit data only."
+            "\"enum\" into the output itself. Emit data only.\n\n"
+            "These four mistakes caused every failure observed so far. Check "
+            "for them specifically:\n"
+            "  1. Every object you open must be closed. A dropped `}` on one "
+            "case invalidates the entire response — count your braces.\n"
+            "  2. No `undefined`, `NaN` or `Infinity`. They are JavaScript, not "
+            "JSON. Use null, or omit the field.\n"
+            "  3. Do not invent fields the schema does not define (no "
+            "`*_note`, no commentary keys). Put reasoning in the field that "
+            "already exists for it.\n"
+            "  4. Inside a string, write an apostrophe as ' — never \\'. The "
+            "only valid escapes are \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\uXXXX."
         )
 
     def _invoke(self, system: str, prompt: str, label: str, attempt: int) -> str:

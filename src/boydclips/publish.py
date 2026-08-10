@@ -208,7 +208,7 @@ def publish_pair(
 
     # Re-publishing uploads a second copy and, because record_publication is an
     # upsert on (clip_id, platform), overwrites the first one's URL — leaving a
-    # public video with no row pointing at it. SAFETY_RULES R10 depends on that
+    # public video with no row pointing at it. SAFETY_RULES R7 depends on that
     # row existing to action a takedown, so this guard is a safety control, not
     # just tidiness.
     for clip in (longform, short):

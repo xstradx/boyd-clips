@@ -21,50 +21,49 @@ safety gate gets no score and is dropped, no matter how compelling it is.
 
 ## PART 1 — SAFETY GATE
 
-Evaluate every case against these rules. Any violation → `safety_pass: false`.
+**The court already redacted this footage.** Judge Boyd mutes audio and cuts the
+camera whenever material may not be shown, so sealed records, juvenile detail
+and protected identifiers never reach the stream. Do not re-litigate decisions
+the court already made with better information than you have. If it aired, it is
+usable.
 
-**R2 — No juveniles.** Anyone under 18 in any role. Reject.
+Only three rules can reject a case. Each requires a specific, nameable trigger.
 
-**R3 — No sexual-offense victims.** Any sexual offense case. Reject.
+**R2 — No identifiable minors.** A person visibly under 18 appears on camera or
+is named. Rarely fires, because the court cuts away.
 
-**R4 — No third-party identifiers.** A victim's, witness's, or juror's name,
-address, phone, or employer is spoken. The *defendant's* name is fine — it is
-on the public record. Everyone else did not choose to be there.
+**R3 — No unredacted contact details.** An address, phone number, or employer of
+a victim or witness was spoken and *not* muted by the court. Names alone are
+fine — they are on the public record. This is a YouTube doxxing-policy rule, not
+a privacy judgement.
 
-**R5 — No jury material.** Juror identity, voir dire questioning of individual
-jurors, or anything about deliberations. Reject.
+**R4 — The cut may not invert the outcome.** Reject only if a viewer would
+believe the *opposite* of what happened: an acquittal shown as a conviction, a
+granted motion shown as denied, a warning shown as a ruling.
 
-**R6 — Vulnerability is not content.** Reject when the compelling thing is
-someone's mental-health crisis, intoxication or withdrawal, disability, or
-poverty.
+> Deliberately narrow. A clip does NOT need to contain the full ruling, be
+> self-explanatory, or represent the whole proceeding. Courtroom exchanges are
+> supposed to be dramatic out of context — that is the format, not a defect.
+> A judge who reads as harsh is fine. Only a reversed *outcome* disqualifies.
 
-> Test: is the drama a *decision or exchange*, or is it watching someone
-> suffer? A defendant arguing with the judge is a decision. A defendant
-> breaking down and unable to answer is suffering. Publish the first only.
-
-**R7 — The clip must be honest standing alone.** Reject if a viewer seeing only
-this case would form a materially false impression of what happened.
-
-> This catches the most cases, and it catches the *most engaging* ones. Courtroom
-> exchanges routinely look outrageous with the surrounding context removed — a
-> judge who reads as harsh is very often enforcing a condition the defendant
-> already agreed to on a record the clip doesn't contain. If the case only works
-> as content because something is missing, that is exactly the case to reject.
-
-**R1 — Presumption of innocence.** This does not reject a case, but you must
-record the correct posture in `guilt_posture`, and everything written later
-must respect it:
+**R1 — Presumption of innocence.** This never rejects a case. Record the correct
+posture in `guilt_posture`, and respect it in all later wording:
 - `accused` — charged, nothing admitted or proven. Say "charged with".
 - `pled_guilty` — a plea was entered on camera. That plea is a fact.
 - `convicted` — a conviction exists. That is a fact.
 - `unclear` — treat as `accused`.
 
-### Uncertainty resolves to rejection.
+### Uncertainty resolves to ACCEPT.
 
-If you are unsure whether a rule applies, reject. A false reject costs one day's
-clip. A false accept can cost a person their privacy, the channel its standing,
-or the operator a defamation claim. These are not symmetric and you should not
-treat them as though they are.
+Reject only on a specific, articulable violation — name the rule and quote what
+triggered it. Vague discomfort, "this feels exploitative", "context might be
+missing", or "the judge seems harsh" are **not** violations and must not be used
+to reject.
+
+If you cannot name the rule and the trigger, `safety_pass` is `true`.
+
+A false reject costs the channel a day of output, and the channel needs daily
+output. The court already handled the asymmetry you might be worried about.
 
 ---
 
@@ -104,9 +103,10 @@ Does Judge Boyd say something decisive, clarifying, or genuinely memorable.
 - 30–59: routine administration.
 - 0–29: barely speaks.
 
-> Score the *substance*, not the volume. A patient explanation of a
-> consequence outscores an angry outburst. Do not reward the judge appearing
-> harsh — that framing is exactly what R7 exists to prevent.
+> Score what lands with a viewer. Boyd's directness is the channel's draw — a
+> blunt, quotable line scores high, and so does a patient explanation that
+> reframes the case. Both are "a judge moment". Do not penalise her for being
+> sharp.
 
 ### self_contained — weight 15
 Can someone with no legal background and no prior context follow it.

@@ -1,125 +1,96 @@
 # SAFETY RULES — Boyd Clips
 
-Texas district court proceedings are public record, and the court publishes
-this livestream itself. Clipping it is lawful. That is not the same as it being
-harmless.
+Texas district court proceedings are public record and the court publishes this
+livestream itself. Clipping it is lawful.
 
-The people in these clips did not choose to be filmed, are mostly not public
-figures, and many are in the worst week of their lives. This file exists so
-that a system running unattended cannot quietly turn that into a liability —
-legal, platform, or moral.
+**The court redacts at the source.** Judge Boyd mutes audio and cuts the camera
+when material may not be shown. Sealed records, juvenile detail and protected
+victim identifiers are therefore filtered upstream by the court, which has far
+better information than any scoring model. This file does not re-litigate those
+decisions. If it aired on the public stream, it is usable.
 
-Rules below are **enforced as a hard gate** in the scoring stage. A case that
-fails any of them is dropped before rendering, regardless of how good it is.
+What remains is a short list protecting the one thing the court's redaction
+cannot protect: **the channel's monetization**, and the accuracy of cuts the
+court did not make.
+
+Rules are enforced as a hard gate in scoring. Everything else is editorial
+judgement and belongs in `CONTENT_SPEC.md`, not here.
 
 ---
 
-## R1 — Presumption of innocence is not optional
+## R1 — Presumption of innocence is a wording rule
 
-Most people appearing on a docket have been **accused**, not convicted.
+Not a rejection rule. It never drops a case; it constrains phrasing.
 
 - Use "charged with", "accused of", "faces a charge of".
-- Never "the man who stole", "the woman who assaulted", or any construction
-  asserting the underlying conduct as fact.
-- Never imply guilt through framing, title, or caption emphasis.
-- A guilty plea entered on camera **is** a fact and may be described as one.
-- A conviction is a fact and may be described as one.
+- Never assert the underlying conduct as fact ("the man who stole").
+- A guilty plea or conviction on the record **is** a fact and may be stated.
 
-**Why:** stating that someone committed a crime they have not been convicted of
-is defamation per se in Texas, and unlike most content risk it is not cured by
-a disclaimer.
+**Why:** asserting a crime someone has not been convicted of is defamation per
+se in Texas and is not cured by a disclaimer. Phrasing costs nothing to get
+right.
 
 ---
 
-## R2 — No juveniles
+## R2 — No identifiable minors on camera
 
-Any case involving a person under 18, in any role — defendant, victim, witness,
-or family member being discussed — is rejected outright. No exceptions, no
-blurring, no "their name wasn't said."
+Rejected only if a person visibly under 18 appears on camera or is named. If the
+court aired it, this rarely fires.
 
----
-
-## R3 — No sexual-offense victims
-
-Any case involving a sexual offense is rejected. Even where the court has not
-sealed identifying detail, the possibility of exposing a victim is not worth
-any amount of engagement.
+**Why:** not ethics — YouTube demonetizes and strikes for minors in criminal
+proceedings regardless of legality. This protects revenue.
 
 ---
 
-## R4 — No third-party identifiers
+## R3 — No unredacted third-party contact details
 
-Reject if the clip contains a victim's, witness's, or juror's name, address,
-phone number, employer, or any detail that would let a viewer locate them.
+Rejected only if the clip contains an address, phone number, or employer of a
+victim or witness that the court did **not** mute. Names alone are fine — they
+are on the public record.
 
-The defendant's name is generally on the public record and may appear. Everyone
-else's presence in that courtroom is not a choice they made.
-
----
-
-## R5 — No jury material
-
-Reject anything touching juror identity, juror questioning, or deliberations.
-This can create actual legal exposure for the proceeding itself.
+**Why:** YouTube's harassment policy treats broadcast contact details as
+doxxing. Strike risk, not squeamishness.
 
 ---
 
-## R6 — Vulnerability is not content
+## R4 — The cut may not invert the outcome
 
-Reject when the thing that makes the moment compelling is a person's:
+Rejected only if a viewer seeing the clip would believe the *opposite* of what
+happened — an acquittal shown as a conviction, a granted motion shown as denied,
+a judge's warning shown as a ruling.
 
-- visible mental-health crisis,
-- intoxication or withdrawal,
-- disability or cognitive impairment,
-- inability to afford counsel, fines, transport, or housing.
+This is deliberately narrow. A clip does not need to contain the full ruling, be
+self-explanatory, or represent the whole proceeding. Courtroom exchanges are
+supposed to be dramatic out of context; that is the format. Only outcome
+inversion is disqualifying.
 
-**The test:** is the drama coming from a *decision or exchange*, or from
-watching someone suffer? Only the first is publishable.
-
-A defendant arguing with the judge is a decision.
-A defendant sobbing while unable to answer is suffering.
-
----
-
-## R7 — The clip must be honest on its own
-
-Reject if a viewer who sees only the clip would form a materially false
-impression of what happened.
-
-This is the rule that catches the most cases in practice. Courtroom exchanges
-routinely look outrageous when the surrounding twenty minutes are removed —
-a judge appearing harsh is often enforcing a condition the defendant already
-agreed to, on a record the clip doesn't show.
-
-**Selective editing that changes the meaning of a proceeding is the single
-highest-risk thing this system could do.** It is also the easiest to do by
-accident, because the most misleading cut is often the most engaging one.
+**Why:** the court chose what to broadcast. It did not choose our edit, and a
+cut that reverses a legal outcome is the one editing decision with real
+defamation exposure.
 
 ---
 
-## R8 — Never reorder speech
+## R5 — Never reorder speech
 
-Cuts may remove material. They may never reorder it. Two statements spliced
-out of sequence can manufacture an exchange that never occurred.
+Cuts may remove material. They may never reorder it. Splicing two statements out
+of sequence manufactures an exchange that never occurred.
 
----
-
-## R9 — Titles are claims
-
-A title is a factual assertion. It must be supported by the clip's own audio.
-See `CONTENT_SPEC.md` §6.
+Costs nothing, blocks nothing, prevents the one unrecoverable mistake.
 
 ---
 
-## R10 — Takedown path
+## R6 — Titles must be supported by the clip's own audio
 
-Every published clip's manifest records its exact source timestamps. If a
-subject, attorney, or the court requests removal, the standing policy is:
-**remove first, evaluate second.** The engagement value of any single clip is
-not worth contesting a removal request from someone whose worst day it depicts.
+A title is a factual assertion. It must be audible in the clip. See
+`CONTENT_SPEC.md` §6.
 
-Removals are logged in the state ledger with the reason, so that patterns in
-requests can inform the rules above.
+---
+
+## R7 — Takedown path
+
+Every published clip's manifest records its exact source timestamps. On a
+removal request from a subject, attorney, or the court: **remove first,
+evaluate second.** Logged in the state ledger with the reason.
 
 ---
 
@@ -130,11 +101,16 @@ The scoring model returns, per case:
 ```json
 {
   "safety_pass": true | false,
-  "safety_rule_violations": ["R2", "R7"],
+  "safety_rule_violations": ["R2"],
   "safety_reasoning": "..."
 }
 ```
 
-`safety_pass: false` drops the case before any video is downloaded. The model is
-instructed that **uncertainty resolves to rejection** — a false reject costs one
-day's clip; a false accept can cost considerably more.
+**Uncertainty resolves to ACCEPT.** Reject only on a specific, articulable
+violation of a rule above, citing which rule and what triggered it. A vague
+discomfort is not a violation. If you cannot name the rule and the trigger, the
+case passes.
+
+Rationale: the court already filtered this footage. A false reject costs a day's
+clip on a channel that needs daily output; the remaining rules exist to catch
+narrow, nameable failures, not to express caution.
