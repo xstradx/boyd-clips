@@ -54,26 +54,36 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         ok &= bool(path)
 
     try:
-        import anthropic  # noqa: F401
-        print("  [ok ] anthropic SDK")
-    except ImportError:
-        print("  [MISS] anthropic SDK   -- pip install anthropic")
-        ok = False
-
-    try:
         cfg = load_config()
         print(f"  [ok ] config          autonomy.mode={cfg.get('autonomy.mode')}")
     except Exception as exc:
         print(f"  [MISS] config         -- {exc}")
         return 1
 
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        print("  [ok ] ANTHROPIC_API_KEY")
-    elif _ant_profile_active():
-        print("  [ok ] Anthropic credentials via `ant auth` profile")
+    # Only check the credential the configured backend actually needs.
+    backend = cfg.get("analysis.backend", "claude_cli")
+    if backend == "claude_cli":
+        claude = shutil.which("claude")
+        print(f"  [{'ok ' if claude else 'MISS'}] claude CLI     "
+              f"{claude or '-- required by analysis.backend=claude_cli'}")
+        ok &= bool(claude)
+        if claude:
+            print(f"  [ok ] auth           via Claude Code login (no API key needed)")
     else:
-        print("  [MISS] ANTHROPIC_API_KEY  -- set it in config/.env or run `ant auth login`")
-        ok = False
+        try:
+            import anthropic  # noqa: F401
+            print("  [ok ] anthropic SDK")
+        except ImportError:
+            print("  [MISS] anthropic SDK  -- pip install anthropic")
+            ok = False
+        if os.environ.get("ANTHROPIC_API_KEY"):
+            print("  [ok ] ANTHROPIC_API_KEY")
+        elif _ant_profile_active():
+            print("  [ok ] credentials via `ant auth` profile")
+        else:
+            print("  [MISS] ANTHROPIC_API_KEY -- set it in config/.env, run `ant auth login`,")
+            print("                             or set analysis.backend: claude_cli")
+            ok = False
 
     if cfg.get("publish.youtube.enabled"):
         token = cfg.root / "config" / "youtube_token.json"

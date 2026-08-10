@@ -25,9 +25,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import anthropic
-
 from .config import Config, prompt_text
+from .llm import BackendError, RefusalError, build_backend  # noqa: F401  (re-exported)
 from .transcribe import Transcript, hhmmss
 
 # ---------------------------------------------------------------------------
@@ -187,17 +186,10 @@ PACKAGE_SCHEMA: dict[str, Any] = {
 }
 
 
-class RefusalError(RuntimeError):
-    """The model's safety classifiers declined the request outright."""
-
-
 class Analyzer:
-    def __init__(self, cfg: Config):
+    def __init__(self, cfg: Config, log=None):
         self.cfg = cfg
-        self.client = anthropic.Anthropic()
-        self.model = cfg.require("analysis.model")
-        self.effort = cfg.get("analysis.effort", "high")
-        self.max_tokens = cfg.get("analysis.max_tokens", 32000)
+        self.backend = build_backend(cfg, log=log)
         self.prompt_versions: dict[str, str] = {}
 
     # ------------------------------------------------------------------ core
@@ -205,62 +197,7 @@ class Analyzer:
     def _call(self, prompt_name: str, user_text: str, schema: dict[str, Any]) -> dict[str, Any]:
         version, system, _ = prompt_text(prompt_name)
         self.prompt_versions[prompt_name] = version
-
-        kwargs: dict[str, Any] = dict(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            # Caching the system block matters here: it carries the entire rubric
-            # and safety spec, and all three stages reuse most of it within the
-            # 5-minute window of a single docket run.
-            system=[
-                {
-                    "type": "text",
-                    "text": system,
-                    "cache_control": {"type": "ephemeral"},
-                }
-            ],
-            messages=[{"role": "user", "content": user_text}],
-            output_config={
-                "effort": self.effort,
-                "format": {"type": "json_schema", "schema": schema},
-            },
-            # Criminal-court transcripts sit close to enough policy boundaries
-            # that a classifier decline is a real possibility. Fall back rather
-            # than lose the day's run.
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-        )
-
-        try:
-            message = self._stream(self.client.beta.messages, kwargs)
-        except TypeError:
-            # SDK predates the fallbacks parameter — proceed without it.
-            kwargs.pop("betas", None)
-            kwargs.pop("fallbacks", None)
-            message = self._stream(self.client.messages, kwargs)
-
-        if message.stop_reason == "refusal":
-            category = getattr(getattr(message, "stop_details", None), "category", None)
-            raise RefusalError(
-                f"{prompt_name}: model declined the request (category={category})"
-            )
-        if message.stop_reason == "max_tokens":
-            raise RuntimeError(
-                f"{prompt_name}: response hit max_tokens ({self.max_tokens}) and is "
-                "truncated. Raise analysis.max_tokens."
-            )
-
-        text = next((b.text for b in message.content if b.type == "text"), None)
-        if not text:
-            raise RuntimeError(f"{prompt_name}: no text block in response")
-        return json.loads(text)
-
-    @staticmethod
-    def _stream(namespace: Any, kwargs: dict[str, Any]) -> Any:
-        # max_tokens is well above the SDK's non-streaming timeout guard, so
-        # streaming is required rather than optional here.
-        with namespace.stream(**kwargs) as stream:
-            return stream.get_final_message()
+        return self.backend.complete(system, user_text, schema, prompt_name)
 
     # ---------------------------------------------------------------- stage 1
 

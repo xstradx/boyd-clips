@@ -53,9 +53,9 @@ class Pipeline:
 
     @property
     def analyzer(self) -> Analyzer:
-        # Deferred so `discover`/`stats` work without an API key present.
+        # Deferred so `discover`/`stats` work without any credential present.
         if self._analyzer is None:
-            self._analyzer = Analyzer(self.cfg)
+            self._analyzer = Analyzer(self.cfg, log=log)
         return self._analyzer
 
     def close(self) -> None:

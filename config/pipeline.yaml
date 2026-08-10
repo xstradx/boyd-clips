@@ -104,9 +104,20 @@ transcription:
 analysis:
   # See prompts/ for the actual instructions and spec/CONTENT_SPEC.md for the
   # format contract. Model IDs live here so you can swap tiers without edits.
+  #
+  # backend:
+  #   claude_cli  Runs `claude -p` headless against your existing Claude Code
+  #               login. No API key, no separate bill. Schema conformance is
+  #               enforced client-side with a retry loop (see llm.py).
+  #   sdk         Anthropic SDK. Needs ANTHROPIC_API_KEY or an `ant auth`
+  #               profile. Gains API-enforced structured outputs and `effort`.
+  backend: claude_cli
+
   model: "claude-opus-5"
-  effort: "high"
-  max_tokens: 32000
+  cli_timeout_s: 1800       # claude_cli only; a 3-hour docket is a long call
+
+  effort: "high"            # sdk only — the CLI has no effort parameter
+  max_tokens: 32000         # sdk only
 
   # A case must clear ALL of these to be eligible. Hard gates, not weights.
   gates:
