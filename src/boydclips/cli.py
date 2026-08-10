@@ -4,6 +4,9 @@
     boyd discover               list new dockets, touch nothing else
     boyd run [--dry-run]        the daily pipeline
     boyd run --case <case_key>  render one specific defendant's case
+    boyd docket [--days N]      Boyd's upcoming hearings, before they air
+    boyd who <name>             jail record + custody status for a defendant
+    boyd archive                snapshot the county's expiring 7-day jail data
     boyd approve <case_key>     record approval and publish a held clip
     boyd reject <case_key>      record rejection with a reason
     boyd stats                  reliability ledger and promotion readiness
@@ -139,6 +142,62 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_docket(args: argparse.Namespace) -> int:
+    """Who is scheduled in front of Boyd, before it airs."""
+    from datetime import date, timedelta
+    from . import records
+
+    start = date.today()
+    rows = records.hearings(start, start + timedelta(days=args.days))
+    if not rows:
+        print("no hearings found — re-scrape the judicial officer id "
+              "(see records.JUDGE_BOYD_ID)")
+        return 1
+
+    by_day: dict[str, list[dict]] = {}
+    for r in rows:
+        by_day.setdefault(r["hearing_date"] or "?", []).append(r)
+
+    for day in sorted(by_day, key=lambda d: (len(d), d)):
+        print(f"\n{day}  ({len(by_day[day])} hearings)")
+        for r in by_day[day][: args.limit]:
+            print(f"  {str(r['hearing_time']):>8}  {str(r['hearing_type'])[:26]:26s} "
+                  f"{str(r['defendant'])[:28]:28s} {r['case_number']}")
+    print(f"\n{len(rows)} hearings total")
+    return 0
+
+
+def cmd_who(args: argparse.Namespace) -> int:
+    """Jail record for a name. Candidates, not an identification."""
+    from . import records
+
+    res = records.custody_status(args.name)
+    print(f"{res['total_hits']} raw hits, {len(res['people'])} distinct SO numbers\n")
+    for p in res["people"][: args.limit]:
+        status = "IN CUSTODY" if p["in_custody"] else "released"
+        print(f"  SO {p['so_number']:>8}  {p['booking_count']:>3} bookings  "
+              f"{status:10s}  {str(p['name'])[:32]:32s} "
+              f"{p['first_booking']}..{p['latest_booking']}")
+        for c in p["latest_charges"][:3]:
+            print(f"        {c[:70]}")
+    print("\nNames are not identities — confirm SONumber before asserting "
+          "anything on camera.")
+    return 0
+
+
+def cmd_archive(args: argparse.Namespace) -> int:
+    """Snapshot the county's 7-day jail activity window before it expires."""
+    from . import records
+
+    out = Path(args.out or "data/jail-activity")
+    res = records.archive_jail_activity(out, days_back=args.days_back)
+    print(f"archived {res['saved']} new file(s), {res['skipped']} already held, "
+          f"{res['missing']} unavailable -> {out}")
+    if res["missing"]:
+        print("  (missing days are normal at the edges of the 7-day window)")
+    return 0
+
+
 def cmd_approve(args: argparse.Namespace) -> int:
     cfg = load_config()
     store = Store(cfg.path("paths.state_db"))
@@ -267,6 +326,24 @@ def build_parser() -> argparse.ArgumentParser:
                      help="render one specific scored case instead of the "
                           "day's top pick (see `boyd bank` for keys)")
     run.set_defaults(func=cmd_run)
+
+    docket = sub.add_parser("docket")
+    docket.add_argument("--days", type=int, default=14,
+                        help="days ahead to look (default 14)")
+    docket.add_argument("--limit", type=int, default=100,
+                        help="max hearings printed per day")
+    docket.set_defaults(func=cmd_docket)
+
+    who = sub.add_parser("who")
+    who.add_argument("name", help='defendant name, e.g. "De Hoyos"')
+    who.add_argument("--limit", type=int, default=10)
+    who.set_defaults(func=cmd_who)
+
+    archive = sub.add_parser("archive")
+    archive.add_argument("--out", default=None,
+                         help="output dir (default data/jail-activity)")
+    archive.add_argument("--days-back", type=int, default=7)
+    archive.set_defaults(func=cmd_archive)
 
     approve = sub.add_parser("approve")
     approve.add_argument("case_key")

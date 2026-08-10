@@ -17,3 +17,7 @@ __pycache__/
 *.py[cod]
 .venv/
 *.egg-info/
+
+# Archived county data — regenerable for 7 days, then not. Kept out of git
+# because it grows daily and contains raw county records.
+data/jail-activity/
