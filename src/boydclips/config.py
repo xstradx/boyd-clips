@@ -14,6 +14,11 @@ CONFIG_PATH = ROOT / "config" / "pipeline.yaml"
 ENV_PATH = ROOT / "config" / ".env"
 SPEC_VERSION = "1.0.0"
 
+# Must match the `scores` object in analyze.SCORE_SCHEMA.
+RUBRIC_DIMENSIONS = frozenset(
+    {"human_stakes", "dramatic_turn", "judge_moment", "self_contained", "hook_strength"}
+)
+
 
 class Config:
     """Dot-and-bracket access over the YAML tree, with path resolution."""
@@ -94,8 +99,20 @@ def _validate(cfg: Config) -> None:
             "Scores are computed against these weights and will be meaningless otherwise."
         )
 
+    # The names matter as much as the sum. Scoring indexes the model's output
+    # by these keys, so a renamed weight that still totals 100 passes startup
+    # and then raises KeyError mid-run — after both API calls have been paid
+    # for, which is exactly what validating here is meant to prevent.
+    if set(weights) != RUBRIC_DIMENSIONS:
+        missing = RUBRIC_DIMENSIONS - set(weights)
+        unknown = set(weights) - RUBRIC_DIMENSIONS
+        raise ValueError(
+            "analysis.rubric_weights keys must match the scoring schema exactly. "
+            f"missing={sorted(missing) or 'none'}, unknown={sorted(unknown) or 'none'}"
+        )
+
     short_max = cfg.require("output.short.max_duration_s")
-    if short_max > 60:
+    if short_max >= 60:
         raise ValueError(
             f"output.short.max_duration_s is {short_max}; platforms reject "
             "vertical shorts at 60s or longer."

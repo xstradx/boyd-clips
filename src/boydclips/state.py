@@ -92,6 +92,12 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+# Statuses meaning "do not look at this docket again". Everything else —
+# discovered, transcribed, analyzed, error, refused — is retried on the next
+# run, which is what makes a failed or dry run recoverable.
+TERMINAL_STATUSES = frozenset({"complete", "no_eligible_cases"})
+
+
 class Store:
     def __init__(self, db_path: Path):
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -117,10 +123,25 @@ class Store:
     # ---------------------------------------------------------------- dockets
 
     def seen_docket(self, video_id: str) -> bool:
+        """Has this docket ever been recorded? Use `is_terminal` to decide
+        whether to skip it — a recorded docket is not a finished one."""
         row = self._conn.execute(
             "SELECT 1 FROM dockets WHERE video_id = ?", (video_id,)
         ).fetchone()
         return row is not None
+
+    def is_terminal(self, video_id: str) -> bool:
+        """True only when a docket is genuinely done with.
+
+        Deliberately narrow. A docket is recorded the moment it is discovered,
+        long before any work happens, so treating "recorded" as "finished"
+        means a dry run, a crash, or an API outage silently consumes the
+        docket and it is never processed again.
+        """
+        row = self._conn.execute(
+            "SELECT status FROM dockets WHERE video_id = ?", (video_id,)
+        ).fetchone()
+        return row is not None and row["status"] in TERMINAL_STATUSES
 
     def add_docket(self, video_id: str, title: str, docket_date: str, duration_s: float) -> None:
         with self.tx() as c:
@@ -283,9 +304,14 @@ class Store:
 
     def reliability(self) -> dict[str, Any]:
         """The evidence base for promoting autonomy.mode. Not a vibe check."""
+        # `id DESC` is the tiebreaker, not decoration: decided_at has
+        # second resolution, so decisions recorded in the same second tie and
+        # SQLite may order a rejection behind an approval — inflating
+        # consecutive_approvals, which is the number that gates autonomy.
         rows = list(
             self._conn.execute(
-                "SELECT decision, safety_related FROM ledger ORDER BY decided_at DESC"
+                "SELECT decision, safety_related FROM ledger "
+                "ORDER BY decided_at DESC, id DESC"
             )
         )
         total = len(rows)

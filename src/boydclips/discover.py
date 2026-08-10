@@ -25,6 +25,9 @@ _DATE_RE = re.compile(
 )
 _SESSION_RE = re.compile(r"\b(MORN\w*|AFTER\w*|EVEN\w*)\s*DOCKET", re.IGNORECASE)
 
+# Chronological, for sorting same-day sessions.
+SESSION_ORDER = {"morning": 0, "afternoon": 1, "evening": 2, "unknown": 3}
+
 
 @dataclass
 class Docket:
@@ -141,7 +144,10 @@ def filter_new(
         keep.append(d)
 
     # Oldest first, so a backlog is worked through in chronological order.
-    keep.sort(key=lambda x: (x.docket_date or "9999", x.session))
+    # Session must sort by time of day, not alphabetically — "afternoon" sorts
+    # before "morning", which would hand the day's single clip slot to the
+    # later session.
+    keep.sort(key=lambda x: (x.docket_date or "9999", SESSION_ORDER.get(x.session, 9)))
     return keep
 
 

@@ -21,12 +21,19 @@ from .transcribe import Word
 # keyframe slop have material to work with.
 SECTION_MARGIN_S = 20.0
 
-# Content wider than this is assumed to be a side-by-side two-participant Zoom
-# layout rather than a single camera.
-SPLIT_STACK_MIN_ASPECT = 2.2
-
-# Where the stacked pair sits on the 1920px canvas.
+# Where the stacked pair sits on the 1920px canvas, and how much clear space
+# the captions need beneath it.
 STACK_TOP_Y = 120
+CAPTION_BAND_MIN = 180
+
+# Minimum content aspect for tile stacking.
+#
+# Each half of a 2-up becomes 1080 wide, so a tile is 1080/(aspect/2) tall and
+# the stacked pair is twice that. For the pair plus STACK_TOP_Y plus a caption
+# band to fit inside 1920, the aspect has to clear ~2.6 — at 2.2 the stack is
+# 2084px and the lower participant is pushed off-frame while the captions land
+# on top of them. Derived rather than guessed, so the two stay in sync.
+SPLIT_STACK_MIN_ASPECT = 2.0 * 1080 / ((1920 - STACK_TOP_Y - CAPTION_BAND_MIN) / 2.0)
 
 
 def choose_vertical_layout(
@@ -37,24 +44,40 @@ def choose_vertical_layout(
     Returns (mode, caption_margin_v). The margin differs per mode because the
     captions must land in empty space, and where that space is depends on how
     the frame was assembled.
+
+    Honours an explicit `vertical_mode`. Deciding the margin from a layout the
+    renderer was never going to use burns captions at the wrong height — and
+    silently, since the frame still renders.
     """
+    default_margin = cfg.get("captions", {}).get("margin_v", 420)
+    configured = cfg.get("vertical_mode", "auto")
+    if configured != "auto":
+        if configured == "split_stack":
+            return configured, _stack_margin(_aspect_of(source, crop) or 2.7)
+        return configured, default_margin
+
+    aspect = _aspect_of(source, crop)
+    if aspect is None:
+        return "blur_pad", default_margin
+
+    if aspect >= SPLIT_STACK_MIN_ASPECT:
+        return "split_stack", _stack_margin(aspect)
+
+    return "blur_pad", default_margin
+
+
+def _aspect_of(source: Path, crop: str | None) -> float | None:
     if crop:
         cw, ch = (int(v) for v in crop.split("=")[1].split(":")[:2])
     else:
         cw, ch = probe_dimensions(source)
-    if not ch:
-        return "blur_pad", cfg.get("captions", {}).get("margin_v", 420)
+    return (cw / float(ch)) if ch else None
 
-    aspect = cw / float(ch)
-    if aspect >= SPLIT_STACK_MIN_ASPECT:
-        # Each half becomes 1080 wide; two stacked tiles plus the top offset
-        # determine where the free band starts.
-        tile_h = int(round(1080 / (aspect / 2)))
-        stack_bottom = STACK_TOP_Y + 2 * tile_h
-        margin = max(60, 1920 - stack_bottom - 40)
-        return "split_stack", margin
 
-    return "blur_pad", cfg.get("captions", {}).get("margin_v", 420)
+def _stack_margin(aspect: float) -> int:
+    tile_h = int(round(1080 / (aspect / 2)))
+    stack_bottom = STACK_TOP_Y + 2 * tile_h
+    return max(CAPTION_BAND_MIN // 2, 1920 - stack_bottom - 40)
 
 
 @dataclass
@@ -153,6 +176,14 @@ def download_section(
     """
     section_start = max(0.0, start_s - SECTION_MARGIN_S)
     section_end = end_s + SECTION_MARGIN_S
+
+    # The cached file is only reusable if it holds the same window. Keying the
+    # name on the window itself means changing pad_before_s can't silently
+    # return a file whose t=0 is somewhere else — which would shift every
+    # downstream trim and desync the burned-in captions from the audio.
+    out_path = out_path.with_name(
+        f"{out_path.stem}_{int(section_start)}-{int(section_end)}{out_path.suffix}"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     if out_path.exists():

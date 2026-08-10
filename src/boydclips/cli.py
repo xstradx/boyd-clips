@@ -150,6 +150,12 @@ def cmd_approve(args: argparse.Namespace) -> int:
         store.close()
         return 0
 
+    if store.case_published(args.case_key):
+        print(f"{args.case_key} is already published — not uploading again.")
+        print("Approval was still recorded. Use --force only if you mean to duplicate.")
+        store.close()
+        return 0
+
     report = publish_pair(
         cfg, store,
         longform=clips.get("longform"),

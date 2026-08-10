@@ -68,7 +68,10 @@ class Pipeline:
             self.cfg.require("source.channel_url"),
             self.cfg.get("source.scan_depth", 8),
         )
-        seen = {d.video_id for d in found if self.store.seen_docket(d.video_id)}
+        # Skip only dockets that actually finished. Filtering on "have I seen
+        # this row" would consume a docket the moment it was discovered, so a
+        # dry run or any mid-run failure would retire it permanently.
+        seen = {d.video_id for d in found if self.store.is_terminal(d.video_id)}
         new = discover.filter_new(
             found,
             seen=seen,
@@ -143,7 +146,17 @@ class Pipeline:
         review_dir = self.out / "review" / stamp
         review_dir.mkdir(parents=True, exist_ok=True)
 
-        transcript = get_transcript(docket.video_id, work)
+        # Same options as the analysis stage. Normally the cache makes this a
+        # no-op, but on a cache miss the defaults would quietly re-transcribe
+        # with settings the config had disabled.
+        transcript = get_transcript(
+            docket.video_id,
+            work,
+            source=self.cfg.get("transcription.source", "auto_captions"),
+            language=self.cfg.get("transcription.language", "en"),
+            whisper_fallback=self.cfg.get("transcription.whisper_fallback", True),
+            whisper_model=self.cfg.get("transcription.whisper_model", "medium"),
+        )
         meta = {"title": docket.title, "docket_date": docket.docket_date, "url": docket.url}
 
         log.info("  package: writing titles and description")
@@ -221,6 +234,8 @@ class Pipeline:
         log.info("  render: short (%d beats, %.1fs)", len(segments),
                  sum(s.duration for s in segments))
 
+        # choose_vertical_layout honours an explicit vertical_mode, so the
+        # margin always matches the layout render_short will actually build.
         mode, caption_margin = render.choose_vertical_layout(source, crop, sh_cfg)
         log.info("  framing: vertical mode=%s, caption margin=%dpx", mode, caption_margin)
 
@@ -297,6 +312,7 @@ class Pipeline:
                 self.store.mark_docket(docket.video_id, "no_eligible_cases")
                 continue
 
+            produced_this_docket = False
             picks = eligible[: max(1, per_day)]
             bank = eligible[len(picks):] if self.cfg.get("output.bank_extras") else []
             if bank:
@@ -314,19 +330,32 @@ class Pipeline:
                     )
                     continue
 
+                produced_this_docket = True
+
                 try:
                     result = self.produce(docket, case)
                 except Exception as exc:
                     log.error("  production failed: %s", exc)
                     log.debug(traceback.format_exc())
+                    produced_this_docket = False
                     continue
 
-                report = publish_pair(
-                    self.cfg, self.store,
-                    longform=result["longform"],
-                    short=result["short"],
-                    context={"hook_line": result["package"]["hook_line"]},
-                )
+                # Publishing must not be able to abort the run. An escape here
+                # would skip cleanup and leave every remaining docket in `new`
+                # unprocessed — and, before the is_terminal fix, permanently
+                # consumed. The clip is already rendered and on disk either
+                # way, so a publish failure is recoverable via `boyd approve`.
+                try:
+                    report = publish_pair(
+                        self.cfg, self.store,
+                        longform=result["longform"],
+                        short=result["short"],
+                        context={"hook_line": result["package"]["hook_line"]},
+                    )
+                except Exception as exc:
+                    log.error("  publish failed (clip is rendered and retained): %s", exc)
+                    log.debug(traceback.format_exc())
+                    report = {"error": str(exc), "skipped": ["publish raised; use boyd approve"]}
                 result["publish"] = report
                 for note in report.get("skipped", []):
                     log.info("  publish: %s", note)
@@ -341,7 +370,16 @@ class Pipeline:
                 produced.append(result)
                 log.info("  done -> %s", result["review_dir"])
 
-            self.store.mark_docket(docket.video_id, "complete")
+            # Only a docket that actually yielded a clip is finished. Marking
+            # it complete after a dry run, a swallowed production failure, or
+            # an all-skipped pick list would assert work that never happened
+            # and make the docket unreachable on later runs.
+            if produced_this_docket:
+                self.store.mark_docket(docket.video_id, "complete")
+            elif dry_run:
+                log.info("  [dry-run] docket left pending for a real run")
+            else:
+                log.warning("  docket left pending — nothing was produced")
 
         return produced
 

@@ -206,6 +206,18 @@ def publish_pair(
     mode = cfg.require("autonomy.mode")
     report: dict[str, Any] = {"mode": mode, "longform": {}, "short": {}, "skipped": []}
 
+    # Re-publishing uploads a second copy and, because record_publication is an
+    # upsert on (clip_id, platform), overwrites the first one's URL — leaving a
+    # public video with no row pointing at it. SAFETY_RULES R10 depends on that
+    # row existing to action a takedown, so this guard is a safety control, not
+    # just tidiness.
+    for clip in (longform, short):
+        if clip and store.publication_url(clip["clip_id"], "youtube"):
+            report["skipped"].append(
+                f"{clip['clip_id']} is already published — refusing to upload a duplicate"
+            )
+            return report
+
     if mode == "manual":
         report["skipped"].append(
             "autonomy.mode=manual — files rendered to out/review/, nothing published"
@@ -266,8 +278,15 @@ def publish_pair(
                     short["clip_id"], result.platform, result.remote_id, result.url, result.privacy
                 )
                 report["short"][name] = {"url": result.url, "privacy": privacy}
-            except (RuntimeError, NotImplementedError) as exc:
-                # One unconfigured platform must not take down the others.
-                report["short"][name] = {"error": str(exc).splitlines()[0]}
+            except Exception as exc:
+                # One platform must not take down the others — and the failure
+                # that matters most is a real API error (googleapiclient's
+                # HttpError on quota, an auth RefreshError), not the stub
+                # adapters' RuntimeError. Catching only the stubs would let a
+                # transient YouTube error skip every remaining platform, which
+                # is the exact case this guard exists to prevent.
+                report["short"][name] = {
+                    "error": f"{type(exc).__name__}: {str(exc).splitlines()[0]}"
+                }
 
     return report

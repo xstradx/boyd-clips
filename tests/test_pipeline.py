@@ -353,6 +353,105 @@ def test_store_idempotency_and_promotion_gate(tmp_path=None):
     store.close()
 
 
+# ------------------------------------------------- regressions (code review)
+
+
+def test_discovered_docket_is_not_treated_as_finished():
+    """A docket is recorded at discovery, before any work. Treating that as
+    'seen' made --dry-run and any crash consume it permanently."""
+    import tempfile
+    store = Store(Path(tempfile.mkdtemp()) / "t.db")
+    store.add_docket("v1", "t", "2026-08-06", 100.0)
+
+    assert store.seen_docket("v1"), "row should exist"
+    assert not store.is_terminal("v1"), "discovered != finished"
+
+    for status in ("transcribed", "analyzed", "error", "refused"):
+        store.mark_docket("v1", status)
+        assert not store.is_terminal("v1"), f"{status} must stay retryable"
+
+    store.mark_docket("v1", "complete")
+    assert store.is_terminal("v1")
+    store.close()
+
+
+def test_same_day_sessions_sort_chronologically():
+    """'afternoon' < 'morning' alphabetically, which handed the day's single
+    clip slot to the later session."""
+    from datetime import date
+    made = [
+        discover.Docket("pm", "t", 3600, "2026-08-06", "afternoon"),
+        discover.Docket("am", "t", 3600, "2026-08-06", "morning"),
+    ]
+    kept = discover.filter_new(
+        made, seen=set(), min_duration_s=900, max_age_days=4, today=date(2026, 8, 7)
+    )
+    assert [d.video_id for d in kept] == ["am", "pm"]
+
+
+def test_renamed_rubric_weight_is_rejected_at_startup():
+    from boydclips.config import Config, _validate
+    import copy
+    bad = copy.deepcopy(CFG._data)
+    w = bad["analysis"]["rubric_weights"]
+    w["judge_moments"] = w.pop("judge_moment")  # still sums to 100
+    _expect_raises(lambda: _validate(Config(bad)), "renamed rubric weight")
+
+
+def test_sixty_second_short_is_rejected():
+    from boydclips.config import Config, _validate
+    import copy
+    bad = copy.deepcopy(CFG._data)
+    bad["output"]["short"]["max_duration_s"] = 60
+    _expect_raises(lambda: _validate(Config(bad)), "max_duration_s of exactly 60")
+
+
+def test_consecutive_approvals_deterministic_within_one_second():
+    """decided_at has second resolution; without an id tiebreaker a rejection
+    can sort behind approvals and inflate the autonomy promotion counter."""
+    import tempfile
+    store = Store(Path(tempfile.mkdtemp()) / "t.db")
+    store.record_decision("c0", "rejected", "bad", safety_related=True)
+    for i in range(5):
+        store.record_decision(f"c{i+1}", "approved")
+    assert store.reliability()["consecutive_approvals"] == 5
+
+    store.record_decision("c9", "rejected", "bad")
+    assert store.reliability()["consecutive_approvals"] == 0, (
+        "newest decision is a rejection; streak must be zero"
+    )
+    store.close()
+
+
+def test_stacked_layout_always_fits_the_canvas():
+    """At the old 2.2 threshold the stacked pair was 2084px tall and the lower
+    participant was pushed off a 1920px frame."""
+    a = render.SPLIT_STACK_MIN_ASPECT
+    for aspect in (a, a + 0.01, 2.7, 3.0, 4.0):
+        tile_h = round(1080 / (aspect / 2))
+        bottom = render.STACK_TOP_Y + 2 * tile_h
+        assert bottom <= 1920, f"aspect {aspect:.2f}: stack bottom {bottom} overflows"
+        assert 1920 - bottom >= 0, "no room left for captions"
+
+
+def test_explicit_vertical_mode_is_honoured():
+    """The margin must match the layout that actually gets rendered."""
+    wide = "crop=1280:476:0:0"
+    cfg = dict(CFG.require("output.short"))
+
+    cfg["vertical_mode"] = "auto"
+    mode, _ = render.choose_vertical_layout(Path("x"), wide, cfg)
+    assert mode == "split_stack", "wide 2-up should auto-select stacking"
+
+    for forced in ("blur_pad", "center_crop"):
+        cfg["vertical_mode"] = forced
+        mode, margin = render.choose_vertical_layout(Path("x"), wide, cfg)
+        assert mode == forced, f"{forced} must not be overridden by detection"
+        assert margin == cfg["captions"]["margin_v"], (
+            f"{forced} got a stacked-layout margin ({margin}) it will not render"
+        )
+
+
 # ---------------------------------------------------------------- config
 
 
