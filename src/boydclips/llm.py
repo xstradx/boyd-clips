@@ -123,6 +123,36 @@ def validate(value: Any, schema: dict[str, Any], path: str = "$") -> list[str]:
     return errors
 
 
+def prune_unknown(value: Any, schema: dict[str, Any]) -> Any:
+    """Drop keys the schema does not declare, recursively.
+
+    The CLI backend has to describe the wanted shape by pasting the JSON schema
+    into the prompt, and models sometimes mirror schema *metadata* back as if
+    it were data — an observed failure was a `safety` object returned with a
+    `required` key copied straight out of the schema. That is harmless: nothing
+    downstream reads undeclared fields.
+
+    Treating it as fatal was not harmless. One echoed key burned all three
+    retries and dropped a 20-case docket. Prune first, then validate what
+    remains, so retries are spent on real problems — missing required fields
+    and wrong types.
+    """
+    if isinstance(value, dict) and schema.get("type") == "object":
+        properties = schema.get("properties", {})
+        return {
+            k: prune_unknown(v, properties[k]) if k in properties else v
+            for k, v in value.items()
+            if k in properties
+        }
+
+    if isinstance(value, list) and schema.get("type") == "array":
+        item_schema = schema.get("items")
+        if item_schema:
+            return [prune_unknown(v, item_schema) for v in value]
+
+    return value
+
+
 _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.MULTILINE)
 
 
@@ -199,6 +229,7 @@ class ClaudeCliBackend:
                 prompt = self._correction(user, last_error)
                 continue
 
+            data = prune_unknown(data, schema)
             errors = validate(data, schema)
             if not errors:
                 return data
@@ -230,7 +261,11 @@ class ClaudeCliBackend:
     def _correction(original: str, error: str) -> str:
         return (
             f"{original}\n\n---\n\nYour previous response was rejected:\n"
-            f"  {error}\n\nReturn the corrected JSON object only."
+            f"  {error}\n\n"
+            "Return the corrected JSON object and nothing else. The schema "
+            "describes the shape your output must take — do not copy schema "
+            "keywords such as \"required\", \"type\", \"properties\" or "
+            "\"enum\" into the output itself. Emit data only."
         )
 
     def _invoke(self, system: str, prompt: str, label: str, attempt: int) -> str:

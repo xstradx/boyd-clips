@@ -501,6 +501,95 @@ def test_explicit_vertical_mode_is_honoured():
         )
 
 
+# ------------------------------------------------------------ llm backend
+
+
+def test_prune_drops_echoed_schema_keywords():
+    """The CLI backend pastes the schema into the prompt, and models sometimes
+    echo schema metadata back as data. Observed in production: a `safety`
+    object returned with a `required` key, which burned all three retries and
+    dropped a 20-case docket."""
+    from boydclips import llm
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "safety": {
+                "type": "object",
+                "properties": {"safety_pass": {"type": "boolean"}},
+                "required": ["safety_pass"],
+                "additionalProperties": False,
+            }
+        },
+        "required": ["safety"],
+        "additionalProperties": False,
+    }
+    polluted = {
+        "safety": {"safety_pass": True, "required": ["safety_pass"], "type": "object"},
+        "properties": {"junk": 1},
+    }
+    cleaned = llm.prune_unknown(polluted, schema)
+    assert cleaned == {"safety": {"safety_pass": True}}
+    assert llm.validate(cleaned, schema) == []
+
+
+def test_prune_preserves_arrays_and_real_data():
+    from boydclips import llm
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "cases": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {"start_s": {"type": "number"}},
+                    "required": ["start_s"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+        "required": ["cases"],
+        "additionalProperties": False,
+    }
+    data = {"cases": [{"start_s": 1.0, "enum": "x"}, {"start_s": 2.0}]}
+    assert llm.prune_unknown(data, schema) == {"cases": [{"start_s": 1.0}, {"start_s": 2.0}]}
+
+
+def test_validate_still_catches_real_problems():
+    """Pruning must not paper over missing required fields or wrong types."""
+    from boydclips import llm
+
+    schema = {
+        "type": "object",
+        "properties": {"n": {"type": "integer"}, "s": {"type": "string"}},
+        "required": ["n", "s"],
+        "additionalProperties": False,
+    }
+    assert llm.validate({"n": 1}, schema), "missing required field must error"
+    assert llm.validate({"n": "no", "s": "x"}, schema), "wrong type must error"
+    assert llm.validate({"n": True, "s": "x"}, schema), "bool is not an integer"
+    assert llm.validate({"n": 1, "s": "x"}, schema) == []
+
+
+def test_extract_json_never_raises_raw_decode_errors():
+    """A JSONDecodeError escaping as itself bypasses the retry loop."""
+    from boydclips import llm
+
+    for bad in ('{"a": 1,}', "not json at all", "", '{"a": '):
+        try:
+            llm.extract_json(bad)
+        except llm.BackendError:
+            pass
+        except Exception as exc:
+            raise AssertionError(
+                f"{bad!r} raised {type(exc).__name__}, which the retry loop cannot catch"
+            ) from exc
+
+    assert llm.extract_json('```json\n{"a": 1}\n```') == {"a": 1}
+    assert llm.extract_json('Here you go:\n{"a": 1}') == {"a": 1}
+
+
 # ---------------------------------------------------------------- config
 
 
