@@ -200,7 +200,7 @@ class Pipeline:
 
         lf_description = self.cfg.require("packaging.longform.description_template").format(
             summary=pkg["summary"],
-            proceeding_type=case["proceeding_type"].replace("_", " ").title(),
+            proceeding_type=_proceeding_label(case["proceeding_type"]),
             court=self.cfg.require("source.court"),
             docket_date=docket.docket_date or "unknown",
             source_url=docket.url,
@@ -506,6 +506,28 @@ class Pipeline:
                     elif f.is_dir():
                         shutil.rmtree(f, ignore_errors=True)
         log.info("cleanup: removed %d stale work file(s)", removed)
+
+
+# Schema enum values are machine tokens; naive title-casing put literal
+# "Other before Judge Stephanie Boyd" into a published description.
+PROCEEDING_LABELS = {
+    "arraignment": "An arraignment",
+    "plea": "A plea hearing",
+    "sentencing": "A sentencing",
+    "bond_hearing": "A bond hearing",
+    "probation_revocation": "A probation revocation hearing",
+    "motion_hearing": "A motion hearing",
+    "status_conference": "A status conference",
+    "trial_segment": "Trial proceedings",
+    "administrative": "A court proceeding",
+    "other": "A court proceeding",
+}
+
+
+def _proceeding_label(proceeding_type: str) -> str:
+    return PROCEEDING_LABELS.get(
+        proceeding_type, proceeding_type.replace("_", " ").capitalize()
+    )
 
 
 def _now() -> str:

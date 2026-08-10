@@ -501,6 +501,20 @@ def test_explicit_vertical_mode_is_honoured():
         )
 
 
+def test_every_proceeding_type_has_a_readable_label():
+    """Schema enums are machine tokens. Title-casing them put the literal
+    sentence "Other before Judge Stephanie Boyd" into a real description."""
+    from boydclips.pipeline import PROCEEDING_LABELS, _proceeding_label
+
+    for value in analyze.PROCEEDING_TYPES:
+        assert value in PROCEEDING_LABELS, f"{value} has no description label"
+        label = _proceeding_label(value)
+        assert label[0].isupper() and "_" not in label
+        assert label.lower() not in ("other", "administrative"), (
+            f"{value} renders as {label!r}, which reads as a stray enum token"
+        )
+
+
 # ------------------------------------------------------------ llm backend
 
 
