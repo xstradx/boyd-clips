@@ -224,10 +224,16 @@ class Pipeline:
 
         segments = render.plan_short_segments(case, sh_cfg)
         if not case.get("shortable") or segments is None:
-            log.info(
-                "  render: no short — %s",
-                case.get("shortable_reasoning") or "beat plan failed validation",
+            # Don't print shortable_reasoning when the model said the case IS
+            # shortable — that text argues the opposite of what happened and
+            # hides which check actually failed.
+            why = (
+                case.get("shortable_reasoning") or "model marked it unshortable"
+                if not case.get("shortable")
+                else "beat plan rejected by plan_short_segments (order, "
+                     "case bounds, or duration budget)"
             )
+            log.info("  render: no short — %s", why)
             self._write_manifest(review_dir, docket, case, pkg, result)
             return result
 
@@ -282,6 +288,53 @@ class Pipeline:
         return result
 
     # ------------------------------------------------------------------ driver
+
+    def run_case(self, case_key: str, dry_run: bool = False) -> dict[str, Any] | None:
+        """Render one specific already-scored case, chosen by the operator.
+
+        run_daily() picks the top scorer; this renders whoever you name. The
+        case must already exist in the store — this deliberately does not
+        re-analyse, so an operator cannot use it to bypass the safety gate on
+        a case that was never scored.
+        """
+        case = self.store.get_case(case_key)
+        if case is None:
+            log.error("unknown case %s — run `boyd bank` to list available cases", case_key)
+            return None
+
+        safety = case.get("safety", {})
+        if not safety.get("safety_pass"):
+            rules = ", ".join(safety.get("safety_rule_violations") or []) or "unspecified"
+            log.error("case %s failed the safety gate (%s) — refusing to render", case_key, rules)
+            return None
+
+        if self.store.case_published(case_key):
+            log.error("case %s is already published", case_key)
+            return None
+
+        row = self.store.get_docket_row(case_key.split(":")[0])
+        if row is None:
+            log.error("no stored docket for %s", case_key)
+            return None
+
+        docket = discover.Docket(
+            video_id=row["video_id"],
+            title=row["title"],
+            duration_s=row["duration_s"] or 0.0,
+            docket_date=row["docket_date"] or "",
+            session="unknown",
+        )
+
+        log.info("case %s — %s (score %.1f)", case_key,
+                 case.get("defendant_name") or "?", case.get("total_score") or 0.0)
+
+        if dry_run:
+            log.info("  [dry-run] would render: %s", (case.get("summary") or "")[:100])
+            return None
+
+        result = self.produce(docket, case)
+        log.info("  rendered -> %s", result["review_dir"])
+        return result
 
     def run_daily(self, limit: int | None = None, dry_run: bool = False) -> list[dict[str, Any]]:
         new = self.discover()

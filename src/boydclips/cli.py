@@ -3,6 +3,7 @@
     boyd doctor                 check the environment before trusting a cron job
     boyd discover               list new dockets, touch nothing else
     boyd run [--dry-run]        the daily pipeline
+    boyd run --case <case_key>  render one specific defendant's case
     boyd approve <case_key>     record approval and publish a held clip
     boyd reject <case_key>      record rejection with a reason
     boyd stats                  reliability ledger and promotion readiness
@@ -114,7 +115,11 @@ def cmd_discover(args: argparse.Namespace) -> int:
 def cmd_run(args: argparse.Namespace) -> int:
     pipe = Pipeline()
     setup_logging(pipe.cfg, args.verbose)
-    results = pipe.run_daily(limit=args.limit, dry_run=args.dry_run)
+    if args.case:
+        one = pipe.run_case(args.case, dry_run=args.dry_run)
+        results = [one] if one else []
+    else:
+        results = pipe.run_daily(limit=args.limit, dry_run=args.dry_run)
     pipe.cleanup()
     pipe.close()
 
@@ -221,7 +226,7 @@ def cmd_bank(args: argparse.Namespace) -> int:
         print("bank is empty")
     for row in rows:
         print(f"  {row['case_key']:28s} score {row['total_score']:5.1f}  "
-              f"{(row['defendant_name'] or '?')[:24]:24s} {row['proceeding_type']}")
+              f"{(row['defendant'] or '?')[:24]:24s} {row['proceeding_type']}")
     store.close()
     return 0
 
@@ -258,6 +263,9 @@ def build_parser() -> argparse.ArgumentParser:
                      help="analyse and select, but download and render nothing")
     run.add_argument("--limit", type=int, default=None,
                      help="override output.clips_per_day")
+    run.add_argument("--case", default=None, metavar="CASE_KEY",
+                     help="render one specific scored case instead of the "
+                          "day's top pick (see `boyd bank` for keys)")
     run.set_defaults(func=cmd_run)
 
     approve = sub.add_parser("approve")

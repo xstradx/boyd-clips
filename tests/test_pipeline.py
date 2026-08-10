@@ -638,6 +638,58 @@ def _expect_raises(fn, label):
 # ---------------------------------------------------------------- runner
 
 
+def test_short_beats_are_clamped_to_the_case_not_discarded():
+    """A hook opening slightly before case_start must be trimmed, not thrown out.
+
+    Observed 2026-08-10 on SPSHGzlOe8c:6031: the hook began 6s before the case
+    boundary and killed an otherwise valid 52s short. Clamping keeps the short
+    while still guaranteeing no audio from the previous defendant.
+    """
+    cfg = {"min_duration_s": 25, "max_duration_s": 59}
+    case = {
+        "start_s": 6031, "end_s": 6300, "shortable": True,
+        "short_segments": [
+            {"start_s": 6025, "end_s": 6040},   # starts before the case
+            {"start_s": 6147, "end_s": 6160},
+            {"start_s": 6188, "end_s": 6198},
+            {"start_s": 6198, "end_s": 6212},
+        ],
+    }
+    segments = render.plan_short_segments(case, cfg)
+    assert segments is not None, "valid short was discarded over a 6s overhang"
+    assert all(s.start_s >= case["start_s"] and s.end_s <= case["end_s"]
+               for s in segments), "a beat still reaches outside the case window"
+    assert sum(s.duration for s in segments) >= cfg["min_duration_s"]
+
+
+def test_short_beat_wholly_outside_the_case_is_rejected():
+    """Clamping must not rescue a plan that points at another defendant."""
+    cfg = {"min_duration_s": 25, "max_duration_s": 59}
+    case = {
+        "start_s": 6031, "end_s": 6300, "shortable": True,
+        "short_segments": [
+            {"start_s": 5900, "end_s": 5930},   # entirely before the case
+            {"start_s": 6147, "end_s": 6180},
+            {"start_s": 6188, "end_s": 6212},
+        ],
+    }
+    assert render.plan_short_segments(case, cfg) is None
+
+
+def test_out_of_order_beats_still_rejected():
+    """Clamping must not have weakened the no-reordering guarantee (R5)."""
+    cfg = {"min_duration_s": 25, "max_duration_s": 59}
+    case = {
+        "start_s": 6031, "end_s": 6300, "shortable": True,
+        "short_segments": [
+            {"start_s": 6188, "end_s": 6212},
+            {"start_s": 6100, "end_s": 6130},   # goes backwards
+            {"start_s": 6240, "end_s": 6260},
+        ],
+    }
+    assert render.plan_short_segments(case, cfg) is None
+
+
 def test_repair_json_recovers_observed_malformations():
     """The exact failures that killed dockets on 2026-08-09.
 

@@ -192,6 +192,15 @@ def download_section(
     _run(
         [
             "yt-dlp", "--no-warnings", "--ignore-config",
+            # A single transient 403 from googlevideo otherwise kills the whole
+            # unattended run. Observed 2026-08-10: the section download failed
+            # with "403 Forbidden" while the same command succeeded moments
+            # later, so the URL was expiring or being throttled mid-transfer
+            # rather than the video being unavailable.
+            "--retries", "10",
+            "--fragment-retries", "10",
+            "--extractor-retries", "5",
+            "--retry-sleep", "exp=2:60",
             "--download-sections", f"*{section_start:.2f}-{section_end:.2f}",
             # Without this, the file starts at the preceding keyframe and every
             # timestamp downstream drifts by up to several seconds.
@@ -505,9 +514,25 @@ def plan_short_segments(
         if b.start_s < a.end_s:
             return None
 
+    # Never take audio from outside the case: the seconds before case_start
+    # belong to the previous defendant, and splicing them in would put another
+    # person's hearing into this clip.
+    #
+    # Clamp rather than reject. The model routinely opens the hook a few
+    # seconds early because the quotable line sits near the boundary that
+    # segmentation drew — observed 2026-08-10, where a hook starting 6s before
+    # case_start discarded an otherwise valid 52s short. Clamping can only ever
+    # shrink a segment toward the case, so it is strictly more conservative
+    # than what was asked for, and it keeps the short.
     case_start, case_end = case["start_s"], case["end_s"]
-    if any(s.start_s < case_start - 1 or s.end_s > case_end + 1 for s in segments):
-        return None
+    clamped: list[Segment] = []
+    for s in segments:
+        start = max(s.start_s, case_start)
+        end = min(s.end_s, case_end)
+        if end - start < 1.0:
+            return None  # a beat lying (almost) wholly outside is a bad plan
+        clamped.append(Segment(start, end))
+    segments = clamped
 
     total = sum(s.duration for s in segments)
     if total < cfg.get("min_duration_s", 25):

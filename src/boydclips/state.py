@@ -219,6 +219,13 @@ class Store:
         ).fetchone()
         return json.loads(row["payload"]) if row else None
 
+    def get_docket_row(self, video_id: str) -> sqlite3.Row | None:
+        """The stored docket for a case, so a single case can be rendered
+        without re-running discovery over the whole channel."""
+        return self._conn.execute(
+            "SELECT * FROM dockets WHERE video_id = ?", (video_id,)
+        ).fetchone()
+
     def banked_cases(self, limit: int = 20) -> list[sqlite3.Row]:
         """Qualifying cases that were never published — inventory for slow days."""
         return list(
