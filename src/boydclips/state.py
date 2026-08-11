@@ -219,6 +219,12 @@ class Store:
         ).fetchone()
         return json.loads(row["payload"]) if row else None
 
+    def cases_for_docket(self, video_id: str) -> list[sqlite3.Row]:
+        """Every case row stored for a docket. Used to detect the case where a
+        scored.json cache exists but its DB rows were never written."""
+        return list(self._conn.execute(
+            "SELECT case_key FROM cases WHERE video_id = ?", (video_id,)))
+
     def get_docket_row(self, video_id: str) -> sqlite3.Row | None:
         """The stored docket for a case, so a single case can be rendered
         without re-running discovery over the whole channel."""

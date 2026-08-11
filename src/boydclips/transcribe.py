@@ -208,6 +208,52 @@ def transcribe_whisper(video_id: str, work_dir: Path, model: str = "medium") -> 
     return Transcript(video_id=video_id, words=words, source=f"whisper:{model}")
 
 
+# Phrases the auto-captions reliably get wrong, applied to every transcript.
+#
+# "Bexar" is pronounced "bear", and YouTube transcribes it phonetically EVERY
+# time: 176 occurrences of "Bear County" across 29 cached transcripts, zero
+# correct. This is not a per-clip typo — it is the county's name, it reaches
+# burned-in captions, titles, descriptions AND the text the scoring model reads,
+# and local viewers notice it immediately.
+#
+# Keys are matched case-insensitively across word boundaries; the replacement
+# preserves the original token count so word timings stay aligned.
+PHRASE_FIXES: dict[str, str] = {
+    "bear county": "Bexar County",
+    "bear kounty": "Bexar County",
+}
+
+
+def apply_phrase_fixes(words: list[Word]) -> tuple[list[Word], int]:
+    """Correct known mistranscriptions in place, preserving timing.
+
+    Only equal-length replacements are supported on purpose. Substituting a
+    different number of tokens would require inventing timestamps, and a
+    caption whose timing has drifted is worse than one with a wrong word.
+    """
+    if not words:
+        return words, 0
+    lowered = [w.w.lower().strip(".,?!:;") for w in words]
+    fixed = 0
+    for wrong, right in PHRASE_FIXES.items():
+        wt, rt = wrong.split(), right.split()
+        if len(wt) != len(rt):
+            continue
+        n = len(wt)
+        for i in range(len(words) - n + 1):
+            if lowered[i:i + n] == wt:
+                for k in range(n):
+                    # keep any trailing punctuation the original token carried
+                    tail = ""
+                    orig = words[i + k].w
+                    while orig and orig[-1] in ".,?!:;":
+                        tail = orig[-1] + tail
+                        orig = orig[:-1]
+                    words[i + k] = Word(t=words[i + k].t, w=rt[k] + tail)
+                fixed += 1
+    return words, fixed
+
+
 def get_transcript(
     video_id: str,
     work_dir: Path,
@@ -221,7 +267,13 @@ def get_transcript(
     they make backfilling and re-scoring free."""
     cache = work_dir / f"{video_id}.transcript.json"
     if cache.exists():
-        return Transcript.from_json(cache.read_text(encoding="utf-8"))
+        t = Transcript.from_json(cache.read_text(encoding="utf-8"))
+        # Applied on read as well as on write, so transcripts cached before the
+        # fix map existed are corrected without re-downloading anything.
+        t.words, n = apply_phrase_fixes(t.words)
+        if n:
+            cache.write_text(t.to_json(), encoding="utf-8")
+        return t
 
     transcript: Transcript | None = None
 
@@ -234,5 +286,6 @@ def get_transcript(
     if transcript is None:
         raise RuntimeError(f"no transcript available for {video_id}")
 
+    transcript.words, _ = apply_phrase_fixes(transcript.words)
     cache.write_text(transcript.to_json(), encoding="utf-8")
     return transcript

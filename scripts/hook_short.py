@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger("hook")
 
 # video_id, hook (start,end), body (start,end), slug
-JOBS = [
+JOBS_ALL = [
     # Body opens on "Are you proceeding with sentencing?" (8106.64) rather than
     # mid-way through the deferred-adjudication boilerplate — after the hook,
     # the viewer needs a line that starts something, not one that finishes it.
@@ -70,6 +70,17 @@ JOBS = [
          punch={"MARIJUANA", "CIGARETTE", "CHILD", "CHILDREN", "SMOKE",
                 "SMOKING", "ALCOHOL", "BRAIN", "DAD", "PROUD", "CHANGE"}),
 
+    # Almaguer, felony DWI 3rd+. Hook is Boyd's framing question and his one-word
+    # answer; body opens on the same line so the hook lands twice, and ends on
+    # her stating the undue-detriment finding — a conclusion that reads straight
+    # back into "you're one of the people who cannot drink".
+    dict(vid="SPSHGzlOe8c", hook=(3024.20, 3029.60), body=(3024.10, 3082.00),
+         slug="cannot-drink-and-know-when-to-stop",
+         note='hook "you\'re one of the people who cannot drink alcohol and '
+              'know when to stop, right?" / "Correct." Loops on the same claim.',
+         punch={"DRINK", "ALCOHOL", "STOP", "JAIL", "GPS", "DWI", "PRISON",
+                "CORRECT", "JOB", "CHILDREN", "DAYS", "FELONY"}),
+
     dict(vid="0OXHpQjbb8Y", hook=(4826.30, 4828.40), body=(4823.10, 4880.40),
          slug="batman-could-beat-anybody",
          note='hook "Batman could beat anybody" -> body opens on the question '
@@ -78,8 +89,9 @@ JOBS = [
          punch={"BATMAN", "ANYBODY", "MARVEL", "HARLEY", "QUINN", "MONEY",
                 "GENTLEMAN", "WOMAN", "KILLED", "DC", "COMICS"}),
 ]
-
 import os as _os
+JOBS=[j for j in JOBS_ALL if j['slug']=='cannot-drink-and-know-when-to-stop']
+
 # Anton: OFL-licensed, condensed and heavy. Condensed matters twice over —
 # it reads less "thick" than Arial Black at the same weight, and long words
 # like SUPERVISION fit without dropping the size. Ships in assets/fonts/.

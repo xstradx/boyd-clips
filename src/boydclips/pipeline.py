@@ -89,8 +89,24 @@ class Pipeline:
 
         cached = work / "scored.json"
         if cached.exists():
-            log.info("  analysis: reusing cached result")
-            return json.loads(cached.read_text(encoding="utf-8"))
+            scored = json.loads(cached.read_text(encoding="utf-8"))
+            # Re-assert the DB rows on every cache hit.
+            #
+            # This path used to return early, before save_case(). If the JSON
+            # existed but the rows didn't — a crash between the two writes, or
+            # a rebuilt DB — the cases were invisible to `boyd bank` and
+            # `boyd run --case` forever, because analysis never ran again to
+            # create them. save_case is INSERT OR REPLACE, so re-asserting is
+            # free and idempotent.
+            existing = {r["case_key"] for r in self.store.cases_for_docket(docket.video_id)}
+            if len(existing) < len(scored):
+                for case in scored:
+                    self.store.save_case(docket.video_id, case, case.get("rank"))
+                log.info("  analysis: reusing cached result (restored %d DB row(s))",
+                         len(scored) - len(existing))
+            else:
+                log.info("  analysis: reusing cached result")
+            return scored
 
         log.info("  transcript: fetching")
         transcript = get_transcript(
@@ -142,7 +158,20 @@ class Pipeline:
         """Download, cut, caption, and package one selected case."""
         work = self.work / docket.video_id
         case_key = self.store.case_key(docket.video_id, case["start_s"])
-        stamp = f"{docket.docket_date or 'undated'}_{docket.video_id}"
+        # The folder name must include the case, not just the docket.
+        #
+        # It was "{date}_{video_id}", which is one folder per DOCKET — but a
+        # docket routinely yields seven eligible cases, and each one silently
+        # overwrote the last. Observed 2026-08-10: rendering Almaguer destroyed
+        # a completed De Hoyos long-form and short with no warning, and the
+        # manifest simply reported the survivor. Across an unattended backfill
+        # that is a lot of quiet data loss.
+        #
+        # start_s is what distinguishes cases within a docket, and it is the
+        # same value the case_key is built from, so the folder and the DB row
+        # stay in step.
+        stamp = (f"{docket.docket_date or 'undated'}_{docket.video_id}"
+                 f"_{int(round(case['start_s']))}")
         review_dir = self.out / "review" / stamp
         review_dir.mkdir(parents=True, exist_ok=True)
 
