@@ -19,7 +19,7 @@ away.
 
 | metric | value | vs prev |
 |---|---|---|
-| published | **0** | — |
+| published | **1** | 0 → 1 |
 | eligible/docket | **7** (SPSHGzlOe8c, 20 cases) | 0 → 7 |
 | safety rejects | **0** | 6+ → 0 |
 | top score | **85.2** | 57.0 → 85.2 |
@@ -39,9 +39,17 @@ boundary — it now clamps into the case instead. That last one had silently
 suppressed the short on the 85.2 pick, and the short is the entire
 distribution mechanism.
 
-**Still zero published.** One clip (`W8IvfROpZc8:774`, score 60.4) has been
-rendered and awaiting approval since Aug 6. A better pick now exists at 85.2.
-Every number above moved except the one that matters.
+**First clip published** — "Teen Shot His Friend In The Face — Judge Boyd Turns
+On His Mother", a 57s Short cut from XiWwYFPhPn0 (2026-07-21 docket). Hook-first
+cut, one-word captions in the letterbox band, amber keyword glow.
+
+**The baseline clock starts here.** Roughly 10 posts are needed before "outlier"
+means anything on this channel — until then, per-video numbers are noise, not
+signal. Do not tune anything off post #1. What to record for each: views,
+retention curve shape, and where the drop-off sits.
+
+Two clips remain rendered and unpublished: `W8IvfROpZc8:774` (60.4) and
+`SPSHGzlOe8c:6031` (85.2, De Hoyos), plus four more hand-cut shorts.
 
 Open question: `min_total_score: 50` was calibrated when nothing scored above
 57. Scores now reach 85. The floor is probably too low — measure before moving.
