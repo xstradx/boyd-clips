@@ -9,6 +9,7 @@ file starts precisely at the requested timestamp.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from dataclasses import dataclass
@@ -467,6 +468,13 @@ def render_short(
         # ffmpeg's filter parser mangles Windows drive letters and backslashes,
         # so run with cwd set to the file's directory and reference it by name.
         tail += f",ass={ass_path.name}"
+        # Project fonts travel with the repo rather than being installed into
+        # Windows. Without this libass silently falls back to a default face,
+        # which renders but looks nothing like the design.
+        fonts_dir = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+        if fonts_dir.is_dir() and any(fonts_dir.iterdir()):
+            rel = os.path.relpath(fonts_dir, ass_path.parent).replace("\\", "/")
+            tail += f":fontsdir='{rel}'"
     tail += ",format=yuv420p[vout]"
 
     filter_complex = f"{trims};{concat};{vertical};{tail}"

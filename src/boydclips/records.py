@@ -47,30 +47,89 @@ class RecordsError(RuntimeError):
     pass
 
 
-def _request(url: str, *, data: bytes | None = None, headers: dict | None = None,
-             timeout: int = 40, retries: int = 3) -> bytes:
-    """One HTTP call with backoff.
+# Minimum gap between requests to the same host.
+#
+# Observed 2026-08-10: a burst of jail_search calls made the portal start
+# closing connections outright (WinError 10054). That is the server shedding
+# load, not a network fault, and retrying harder makes it worse. Pacing at the
+# client is the fix — an unattended daily run must never look like a scraper.
+_MIN_INTERVAL = {"portal-txbexar.tylertech.cloud": 1.2,
+                 "centralmagistrate.bexar.org": 1.0,
+                 "edocs.bexar.org": 0.5}
+_DEFAULT_INTERVAL = 0.8
+_last_call: dict[str, float] = {}
 
-    These are county servers behind a CDN; transient 403/503 happens and a
-    single failure must not abort a daily run (the same lesson yt-dlp taught
-    us on 2026-08-10).
+
+def _throttle(url: str) -> None:
+    host = urllib.parse.urlparse(url).netloc
+    gap = _MIN_INTERVAL.get(host, _DEFAULT_INTERVAL)
+    prev = _last_call.get(host)
+    if prev is not None:
+        wait = gap - (time.monotonic() - prev)
+        if wait > 0:
+            time.sleep(wait)
+    _last_call[host] = time.monotonic()
+
+
+def _cool_off(host: str, seconds: float) -> None:
+    """Push the next allowed call into the future after a refusal."""
+    _last_call[host] = time.monotonic() + seconds
+
+
+def _request(url: str, *, data: bytes | None = None, headers: dict | None = None,
+             timeout: int = 40, retries: int = 4) -> bytes:
+    """One HTTP call, paced and backed off.
+
+    County servers behind a CDN: transient 403/503 happens and a single failure
+    must not abort a daily run. But a *connection reset* means something
+    different from a 5xx — the host is refusing us — so it gets a long cool-off
+    rather than the standard ramp.
     """
     hdrs = {"User-Agent": UA, "Accept": "application/json, text/plain, */*"}
     hdrs.update(headers or {})
+    host = urllib.parse.urlparse(url).netloc
     last: Exception | None = None
+
     for attempt in range(1, retries + 1):
+        _throttle(url)
         req = urllib.request.Request(url, data=data, headers=hdrs)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return resp.read()
         except urllib.error.HTTPError as exc:
             last = exc
+            # 400/404 are answers, not failures — the id is bad, stop asking.
             if exc.code in (400, 404):
                 raise RecordsError(f"{url} -> HTTP {exc.code}") from exc
+            if exc.code in (429, 503):
+                retry_after = exc.headers.get("Retry-After") if exc.headers else None
+                pause = float(retry_after) if (retry_after or "").isdigit() else 30.0
+                log.warning("  %s rate-limited (%s); cooling off %.0fs",
+                            host, exc.code, pause)
+                _cool_off(host, pause)
+                time.sleep(pause)
+                continue
+        except (ConnectionResetError, ConnectionAbortedError) as exc:
+            # WinError 10054 and friends. The host hung up on us.
+            last = exc
+            pause = 20.0 * attempt
+            log.warning("  %s closed the connection; cooling off %.0fs",
+                        host, pause)
+            _cool_off(host, pause)
+            time.sleep(pause)
+            continue
         except Exception as exc:  # noqa: BLE001 - urllib raises a zoo of these
             last = exc
+            if isinstance(getattr(exc, "reason", None),
+                          (ConnectionResetError, ConnectionAbortedError)):
+                pause = 20.0 * attempt
+                log.warning("  %s closed the connection; cooling off %.0fs",
+                            host, pause)
+                _cool_off(host, pause)
+                time.sleep(pause)
+                continue
         if attempt < retries:
-            time.sleep(2 ** attempt)
+            time.sleep(min(2 ** attempt, 15))
     raise RecordsError(f"{url} failed after {retries} attempts: {last}")
 
 
