@@ -35,7 +35,7 @@ degraded case.
 ## 2. Long-form structure
 
 ```
-[0:00]  COLD OPEN     — the case begins; no intro, no branding, no logo sting
+[0:00]  STING         — branded open, 2.6s, then straight into the case
         BODY          — the proceeding, uncut except for dead air > 4s
         RESOLUTION    — the judge's ruling or the case's natural end
 [end]   HARD CUT      — no outro, no "like and subscribe"
@@ -43,10 +43,26 @@ degraded case.
 
 Rules:
 
+- **The sting is branding, not content.** `boyd-brand/sting_v2.mp4`, 2.6s,
+  1920x1080, with audio. It goes in front of the body inside the same filter
+  graph, so the court footage is compressed once. The watermark is applied to
+  the BODY only — stacking the mark on top of the sting reads as a mistake.
+  Config: `output.longform.intro_enabled`.
+
+  **AMENDED 2026-08-17, Nathan's instruction.** This section previously
+  specified `COLD OPEN — the case begins; no intro, no branding, no logo
+  sting`. That rule was written before the channel had a brand, and the build
+  had diverged from it in practice: `render_longform` accepted an `intro`
+  argument from the start. Keep the sting short. The 5.1s and 7.7s `_SLOW`
+  variants exist and are the wrong choice — both are silent, which forces a
+  synthesised audio branch to keep concat happy, and long branding in front of
+  a hearing is retention spent on nothing.
+
 - **Never** cut mid-sentence. Boundaries snap to caption-segment edges.
 - Dead air longer than 4 seconds is removed. Shorter gaps stay — courtroom
   pauses carry weight and cutting them makes proceedings feel falsified.
 - No music. No sound effects. No added narration. The audio is the record.
+  The sting carries its own audio; nothing is added over the proceeding.
 - No zooms, speed ramps, or reaction overlays. This is a document.
 - Trim only at the head and tail plus interior dead air. **Never reorder.**
   Reordering courtroom speech misrepresents a proceeding.
@@ -191,3 +207,37 @@ versions used, and the generated title/description.
 
 This exists so that if a clip is ever challenged, you can reconstruct in one
 step exactly what was published, from where, and why the system chose it.
+
+---
+
+## 9. Profanity — audio uncensored, text always censored
+
+Nathan, 2026-08-13: *"leave the sound in but always cencor it in the text pls."*
+
+**Audio ships as recorded.** Bleeping testimony edits what a witness actually
+said, and primary-source fidelity is this channel's entire claim. Leave it.
+
+**Every text surface is censored** — burned-in captions, SRT/VTT sidecars,
+titles, descriptions, thumbnails, on-screen cards, chapter names, and the shot
+lists and dossiers in this repo.
+
+The asymmetry is not inconsistency: text is what gets **indexed, thumbnailed and
+read out of context**. A caption or title carries the word stripped of the
+courtroom around it, to a classifier or a scrolling viewer. Spoken audio inside
+the clip is contextualised by the footage carrying it.
+
+Use `scripts/censor.py`:
+
+```python
+from censor import censor, has_profanity
+caption = censor(line)     # "I shouldn't have f***ing told him anything"
+```
+
+Style is first letter, asterisks, trailing letters — `f***ing`. Never delete the
+word and never paraphrase it; the reader should know exactly what was said.
+
+**Corollary, and it has already bitten once:** a quote in our own notes may have
+been sanitised at write time and is therefore not evidence of what was said.
+`out/dossiers/CASTILLO_SINGLE_CUT.md` rendered this line clean; the transcript at
+`a3_shouldnt_have_said.mp4` 32.32–46.16 is stronger. Check the transcript before
+trusting a quote from our own documents.
