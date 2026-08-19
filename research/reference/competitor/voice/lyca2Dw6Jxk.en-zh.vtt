@@ -1,0 +1,655 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:03.360
+Hi everyone, today we're going to learn a different approach. I
+
+00:00:03.360 --> 00:00:08.880
+write and prepare scripts for voice-overs and similar things. Right now,
+
+00:00:08.880 --> 00:00:15.120
+most of my work involves creating voice-overs for these tutorial videos or pluralsights or
+
+00:00:15.120 --> 00:00:19.440
+udemy and similar things, but I'll share some lessons I've learned.
+
+00:00:19.440 --> 00:00:24.040
+Hopefully, these lessons will be helpful if you have to do the same thing, so let's get started! [Music]
+
+00:00:28.140 --> 00:00:37.080
+Okay, welcome back. My name is Jeff Bat. If you haven't already checked out my
+
+00:00:37.080 --> 00:00:41.880
+website, keep checking it out! Here you can learn everything about development, you
+
+00:00:41.880 --> 00:00:46.920
+can see all my previous blog posts on Clear Storyboards tips and tricks, Adobe's
+
+00:00:46.920 --> 00:00:52.260
+fascination with AR, and tips and tricks for production. All the different blog posts I've published in the last two years are
+
+00:00:52.260 --> 00:00:56.700
+here. You can also download templates for
+
+00:00:56.700 --> 00:01:01.860
+Clear Storyboards and the X API. If you're not familiar with any of these tools, you can check out the full
+
+00:01:01.860 --> 00:01:08.400
+courses: Clear Storyboards from A to Z, 360 Adobe Captivate XAPI Basics,
+
+00:01:08.400 --> 00:01:15.600
+Camtasia Clear Rice Custom Scorm and HTML5.  The video is now, as I mentioned before, I've done a lot of
+
+00:01:15.600 --> 00:01:21.480
+narration, mainly for things like pluralsights or udemy and/or different courses, and
+
+00:01:21.480 --> 00:01:26.580
+some different things to keep in mind when creating a script, as well as
+
+00:01:26.580 --> 00:01:31.260
+some different tips and tricks I've learned over the years that I want to share with everyone. Every
+
+00:01:31.260 --> 00:01:37.200
+voice-over artist has their own stuff. I mean, I don't even consider myself a voice-over artist. I've just
+
+00:01:37.200 --> 00:01:42.300
+done a lot of narration stuff. Everyone has their own process. Everyone has their own preparation. Uh, you
+
+00:01:42.300 --> 00:01:46.740
+know, you know preparation and making sure they're ready with their voices. So I don't want to
+
+00:01:46.740 --> 00:01:51.600
+say this is the best way, but it's just how I've learned in voice-over and scripting
+
+00:01:51.600 --> 00:01:57.420
+, so I just want to make sure it's
+
+00:01:57.420 --> 00:02:01.380
+clear because I know some people say, "No, you shouldn't do this," "No, you shouldn't
+
+00:02:01.380 --> 00:02:05.820
+do that." I don't think it's black and white. I think you know some methods
+
+00:02:05.820 --> 00:02:09.900
+work for people, some methods don't work for people, it depends on what works for you, so please
+
+00:02:09.900 --> 00:02:14.820
+keep that in mind. So I'm going to move on and pull out my slides here.
+
+00:02:14.820 --> 00:02:19.680
+There are a few things to keep in mind in scripting and preparation. This is the first question I get: Should you write a script
+
+00:02:19.680 --> 00:02:26.160
+? Should you write a script for the video of my blog post? I don't write scripts. I actually
+
+00:02:26.160 --> 00:02:32.940
+just have a few points to keep in mind.  I came up with a topic, and I wrote down a few
+
+00:02:32.940 --> 00:02:38.640
+points I wanted to cover. Then I started writing about how much I've done in the last two years, how much I've done this kind of
+
+00:02:38.640 --> 00:02:44.160
+blog post, to the point that it's easier for me not to write scripts. I'm just being honest, I'm not a
+
+00:02:44.160 --> 00:02:50.880
+writer. I'm more of a developer than anyone else, but I'm not a writer, and I have a hard time
+
+00:02:50.880 --> 00:02:55.620
+sitting down and writing exactly what I want to say, and another person. Why
+
+00:02:55.620 --> 00:03:01.440
+I don't write a lot of scripts is because many times my scripts sound mechanical
+
+00:03:01.440 --> 00:03:06.780
+unless I write them in a certain way, which I'll talk about here later, but that's one of the
+
+00:03:06.780 --> 00:03:12.180
+reasons. I don't specifically write scripts for camera videos because I want
+
+00:03:12.180 --> 00:03:18.480
+them to sound smoother and more dynamic, but that's up to you. So if
+
+00:03:18.480 --> 00:03:23.400
+scripting works for you, if you feel more comfortable using scripts
+
+00:03:23.400 --> 00:03:27.720
+, hopefully these tips and tricks will apply to my time writing scripts for pluralsights and udemy,
+
+00:03:27.720 --> 00:03:32.700
+and other similar things. These tips and tricks helped me get through scripting, so we'll
+
+00:03:32.700 --> 00:03:37.320
+discuss scripting or not scripting. We're going to discuss scripting using tags.
+
+00:03:37.320 --> 00:03:41.880
+We'll discuss some other methods I've already mentioned, as well as some tips
+
+00:03:41.880 --> 00:03:46.620
+and tricks, so first let's talk about one of the key things about no scripting.
+
+00:03:46.620 --> 00:03:52.500
+No scripting is knowledge, if you know this tool, if you know what you're going to talk about.
+
+00:03:52.500 --> 00:03:58.440
+It makes things much easier, so that's one of the reasons I can clearly articulate the
+
+00:03:58.440 --> 00:04:04.740
+storyline and show you how to create tab interactions, just you know to add some key points
+
+00:04:04.740 --> 00:04:09.240
+, but you don't have to write everything because I've taught and talked a lot about it,
+
+00:04:09.240 --> 00:04:14.880
+so it flows much more smoothly. The tip for you is to learn your content. If
+
+00:04:14.880 --> 00:04:19.740
+you're not going to write a script, make sure you know what you're practicing is just for a meeting
+
+00:04:19.740 --> 00:04:25.140
+or to show knowledge to someone or something similar, or just to pull up your iPhone
+
+00:04:25.140 --> 00:04:30.060
+and take notes. This can help you practice, this can help you gain knowledge, especially
+
+00:04:30.060 --> 00:04:35.760
+sharing knowledge and sharing knowledge that others need to know. It really comes with practice; it comes
+
+00:04:35.760 --> 00:04:41.820
+with you taking it out, doing it, and showing it at different times. Posting
+
+00:04:41.820 --> 00:04:47.040
+YouTube videos can also help you practice what you're talking about. So here's an example.
+
+00:04:47.040 --> 00:04:52.200
+I'll quickly extract an untagged script, so I believe this
+
+00:04:52.200 --> 00:04:57.840
+is a trailer for my pluralsight course and a little bit of stuff they have very specific things to say about pluralsight. They
+
+00:04:57.840 --> 00:05:02.400
+want you to talk about some things inside, and that's what I'm going to
+
+00:05:02.400 --> 00:05:08.280
+start using my script here now. If I were to go in and I'm reading this post, then there are a few things that won't really be here talking to me.
+
+00:05:08.280 --> 00:05:13.320
+This makes it a little difficult for me to read, probably just because of my reading difficulties. It
+
+00:05:13.320 --> 00:05:18.600
+just makes it harder to hear. Naturally, I'm going to talk about scripting, so
+
+00:05:18.600 --> 00:05:24.420
+even if I'm not marking it or anything like that, the first piece of advice I'd give is to work
+
+00:05:24.420 --> 00:05:31.320
+line by line. So that means going into my script and then down and breaking it down into
+
+00:05:31.320 --> 00:05:38.160
+each line that everyone thinks of here, to make sure it's clearly separated. Now I can go in, and if
+
+00:05:38.160 --> 00:05:43.140
+I'm not on camera, I can go in and practice a few times. Hi everyone, my name is Jeff
+
+00:05:43.140 --> 00:05:48.900
+Batten, welcome to my JavaScript arrays and collections course. Practice a few times so that once
+
+00:05:48.900 --> 00:05:54.420
+you've practiced, you can set a record, and then you can just say that line. Now you can delete it in post-editing.
+
+00:05:54.420 --> 00:06:00.240
+You can delete the spaces between those lines so even if you pause and go to the
+
+00:06:00.240 --> 00:06:05.100
+next line, you can still delete that space. So it sounds natural. That's one of the benefits.
+
+00:06:05.100 --> 00:06:11.220
+Recording is that you can eliminate all the errors by writing scripts. Although I do find that I tend not to say "
+
+00:06:11.220 --> 00:06:18.060
+um" and "uh-huh," so that's one of the benefits of writing scripts. And it's more concise and clearer. So I'm not saying
+
+00:06:18.060 --> 00:06:23.580
+don't write scripts. There are some obvious benefits to writing scripts. These are some tips and tricks I've learned while working through scripts.
+
+00:06:23.580 --> 00:06:28.680
+I easily focus on one line at a time,
+
+00:06:28.680 --> 00:06:34.200
+practice a few times, click to record, and that's another thing you can do.  You
+
+00:06:34.200 --> 00:06:38.880
+can mark up your script. There are now several different ways to mark up your script. You
+
+00:06:38.880 --> 00:06:44.760
+can see them on the right. This has actually gotten me used to several
+
+00:06:44.760 --> 00:06:49.080
+different things visually, so I'm going to call up the same script here. You'll notice here. Hello everyone,
+
+00:06:49.080 --> 00:06:53.820
+my name is Jeff Bart, welcome. Here you'll see some different tips and tricks.
+
+00:06:53.820 --> 00:07:00.000
+We'll cover what all of these mean. Different colors are used in certain areas. Italics are used in
+
+00:07:00.000 --> 00:07:06.960
+certain areas. Orange is used in certain areas. And pauses of two, three, etc. I'll cover all of these,
+
+00:07:06.960 --> 00:07:14.040
+especially OSTs, and what all of these mean. If you're new to reading narration, even
+
+00:07:14.040 --> 00:07:19.140
+with all these types of marking, you probably know it takes a little time to get used to it. But once you've done some of these things by visually seeing these markings
+
+00:07:19.140 --> 00:07:25.140
+, it will trigger the way you need to read certain areas. Let's delve deeper
+
+00:07:25.140 --> 00:07:30.600
+into what some of these markings mean. So when you use
+
+00:07:30.600 --> 00:07:36.360
+different colors to emphasize different areas, the first thing is the color. You can talk about these colors in certain ways.
+
+00:07:36.360 --> 00:07:44.220
+The first is names. What I usually do is mark anyone's name in blue, or
+
+00:07:44.220 --> 00:07:49.800
+any similar software name in blue, or any similar name. For example, if I'm teaching JavaScript, I'll talk about
+
+00:07:49.800 --> 00:07:56.700
+JavaScript, and I'll also mark it in blue. Next is questions, because I want to make sure
+
+00:07:56.700 --> 00:08:02.220
+I have variations in questions when I get to the questions, because sometimes I will...
+
+00:08:02.220 --> 00:08:07.740
+Reading it, maybe it's just me, but sometimes I don't read it as a question and realize at the end that
+
+00:08:07.740 --> 00:08:13.680
+it is a question, so I like to mark them in purple. So when I first started reading
+
+00:08:13.680 --> 00:08:20.100
+this sentence, it was obviously a question. If I go back here, I'll scroll up, and
+
+00:08:20.100 --> 00:08:25.860
+you'll notice what I did right here. Maybe this also comes from learning Spanish.
+
+00:08:25.860 --> 00:08:33.060
+I added an inverted question mark at the beginning and then I set it to purple. You don't have to
+
+00:08:33.060 --> 00:08:38.340
+do this, but that lets me know from the beginning that it's a question, so I can make sure
+
+00:08:38.340 --> 00:08:44.100
+I've done the right twists and turns or even paused for a second before addressing the question. So
+
+00:08:44.100 --> 00:08:49.500
+this is one way I mark things: I do blue for names and things that are very important, then I
+
+00:08:49.500 --> 00:08:54.720
+do purple for questions, and then if I know there will be a
+
+00:08:54.720 --> 00:09:00.120
+specific type of screen movement, I'll use red for screen movement, especially if I'm doing narration separate from the
+
+00:09:00.120 --> 00:09:06.120
+actual screen recording. I'll mark the movement in red so I know the
+
+00:09:06.120 --> 00:09:12.000
+camera I'm talking about, I know the camera is or these screen recordings are moving.
+
+00:09:12.000 --> 00:09:17.040
+So this is another useful thing: I'm not sure if I have red here. It doesn't look like I
+
+00:09:17.040 --> 00:09:21.840
+have any red there, so it's just a trailer. They'll be animated later, so
+
+00:09:21.840 --> 00:09:25.920
+I don't need to actually mark red, but I've done a lot of software tutorials, so if I know...
+
+00:09:25.920 --> 00:09:31.740
+I want to go to a certain air area in my software, so I'll mark it red and green,
+
+00:09:31.740 --> 00:09:38.100
+which are my directions. This is something I won't say, but I just want to hint at it,
+
+00:09:38.100 --> 00:09:45.000
+or just let myself know something again when recording. So if I come here most often, one of the parts
+
+00:09:45.000 --> 00:09:51.660
+is done by pausing. So when I speak, sometimes I speak very fast, and I know I'm getting
+
+00:09:51.660 --> 00:09:57.180
+a lot of feedback, like he's speaking too fast. Maybe when I get excited about something,
+
+00:09:57.180 --> 00:10:02.940
+I just start in different sentences. So when I'm doing narration,
+
+00:10:02.940 --> 00:10:08.940
+pausing slightly chillax and then continuing helps me too. The next sentence is
+
+00:10:08.940 --> 00:10:13.920
+here. Hi everyone, my name is Jeff Batten. Welcome to my course JavaScript and Arrays
+
+00:10:13.920 --> 00:10:20.220
+and Collections. JavaScript Arrays and Collections.
+
+00:10:20.220 --> 00:10:25.500
+Pausing to edit to make them sound more natural,
+
+00:10:25.500 --> 00:10:31.440
+but it lets me know that I not only need to pay attention to this, but there are also
+
+00:10:31.440 --> 00:10:37.500
+one, two, and three points to show, so they are
+
+00:10:37.500 --> 00:10:42.720
+different parts I don't need to say, but I need to pause and wait for that
+
+00:10:42.720 --> 00:10:48.120
+point to appear. Now this one is OST. Now I'm going to talk about what OST
+
+00:10:48.120 --> 00:10:55.020
+means, but this is the text that will appear on the screen, but I won't specify
+
+00:10:55.020 --> 00:11:01.500
+what the text is because I don't need to read any text on the screen. I know sometimes we tend to
+
+00:11:01.500 --> 00:11:06.480
+Read all the content, and the text is on the screen so you don't necessarily need to read it,
+
+00:11:06.480 --> 00:11:11.760
+so let's talk about making arrays more useful and some other advanced methods. I don't need to go into
+
+00:11:11.760 --> 00:11:16.680
+advanced arrays; they get the idea there, so that's another thing. Those are the
+
+00:11:16.680 --> 00:11:22.020
+directions that give me. This is what I need to know to know what's going to happen on the screen, but
+
+00:11:22.020 --> 00:11:27.300
+after doing it a few times, I won't say it anymore. Seeing green triggers automatically.
+
+00:11:27.300 --> 00:11:32.160
+I won't say it, but I can pause for a second, and I can look at those directions there.
+
+00:11:32.160 --> 00:11:37.800
+Okay, so let's move on to the next thing. So the next one is orange. Now orange is looking to the future.
+
+00:11:37.800 --> 00:11:42.840
+We're going to talk about things in the future. We're going to talk about things that are
+
+00:11:42.840 --> 00:11:48.060
+exciting, or things you know that are exciting. This usually helps me, well, more about reflecting
+
+00:11:48.060 --> 00:11:53.460
+excitement. This is something you can take advantage of or something like that, so I'm going to
+
+00:11:53.460 --> 00:11:58.080
+go back here and get into the script, so this is here. We'll cover what you need to
+
+00:11:58.080 --> 00:12:02.820
+know about this course. Let me know what I need to be excited about, so we'll
+
+00:12:02.820 --> 00:12:08.100
+cover everything you need to know about this course, so it's been a bit helpful for me.
+
+00:12:08.100 --> 00:12:12.900
+One point to emphasize here is looking to the future at the end of this course,
+
+00:12:12.900 --> 00:12:18.180
+so I can emphasize something different again, which is the color
+
+00:12:18.180 --> 00:12:23.760
+and some other things I mark up my script. What I do visually is what I also use.
+
+00:12:23.760 --> 00:12:28.620
+Bold text highlights important words, so if I come here you'll notice things like "map," which are important words, "
+
+00:12:28.620 --> 00:12:37.200
+set up new data collection arrays," etc., so I say those words out loud so I can
+
+00:12:37.200 --> 00:12:43.500
+emphasize them at the beginning and read them. So, to make some advanced methods of raising more functional,
+
+00:12:43.500 --> 00:12:48.000
+I just pause for a second, or I emphasize the word array more.
+
+00:12:48.000 --> 00:12:54.240
+And another thing you can do is work with bolding and resizing, so
+
+00:12:54.240 --> 00:12:59.520
+when I browse through my script here you'll notice a few words you really know are
+
+00:12:59.520 --> 00:13:05.580
+larger than the others because I really want to emphasize those words in this context. Hello everyone,
+
+00:13:05.580 --> 00:13:12.120
+my name is Jeff Bat and welcome to this course on JavaScript arrays and collections. This helps me
+
+00:13:12.120 --> 00:13:17.820
+emphasize the actual array, and when I read this script, it visually calls the welcome in the script.
+
+00:13:17.820 --> 00:13:23.160
+I need to emphasize it, so the more I want to emphasize it, the more I actually resize
+
+00:13:23.160 --> 00:13:28.980
+it. This is another trick, you can see, as I browse here we have some exciting
+
+00:13:28.980 --> 00:13:33.360
+new methods, you know maybe you don't want to do that. We have some exciting new methods for
+
+00:13:33.360 --> 00:13:39.360
+dealing with arrays and data collection. Raising and data collection isn't exciting, but it is if
+
+00:13:39.360 --> 00:13:44.940
+you are new to it, or if you are familiar with it...  JavaScript, so some people might not be familiar with how to do
+
+00:13:44.940 --> 00:13:49.080
+raisin collection, so that's why I wanted to emphasize the excitement there. So this is another
+
+00:13:49.080 --> 00:13:54.840
+way to visually present it, and then there's the typewriter text direction or screen movement.
+
+00:13:54.840 --> 00:14:00.540
+This is related to pauses, and I'll put it in the typewriter text right here.
+
+00:14:00.540 --> 00:14:06.660
+American typewriter is text, or you can do Lucid Sans typewriters, or I'll find
+
+00:14:06.660 --> 00:14:11.700
+any typewriter text, so even text is
+
+00:14:11.700 --> 00:14:16.320
+visually different from other text on the screen, and more about direction and screen movement, so even the red, like
+
+00:14:16.320 --> 00:14:20.460
+I mentioned before the inversion, the question mark lets me
+
+00:14:20.460 --> 00:14:25.020
+know at the beginning of the sentence that it's a question, so I can make sure I
+
+00:14:25.020 --> 00:14:30.300
+'ve emphasized the question at the beginning, and there's also the highlighter head snappers. There's something called Head Snappers by
+
+00:14:31.080 --> 00:14:38.880
+Simon Allardyce. He's an author who's been around for a long time (lynda.com). I think he's the
+
+00:14:38.880 --> 00:14:44.520
+author of pluralsight and has a lot of popular coding courses. He mentioned some
+
+00:14:44.520 --> 00:14:49.320
+things about head snappers that I really like, so I wanted to make sure I gave him my credit for it.
+
+00:14:49.320 --> 00:14:56.280
+But head snappers are when you call the learner back to the screen, when you're talking about something on the screen...
+
+00:14:56.280 --> 00:15:02.940
+When you're working on a project, you want to get their attention back on you because sometimes people
+
+00:15:02.940 --> 00:15:10.740
+will turn the tutorial off and put it aside. You want to say, you know what
+
+00:15:10.740 --> 00:15:16.080
+you know will bring them back, or something very important, or
+
+00:15:16.080 --> 00:15:21.660
+something you want to emphasize, that's what brings them back. I'm not sure if I
+
+00:15:21.660 --> 00:15:27.180
+have any
+
+00:15:27.180 --> 00:15:32.280
+head
+
+00:15:32.280 --> 00:15:37.740
+snaps like this. I want to emphasize going back to the video and paying attention to the
+
+00:15:37.740 --> 00:15:44.040
+video. If you have the chance to watch any of Simon Allardyce's videos, he does this
+
+00:15:44.040 --> 00:15:50.520
+very well, so he's a great example of bringing it back, even saying
+
+00:15:50.520 --> 00:15:55.680
+things like, "You'll recall yourself, or even anticipate different questions,
+
+00:15:55.680 --> 00:16:00.720
+like what you might be thinking right now, or what you might be questioning, or what you might have a question in
+
+00:16:00.720 --> 00:16:06.240
+your head for the learner, because
+
+00:16:06.240 --> 00:16:10.800
+the learner might be thinking that, and you kind of expect what they're thinking, which will bring
+
+00:16:10.800 --> 00:16:16.140
+them back. It's a head snap, it needs them, you know, look elsewhere, and then bring it back
+
+00:16:16.140 --> 00:16:21.540
+to the screen and get their attention." So they are also text acronyms. So you
+
+00:16:21.540 --> 00:16:28.740
+see OST on the screen, which stands for text not said on the screen. So in this case, we have some
+
+00:16:28.740 --> 00:16:34.980
+text on the screen here. Advanced arrays: this is not said, but it's just a quick way to get a sense of the text on the screen.  The method of moving on the screen
+
+00:16:34.980 --> 00:16:41.580
+, so if you want to know exactly what's happening on the screen,
+
+00:16:41.580 --> 00:16:47.100
+you can put them in brackets and then you can trigger on the screen, or you can just
+
+00:16:47.100 --> 00:16:52.080
+show the action on the screen so I can know exactly what's happening on the screen even if
+
+00:16:52.080 --> 00:16:57.840
+I'm recording the screen at the same time I can even move my screen or my mouse.
+
+00:16:57.840 --> 00:17:03.300
+While I'm talking about it, if you want to get used to it this way, like
+
+00:17:03.300 --> 00:17:08.940
+I mentioned before, a lot of it is just practice. Practice pulling out your iPhone
+
+00:17:08.940 --> 00:17:15.780
+and recording your screen. Record yourself as you read the narrative and then you know
+
+00:17:15.780 --> 00:17:21.900
+it will get a lot easier over time. I've been making screen videos for over two years, but I've been
+
+00:17:21.900 --> 00:17:28.320
+doing these different plural sites and Udemy courses for over 10 years, so it's been a long time,
+
+00:17:28.320 --> 00:17:33.420
+so I've learned a lot, but I still have a lot to learn myself, so
+
+00:17:33.420 --> 00:17:38.280
+it's a kind of progress, you can keep improving in a certain area.
+
+00:17:38.280 --> 00:17:44.220
+Maybe it's not just about the microphone, but maybe there's a better microphone that can help you or
+
+00:17:44.220 --> 00:17:49.320
+just a better way of preparing or breathing or other similar methods. Now the
+
+00:17:49.320 --> 00:17:55.620
+last thing I want to talk about is creating lists or steps. This is what I do most often. What I do is if I go into
+
+00:17:55.620 --> 00:18:01.980
+my Trello. When I'm preparing a video, for example, if I click on that Trello board, these are
+
+00:18:01.980 --> 00:18:07.920
+Now I want to talk about something different. This is a video from last week, it's an
+
+00:18:07.920 --> 00:18:13.680
+interactive video within a storyline, so there are some things I just created that trigger hotspots and
+
+00:18:13.680 --> 00:18:18.600
+show layers to jump back to specific points. These are some things I want to cover in the video
+
+00:18:18.600 --> 00:18:24.360
+, so while recording the video, I would put some things next to the video. I didn't,
+
+00:18:24.360 --> 00:18:29.580
+but I would put some things next to it to let me know these different points, so
+
+00:18:29.580 --> 00:18:34.620
+if I'm recording something but I haven't written a script and I forget to cover point two well, I can bring
+
+00:18:34.620 --> 00:18:39.720
+it back to point two and I can make sure I've covered it too. So this is my most
+
+00:18:39.720 --> 00:18:45.420
+common method, but I've been using scripts and other things that have been populated,
+
+00:18:45.420 --> 00:18:50.820
+so hopefully this helps you, at least if you're thinking about writing scripts, if
+
+00:18:50.820 --> 00:18:57.180
+you know scripting for storylines or Adobe Captivate or something similar, and you
+
+00:18:57.180 --> 00:19:02.040
+want to create a script and mark it this way, hopefully this helps you.
+
+00:19:02.040 --> 00:19:06.240
+You can at least get one or two things out of this. If you like my videos and
+
+00:19:06.240 --> 00:19:11.580
+want to see more, say lea rningdojo.ninja. You can go to
+
+00:19:11.580 --> 00:19:17.220
+my blog posts and see all the previous blog posts. You can also download different templates for developing
+
+00:19:17.220 --> 00:19:22.560
+templates and clear storylines 360 ax API and videos. You can view the complete courses
+
+00:19:22.560 --> 00:19:29.520
+from A to  Z's content on 360 has a clear storyline.  This video, a basic explanation of Adobe Captivate XAPI by Camtasia,
+
+00:19:29.520 --> 00:19:34.740
+explains Rise, a custom scorm, and HTML5 video. If you enjoyed it, please continue and go to
+
+00:19:34.740 --> 00:19:39.720
+my YouTube channel. Make sure you click the like button and subscribe to my channel, then
+
+00:19:39.720 --> 00:19:45.540
+click the bell notification so you'll receive notifications for all future videos.
+
+00:19:45.540 --> 00:19:50.580
+These free videos really help my channel and keep me making these videos, these tips and
+
+00:19:50.580 --> 00:19:55.980
+tricks, and comment below on which ones were helpful to you and which others weren't in
+
+00:19:55.980 --> 00:19:59.940
+the video. When you have to leave a comment below my YouTube video, you're done.
+
+00:19:59.940 --> 00:20:07.380
+That's all for today, so see you next time! [Music] Foreign [Music]
+
+00:20:07.380 --> 00:20:07.880
+
+

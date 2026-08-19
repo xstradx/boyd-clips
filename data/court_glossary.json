@@ -1,0 +1,1176 @@
+{
+  "terms": [
+    {
+      "spoken": "TDC",
+      "formal": "Texas Department of Corrections - the prison agency's name until September 1, 1989, when it became the Texas Department of Criminal Justice (TDCJ)",
+      "short": "State prison. Judges still use the agency's pre-1989 name.",
+      "long": "\"TDC\" means Texas state prison. The agency stopped being the Texas Department of Corrections on September 1, 1989, when the legislature merged it with the parole and adult probation agencies into the Texas Department of Criminal Justice - but Texas judges and lawyers have never stopped saying \"TDC\".",
+      "source": "https://txarchives.org/tslac/finding_aids/20183.xml",
+      "confidence": "high",
+      "notes": "OUTDATED USAGE, INTENTIONALLY KEPT. The name is ~37 years out of date but remains near-universal in Texas courtrooms. Do not 'correct' the judge on screen. A sentence 'to TDC' means prison, as opposed to state jail or county jail. Full history: the Texas Prison System became the Texas Department of Corrections in 1957 (S.B. 42, 55th Leg.); TDCJ was created by H.B. 2335, 71st Leg. R.S. (Acts 1989, ch. 785), effective September 1, 1989, merging TDC, the Board of Pardons and Paroles and the Texas Adult Probation Commission. Do NOT cite S.B. 251 for this - that bill concerns controlled substance precursors.",
+      "also_said": [
+        "TDC-ID",
+        "the penitentiary",
+        "the pen"
+      ]
+    },
+    {
+      "spoken": "TDCJ",
+      "formal": "Texas Department of Criminal Justice",
+      "short": "The state agency running Texas prisons, parole and felony probation.",
+      "long": "The Texas Department of Criminal Justice is the state agency that runs the prison system, the parole division, and oversight of felony community supervision. It was created effective September 1, 1989 out of the old Texas Department of Corrections.",
+      "source": "https://www.tdcj.texas.gov/index.html",
+      "confidence": "high",
+      "notes": "Formally correct current name. Statutory framework is Government Code Chapter 493."
+    },
+    {
+      "spoken": "ID",
+      "formal": "Institutional Division of TDCJ - the prison side of the agency. TDCJ operates it under the name Correctional Institutions Division (CID)",
+      "short": "The prison part of TDCJ, as opposed to parole or probation.",
+      "long": "\"ID\" is the Institutional Division - the prison-operating arm of TDCJ, as distinct from the parole division or community supervision. TDCJ merged it into the Correctional Institutions Division (CID) in September 2003, and now uses only \"CID\" - but the Government Code still says \"institutional division\", and lawyers still say \"ID\".",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.493.htm",
+      "confidence": "high",
+      "notes": "NAMING SPLIT - the subtlest entry here, worth getting right. TDCJ created CID in September 2003 by merging the Institutional, Operations, Private Facilities and State Jail Divisions, done administratively under Gov't Code 493.0021 rather than by statute (quoted from TDCJ's website in Rogers v. State, No. 06-13-00262-CR (Tex. App.-Texarkana June 13, 2014) n.1). TDCJ's own divisions index and glossary now contain no 'Institutional Division' entry. BUT Gov't Code 493.002(a)(2) and 493.004 still say 'institutional division' - and were re-amended in 2025 still saying it - and Ch. 508 defines parole as release of an inmate 'sentenced to the institutional division' (508.001(6)). So 'ID' is outdated in PRACTICE but not flatly wrong in LAW. Safe on-screen wording avoids declaring either one incorrect.",
+      "also_said": [
+        "TDCJ-ID",
+        "CID"
+      ]
+    },
+    {
+      "spoken": "state jail",
+      "formal": "State jail felony facility operated by TDCJ under Government Code Chapter 507",
+      "short": "Lowest-level felony lockup. No parole from a state jail sentence.",
+      "long": "A state jail is a TDCJ facility for the lowest grade of felony. A state jail sentence runs 180 days to 2 years. There is no parole and no good conduct time - the only reduction is \"diligent participation\" credit for work, education or treatment, capped at one-fifth of the sentence. So state jail time is served close to day for day.",
+      "source": "https://www.tdcj.texas.gov/bpp/publications/PIT_English.pdf",
+      "confidence": "high",
+      "notes": "Do not call it prison and do not call it county jail - it is a third, separate thing, and this trips up non-Texans constantly. No parole: Board of Pardons and Paroles, 'Parole in Texas', p. 11 - 'state jail convictions are not applicable for parole eligibility'; see also Ex parte Baker, 297 S.W.3d 256 (Tex. Crim. App. 2009). No good conduct time and the one-fifth cap on diligent participation credit: CCP Art. 42A.559(b), (h). Facilities authorised by Gov't Code Ch. 507; run by CID since the 2003 merger."
+    },
+    {
+      "spoken": "SAFPF",
+      "formal": "Substance Abuse Felony Punishment Facility - a locked TDCJ treatment facility, Government Code 493.009, imposed as a condition of community supervision under CCP Art. 42A.303",
+      "short": "Locked in-prison drug treatment, 90 days to a year, then aftercare.",
+      "long": "SAFPF is a locked TDCJ substance abuse treatment facility a judge can order someone into as a condition of community supervision. By statute the term is indeterminate - not less than 90 days, not more than one year - and in practice TDCJ runs it as about six months, followed by a required aftercare plan starting with a transitional treatment centre.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.493.htm",
+      "confidence": "high",
+      "notes": "It is a condition of probation, not a separate sentence. Statutory range 90 days to 12 months, Gov't Code 493.009(c); no good conduct time earned there, 493.009(d). Judge must find drug/alcohol abuse significantly contributed to the offence, CCP 42A.303(c)(2); excluded for Penal Code 21.11, 22.011, 22.021. Aftercare mandatory, CCP 42A.303(d). In practice TDCJ describes it as a six-month in-prison programme (nine for special needs) plus up to three months in a TTC and outpatient aftercare. PRONUNCIATION 'safe-P' is genuine courthouse usage but no authority publishes pronunciations - do not present it as sourced. TIME IN A SAFPF COUNTS: on revocation the judge SHALL credit it (42A.755(d)) - but only if the defendant successfully completed the programme. DO NOT CONFUSE WITH SACP: TDCJ's Substance Abuse Counseling Program has attractive inpatient/outpatient language but is a PAROLE program for released inmates on special condition 'S', not court-ordered probation. Mixing parole-side and probation-side vocabulary is the classic error in Texas legal explainers."
+    },
+    {
+      "spoken": "parole",
+      "formal": "Discretionary conditional release of an inmate sentenced to the institutional division, Government Code Chapter 508",
+      "short": "Early supervised release from prison, decided by a parole board.",
+      "long": "Parole is the discretionary, conditional release of a prison inmate to serve the rest of the sentence under supervision in the community. It is granted by the Board of Pardons and Paroles, not by the judge - a Texas judge cannot promise parole.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.508.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 508.001(6). Most inmates become parole ELIGIBLE when calendar time plus good conduct time equals one-fourth of the sentence or 15 years, whichever is less (508.145(f)). Eligibility is not release; the board still has to vote. STATUTORY HAZARD - I saw this directly in the source text: Sec. 508.145 currently carries THREE different versions of subsection (a) and two of (d)(1), printed side by side as competing 2025 amendments that have not been reconciled. If a clip turns on a specific parole-ineligibility offence, check which version governs before scripting it. The general rules in (d)(2) and (f) quoted throughout this file are not affected."
+    },
+    {
+      "spoken": "mandatory supervision",
+      "formal": "Release to mandatory supervision, Government Code 508.147",
+      "short": "Automatic supervised release when time plus good time equals the sentence.",
+      "long": "Mandatory supervision is release from prison - not by a board's discretion but automatically - when the inmate's actual calendar time served plus accrued good conduct time adds up to the full sentence. Many offenses are excluded entirely, and for most eligible inmates a parole panel can still block it.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.508.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 508.147(a); exclusions in 508.149(a), which lists ~25 offence categories including murder, aggravated robbery, sexual assault and any judgment with a deadly weapon finding. A person released to mandatory supervision is legally 'considered to be released on parole' (508.147(b)). IMPORTANT WRINKLE - 'discretionary mandatory supervision': for offences committed on or after September 1, 1996, a parole panel can still block release if it finds the good conduct time does not accurately reflect rehabilitation potential and release would endanger the public (508.149(b)). So 'mandatory' is not actually automatic for modern cases.",
+      "also_said": [
+        "discretionary mandatory supervision"
+      ]
+    },
+    {
+      "spoken": "good conduct time",
+      "formal": "Good conduct time, Government Code 498.003",
+      "short": "Credit that moves parole eligibility earlier. It does not shorten the sentence.",
+      "long": "Good conduct time is credit an inmate earns for behaviour and program participation. Critically, under Government Code 498.003(a) it applies ONLY to eligibility for parole or mandatory supervision and \"does not otherwise affect an inmate's term\" - it is a privilege, not a right, and it can be taken away.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.498.htm",
+      "confidence": "high",
+      "notes": "MAJOR VIEWER MISCONCEPTION. Good time does not cut the sentence; it only moves the eligibility date. Verbatim from 498.003(a). Not earned in state jail (CCP 42A.559(b)) or SAFPF (Gov't Code 493.009(d)).",
+      "also_said": [
+        "good time"
+      ]
+    },
+    {
+      "spoken": "day for day",
+      "formal": "Colloquial phrase for a sentence served on flat calendar time, with good conduct time not counting toward parole eligibility",
+      "short": "Every day counts as one day. Good time does not help.",
+      "long": "\"Day for day\" (or \"flat time\") means the person serves actual calendar days with no good-conduct-time shortcut to release. It is how people describe state jail sentences, and how they describe the 3g/42A.054 rule that certain violent and sexual offences require serving half the sentence in real calendar time before parole eligibility.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.508.htm",
+      "confidence": "medium",
+      "notes": "PRACTITIONER SLANG, NOT A STATUTORY TERM - no Texas statute defines 'day for day', so this entry describes usage rather than quoting a definition. The underlying rules are statutory and verified: Gov't Code 508.145(d)(2) (half the sentence, calendar time, 'without consideration of good conduct time', capped at 30 years, minimum 2 years) and CCP 42A.559(b) (no good conduct time in state jail).",
+      "also_said": [
+        "flat time"
+      ]
+    },
+    {
+      "spoken": "in-patient treatment",
+      "formal": "Residential (live-in) court-ordered treatment; contemplated by CCP Art. 42A.301(c) for substance abuse and Art. 42A.506 for mental health",
+      "short": "Live-in treatment. You stay at the facility, you cannot leave.",
+      "long": "In-patient treatment means the person lives at the treatment facility for the length of the program rather than going home at night. A judge can order it as a condition of community supervision. At the most secure end this is SAFPF, a locked TDCJ facility; less restrictive options are residential treatment centres.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.301(c) expressly refers to 'a state-funded substance abuse treatment program, including an inpatient or outpatient program'; Art. 42A.506 covers 'outpatient or inpatient mental health or intellectual disability treatment'. Statute uses the terms but does not define them, so the live-in vs go-home gloss is practice-based. THE JUDGE MUST CONSULT AN EVALUATION FIRST: 42A.301(c) bars ordering such treatment until the judge considers an evaluation of 'the appropriate type and level of treatment necessary', conducted under 42A.257; for intoxication offences 42A.402(d) makes both the evaluation and the resulting treatment mandatory. TDCJ-CJAD's actual ladder, lightest to heaviest, is screening/assessment, outpatient, intensive outpatient, then residential. 'Residential' is the statutory term of art - the umbrella is 'community corrections facility' (Gov't Code 509.001(1)), which includes court residential treatment centres, substance abuse treatment facilities and ISFs, capped at 24 months (42A.602). COULD NOT VERIFY: there is no bright-line clinical threshold in Texas authority for when in-patient is required - the evaluation decides case by case. Do not script a number.",
+      "also_said": [
+        "inpatient",
+        "residential treatment"
+      ]
+    },
+    {
+      "spoken": "out-patient treatment",
+      "formal": "Non-residential court-ordered treatment; contemplated by CCP Art. 42A.301(c) and Art. 42A.506",
+      "short": "Treatment you attend on a schedule while living at home.",
+      "long": "Out-patient treatment means the person lives at home and attends counselling or treatment sessions on a set schedule, usually with drug testing. It is the less restrictive of the two options and is commonly ordered as a condition of community supervision, or stepped down to after in-patient treatment.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "Same statutory basis as in-patient (CCP 42A.301(c), 42A.506). The terms appear in statute but are not defined there. In court the pair is almost always framed as a ladder: out-patient first, in-patient if the person fails.",
+      "also_said": [
+        "outpatient"
+      ]
+    },
+    {
+      "spoken": "continuum of care",
+      "formal": "Continuum of care treatment plan / residential aftercare required after SAFPF, CCP Art. 42A.303(d)",
+      "short": "Required aftercare treatment following release from a locked treatment facility.",
+      "long": "When a judge orders SAFPF, the law also requires aftercare: on release the person must take part in a drug or alcohol continuum-of-care treatment plan, which typically begins with months in a transitional treatment centre before returning to normal supervision.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.303(d)-(e). Judges often say 'and then aftercare' or 'TTC' (transitional treatment center) as part of the same breath as SAFPF.",
+      "also_said": [
+        "aftercare",
+        "TTC",
+        "transitional treatment center"
+      ]
+    },
+    {
+      "spoken": "community supervision",
+      "formal": "Community supervision, CCP Art. 42A.001(1) - the formal Texas name for what is elsewhere called probation",
+      "short": "Texas's legal name for probation - supervision instead of lockup.",
+      "long": "Community supervision is the formal Texas term for probation: the court suspends the sentence or defers a finding of guilt and supervises the person in the community under conditions. Texas renamed probation to \"community supervision\" in statute, but judges and lawyers still say \"probation\" in open court every day.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "TEXAS-SPECIFIC NAMING. Other states say probation; Texas statute says community supervision. Both are heard in court, and the statute itself still uses the verb 'is probated'. TWO THINGS TO GET RIGHT: (1) 'Community supervision' is the UMBRELLA term - Art. 42A.001(1)(A) covers deferred adjudication and (B) covers straight probation. Deferred adjudication is a species of community supervision, not an alternative to it; never write a card opposing the two. (2) Texas probation is a JUDICIAL-BRANCH, COUNTY-LEVEL function: the officer is a Community Supervision Officer employed by one of 122 CSCDs answering to the local district judges, not to TDCJ. TDCJ-CJAD only funds and audits. A viewer who assumes 'TDCJ runs probation' is wrong.",
+      "also_said": [
+        "probation",
+        "CSCD"
+      ]
+    },
+    {
+      "spoken": "deferred adjudication",
+      "formal": "Deferred adjudication community supervision, CCP Art. 42A.101",
+      "short": "No guilty finding yet. Finish it and the case is dismissed.",
+      "long": "On deferred adjudication the judge takes a guilty or no-contest plea, finds the evidence substantiates guilt, but does NOT enter a conviction - proceedings are deferred while the person is supervised. Finish successfully and the case is dismissed with no conviction. Violate, and the judge can adjudicate guilt and sentence anywhere in the full punishment range for the offence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "THE BIG TRAP, AND THE MOST IMPORTANT DISTINCTION IN THIS GLOSSARY. On revocation the original plea-bargain cap does NOT limit the judge: CCP Art. 42A.110(a) says proceedings continue 'as if the adjudication of guilt had not been deferred'. Confirmed by case law: Ex parte Huskins, 176 S.W.3d 818, 819 (Tex. Crim. App. 2005) - 'once the trial court proceeds to adjudication, it is restricted in the sentence it imposes only by the relevant statutory limits' - quoting Von Schounmacher v. State, 5 S.W.3d 221, 223 (Tex. Crim. App. 1999); applied in Salazar v. State, No. 11-18-00169-CR (Tex. App.-Eastland 2020), where 7 years' deferred became 25 years on adjudication. ALSO: successful completion means dismissal and discharge under Art. 42A.111, but that is NOT an expunction - records stay public (42A.106(a)) and the remedy is an order of nondisclosure. DWI is categorically INELIGIBLE for deferred (42A.102). AND DEFERRED STILL TRIGGERS SEX OFFENDER REGISTRATION - CCP Art. 62.001(5) defines 'reportable conviction or adjudication' to include deferred adjudication, so 'no conviction' does not mean 'no registry'. This is the single most misunderstood consequence for viewers. Felony deferred period cannot exceed 10 years (42A.103(a))."
+    },
+    {
+      "spoken": "straight probation",
+      "formal": "Judge-ordered community supervision with a suspended sentence, CCP Art. 42A.053",
+      "short": "Convicted, sentence assessed but suspended while you're supervised.",
+      "long": "\"Straight probation\" is regular community supervision: there IS a conviction, the judge assesses a sentence and then suspends it while the person is supervised. If it is revoked, the judge cannot exceed the sentence originally assessed - only reduce it, down to the statutory minimum.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "PRACTITIONER SLANG for regular/judge-ordered community supervision as opposed to deferred; TDCJ-CJAD's official reporting name is 'Adjudicated Community Supervision'. REVOCATION CEILING - VERIFIED BY STATUTE, NOT BY CASE LAW: CCP Art. 42A.755(a) gives the judge exactly two options, impose the sentence already assessed or reduce it to no less than the statutory minimum. There is no power to increase. Neither I nor a second researcher could retrieve a case squarely so holding, so treat this as a direct reading of an exhaustive statutory list - it is the universal practitioner understanding, but have a lawyer confirm the one sentence before burning it in. ALSO WORTH A CARD: 42A.755(c) - no part of the time on community supervision counts toward the sentence, so five clean years then revocation still means the full term. Not eligible if the sentence exceeds 10 years or is a state jail term under Penal Code 12.35 (42A.053(c)).",
+      "also_said": [
+        "regular probation",
+        "judge-ordered community supervision"
+      ]
+    },
+    {
+      "spoken": "shock probation",
+      "formal": "Continuing jurisdiction / suspension of further execution of sentence, CCP Art. 42A.202",
+      "short": "Sent to prison, then pulled back onto probation within 180 days.",
+      "long": "True shock probation is when a judge sends someone to prison, keeps jurisdiction for 180 days from the day the sentence actually starts, then suspends the rest and places the person on community supervision. It requires that the person has never before been in a penitentiary on a felony. But judges use the word \"shock\" loosely, and it usually means something else.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CAREFUL - TEXAS HAS THREE DIFFERENT THINGS CALLED 'SHOCK', AND THEY ARE ROUTINELY CONFLATED. (1) Art. 42A.202 TRUE SHOCK PROBATION: the court keeps jurisdiction 180 days from when execution of the sentence actually begins and can pull the person back out of TDCJ onto supervision; excludes state jail felonies; requires no prior penitentiary time on a felony. (2) Art. 42A.302 'SHOCK TIME': county jail served as a CONDITION of probation, capped at 180 days for a felony and 30 days for a misdemeanour, imposable at any time during the supervision period - THIS IS WHAT MOST BENCH AUDIO ACTUALLY MEANS. (3) Art. 42A.555: a front-end term of not less than 90 and not more than 180 days at the start of state jail felony probation. Before captioning 'shock probation', work out which one the judge means - the difference is prison versus county jail.",
+      "also_said": [
+        "shock time",
+        "shock"
+      ]
+    },
+    {
+      "spoken": "motion to revoke",
+      "formal": "Motion to revoke community supervision, CCP Art. 42A.751",
+      "short": "Prosecutor's filing asking the judge to end your probation.",
+      "long": "A motion to revoke - an \"MTR\" - is the State's written allegation that someone on regular community supervision broke its conditions. There is no jury; the judge hears it and may continue, extend, modify, or revoke the supervision.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.751(d): 'After a hearing without a jury, the judge may continue, extend, modify, or revoke.' BURDEN OF PROOF: preponderance of the evidence - but note this is JUDGE-MADE law, not statute. Ch. 42A states it expressly only for fee/cost allegations (42A.751(i)). The general standard comes from Rickels v. State, 202 S.W.3d 759, 763-64 (Tex. Crim. App. 2006): 'that greater weight of the credible evidence which would create a reasonable belief that the defendant has violated a condition of his probation.' Review is for abuse of discretion. THE ON-SCREEN BEAT: at trial the State must convince a jury beyond reasonable doubt; at revocation there is no jury and the State need only persuade the same judge who granted probation that it is more likely than not. The judge need not revoke - 42A.752/42A.753 allow continuing, modifying or extending instead, which is how most MTRs actually end. 'MTR' is official state usage, not just slang (TDCJ-CJAD Data Manual).",
+      "also_said": [
+        "MTR",
+        "motion to revoke probation"
+      ]
+    },
+    {
+      "spoken": "motion to adjudicate",
+      "formal": "Motion to proceed with an adjudication of guilt, CCP Art. 42A.108",
+      "short": "Filing to end deferred adjudication and finally convict you.",
+      "long": "A motion to adjudicate is the deferred-adjudication counterpart of an MTR. Because guilt was never formally entered, the State is not asking to \"revoke\" - it is asking the judge to proceed to adjudicate guilt. If granted, sentencing opens up to the full range for the offence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.108(b)-(c); consequence in 42A.110(a). The statute's own phrase is 'motion to proceed with the adjudication' - it never says 'motion to adjudicate'. The distinction from an MTR matters enormously to the defendant's exposure and is the single most useful thing to explain on screen. CAPTIONING WARNING: prosecutors routinely style the pleading as a hybrid - in Salazar the document on a deferred case was a 'motion to revoke community supervision and adjudicate guilt'. A pleading titled 'Motion to Revoke' on a deferred case is NOT an error and does NOT mean the defendant was on straight probation. Check whether guilt was ever adjudicated before captioning which motion it is.",
+      "also_said": [
+        "MTA",
+        "motion to proceed to adjudication"
+      ]
+    },
+    {
+      "spoken": "true or not true",
+      "formal": "Plea entered to the allegations in a motion to revoke or motion to adjudicate, and to enhancement paragraphs",
+      "short": "How you answer probation-violation allegations - true means admitted.",
+      "long": "In a revocation or adjudication hearing the defendant does not plead \"guilty\" or \"not guilty\" - the question is whether the alleged violations are true. \"True\" admits the allegation, \"not true\" contests it and requires the State to prove it. The same words are used to answer enhancement paragraphs alleging prior convictions.",
+      "source": "https://search.txcourts.gov/Case.aspx?cn=PD-0578-18&coa=coscca",
+      "confidence": "high",
+      "notes": "NOW SOURCED TO THE COURT OF CRIMINAL APPEALS. Simpson v. State, 591 S.W.3d 571 (Tex. Crim. App. 2020), gives the best lay explanation of why the word differs from 'guilty': 'When a defendant pleads true to an allegation at a revocation proceeding, she essentially concedes that the State has enough evidence to prove the allegation by a preponderance of evidence. Both logically and in fact, that is not the same thing as a concession that the State has enough evidence to prove the allegation beyond a reasonable doubt.' Simpson also holds a true plea does not stop the same defendant from pleading not guilty and winning a later trial on the same conduct. EFFECT: Tapia v. State, 462 S.W.3d 29, 31 n.2 (Tex. Crim. App. 2015) - 'A plea of true, standing alone, is sufficient to support the revocation of community supervision and adjudicate guilt.' ON ENHANCEMENTS: pleading true relieves the State of proving the prior and forfeits the sufficiency challenge (Roberson v. State, 420 S.W.3d 832, 838; Harvey v. State, 611 S.W.2d 108, 111); the plea to enhancements is only mandatory in a jury punishment phase (Ex parte Sewell, 742 S.W.2d 393, 395). No statute defines the plea - CCP Art. 37.07 Sec. 1(a) is the nearest echo. Safe caption: 'true and not true are standard Texas courtroom wording' - do NOT caption what other states say.",
+      "also_said": [
+        "plea of true",
+        "plead true"
+      ]
+    },
+    {
+      "spoken": "conditions",
+      "formal": "Conditions of community supervision, CCP Art. 42A.301",
+      "short": "The rules you must follow while on probation.",
+      "long": "The conditions are the specific rules the judge attaches to community supervision - reporting, fees, drug testing, treatment, curfew, no-contact orders, electronic monitoring, community service. Breaking any one of them can support a motion to revoke.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.301. The judge may impose 'any conditions that the judge determines are reasonable', so the list varies case to case.",
+      "also_said": [
+        "conditions of probation",
+        "terms and conditions"
+      ]
+    },
+    {
+      "spoken": "early termination",
+      "formal": "Reduction or termination of the community supervision period, CCP Art. 42A.701",
+      "short": "Ending probation early for good compliance.",
+      "long": "A judge may cut community supervision short once the person has satisfactorily completed one-third of the period or two years, whichever is less. At the halfway point the judge is required to review the case and consider it. On discharge the judge may also set aside the verdict and dismiss the charge.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.701(a)-(b). THREE CATEGORIES ARE EXCLUDED ENTIRELY under 42A.701(g): DWI and other intoxication offences (Penal Code 49.04-49.08), offences requiring sex offender registration, and any felony listed in Art. 42A.054 (the '3g' list). A Texas DWI probationer can never get off early - which surprises viewers from states with universal discretionary early termination. On discharge the judge MAY also set aside the verdict or let the plea be withdrawn and dismiss the charge, releasing the defendant 'from all penalties and disabilities' (42A.701(f)) - this is judicial clemency and is discretionary, not automatic. OCA prescribes a mandatory standardised discharge form (42A.701(f-1)). 'Terminated unsuccessfully' is NOT a Texas legal term - the official termination reasons are early termination, expired term, revocation, administrative closure and death."
+    },
+    {
+      "spoken": "plea bargain",
+      "formal": "Plea bargain agreement, referenced in CCP Art. 26.13(a)(2)",
+      "short": "Agreed deal on the charge and punishment, subject to judge's approval.",
+      "long": "A plea bargain is an agreement between the prosecutor and the defence on what the plea and the punishment will be. The judge is not bound by it - but must say in open court before ruling whether the agreement will be followed, and if the judge rejects it the defendant is allowed to withdraw the plea.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.26.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 26.13(a)(2). The withdrawal right on rejection is the part viewers find surprising. APPEAL CONSEQUENCE: in a plea-bargain case where punishment did not exceed the agreed recommendation, the defendant may appeal only matters raised by written motion ruled on before trial, or with the trial court's permission, or where a statute expressly allows it - Texas Rule of Appellate Procedure 25.2(a)(2). DEAD CITATION WARNING: do NOT cite CCP Art. 44.02 for this. Its restrictive proviso was repealed by order of the Court of Criminal Appeals effective September 1, 1986, as the statute's own trailing note records. The live authority is TRAP 25.2(a)(2).",
+      "also_said": [
+        "plea agreement",
+        "agreed plea"
+      ]
+    },
+    {
+      "spoken": "open plea",
+      "formal": "A plea of guilty or nolo contendere with no agreement as to punishment, leaving sentencing to the judge",
+      "short": "Pleading guilty with no agreement on what the punishment will be.",
+      "long": "An open plea - also called pleading \"to the court\" - is pleading guilty without any agreement on the sentence. The defendant gives up the trial but gambles on punishment, and the judge can assess anything within the statutory range.",
+      "source": "https://search.txcourts.gov/Case.aspx?cn=06-24-00042-CR&coa=coa06",
+      "confidence": "high",
+      "notes": "NOW SOURCED - a Texas court states the definition flatly: 'An open plea is one where there is no plea-bargain agreement regarding punishment.' Grissom v. State, No. 06-24-00042-CR (Tex. App.-Texarkana Mar. 12, 2025) at 4. A trial judge's own words, from the record in Brumit v. State, 206 S.W.3d 639, 641 (Tex. Crim. App. 2006): 'Do you understand an open plea to the Court means there is no plea agreement between you and your attorney and the State's attorney?' The full punishment range stays open, and a court's arbitrary refusal to consider the entire range would deny due process (McClenan v. State, 661 S.W.2d 108, 110). TWO PRECISION TRAPS - I corrected both in this entry: (1) do NOT say 'the judge decides punishment' as though automatic - CCP Art. 27.02(7) preserves the defendant's election to have the JURY assess punishment, so say 'no agreement on punishment'. (2) Do NOT say 'an open plea means you keep your appeal rights'. A plea bargain for appeal purposes includes a CHARGE concession, not just a sentence one (Wayne v. State, 756 S.W.2d 724, 728 (Tex. Crim. App. 1988)), so a defendant who got counts dismissed may still be restricted by TRAP 25.2(a)(2).",
+      "also_said": [
+        "plea to the court",
+        "plead open"
+      ]
+    },
+    {
+      "spoken": "nolo contendere",
+      "formal": "Nolo contendere - no contest - CCP Art. 27.02(5)",
+      "short": "No contest. Same as guilty, except in a related civil lawsuit.",
+      "long": "A plea of nolo contendere has, by statute, exactly the same legal effect as a plea of guilty in the criminal case. The single difference: it cannot be used against the defendant as an admission in a civil suit arising out of the same conduct.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.27.htm",
+      "confidence": "high",
+      "notes": "Verbatim from CCP Art. 27.02(5). It is NOT a lesser plea and does not reduce punishment - the only difference is civil-suit admissibility. In practice you are still convicted.",
+      "also_said": [
+        "no contest",
+        "nolo"
+      ]
+    },
+    {
+      "spoken": "admonishments",
+      "formal": "Admonishments required before accepting a plea, CCP Art. 26.13(a)",
+      "short": "The warnings a judge must read before accepting your plea.",
+      "long": "Before taking a guilty or no-contest plea the judge must admonish the defendant - state the punishment range, explain that the prosecutor's recommendation is not binding, warn about immigration consequences and, where applicable, sex offender registration. This is the scripted question-and-answer sequence viewers see at every plea.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.26.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 26.13(a)(1)-(6). THE ONE THAT MUST BE SPOKEN ALOUD: admonishments may generally be oral or written (26.13(d)), but 26.13(d-1) requires the immigration warning to be given 'both orally and in writing'. That is why you always hear the deportation line even in a paper-heavy plea. Texas's mandatory immigration admonishment predates and exceeds Padilla v. Kentucky; most states have no such script. Explains why plea hearings sound repetitive and rehearsed.",
+      "also_said": [
+        "admonished"
+      ]
+    },
+    {
+      "spoken": "waiving the jury",
+      "formal": "Waiver of trial by jury, CCP Art. 1.13; felony plea evidence requirement, CCP Art. 1.15",
+      "short": "Giving up your right to a jury so the judge decides.",
+      "long": "A defendant may waive a jury and let the judge decide, but in Texas it must be done in person, in writing, in open court, with the consent of both the judge and the prosecutor. Even on a guilty plea in a felony the State must still put in evidence of guilt.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.1.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 1.13(a) and Art. 1.15. The prosecutor's veto over a jury waiver surprises non-Texans. Art. 1.15 is why a plea hearing includes a judicial confession or stipulation being offered into evidence."
+    },
+    {
+      "spoken": "concurrent",
+      "formal": "Concurrent sentences, Penal Code 3.03(a); CCP Art. 42.08",
+      "short": "Sentences served at the same time, not added together.",
+      "long": "Concurrent sentences run at the same time, so two ten-year sentences amount to ten years. For multiple offences arising out of the same criminal episode tried together, Texas law makes concurrent the default.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.3.htm",
+      "confidence": "high",
+      "notes": "Penal Code 3.03(a): 'Except as otherwise provided by this section, the sentences shall run concurrently.' Exceptions in 3.03(b) cover certain sex, trafficking, intoxication-manslaughter and child-injury offences."
+    },
+    {
+      "spoken": "stacked",
+      "formal": "Consecutive / cumulative sentences - a cumulation order under CCP Art. 42.08; Penal Code 3.03(b)",
+      "short": "Sentences served back to back, one after the other.",
+      "long": "Stacked - formally consecutive or cumulated - sentences run one after another, so two ten-year sentences mean twenty years. The judge's written cumulation order specifies that the second sentence begins when the first ceases to operate.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42.htm",
+      "confidence": "high",
+      "notes": "TERMINOLOGY SPLIT: lawyers say 'stacked', the statute says 'cumulative' and the document is a 'cumulation order'. CCP Art. 42.08(a). Note the cumulative total of SUSPENDED felony sentences cannot exceed 10 years.",
+      "also_said": [
+        "consecutive",
+        "cumulated",
+        "stack the sentences"
+      ]
+    },
+    {
+      "spoken": "enhancement",
+      "formal": "Enhancement of punishment by prior convictions, Penal Code 12.42 and 12.425; alleged in enhancement paragraphs",
+      "short": "Prior convictions that raise the punishment range for this case.",
+      "long": "An enhancement is a prior final conviction the State pleads in order to raise the punishment range. One prior felony bumps a third degree up to second degree range, and a second degree up to first degree range. The prior must be proved, and the defendant answers the enhancement paragraph \"true\" or \"not true\".",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.42(a) (3rd -> 2nd), 12.42(b) (2nd -> 1st), 12.42(c)(1) (1st degree + prior = 15-99 or life), 12.425 for state jail felonies. A state jail felony punishable under 12.35(a) generally cannot be used as the enhancing prior.",
+      "also_said": [
+        "enhancement paragraph",
+        "enhanced"
+      ]
+    },
+    {
+      "spoken": "habitual offender",
+      "formal": "Habitual felony offender, Penal Code 12.42(d)",
+      "short": "Two prior sequential felonies. Range becomes 25 to 99 years or life.",
+      "long": "A defendant is a habitual offender when the State proves two prior final felony convictions where the second offence happened after the first conviction became final. The punishment range for the new felony then becomes 25 to 99 years or life, regardless of the original degree.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.42(d), verbatim range: 'imprisonment ... for life, or for any term of not more than 99 years or less than 25 years.' The SEQUENCE requirement is essential and often litigated. State jail felonies under 12.35(a) cannot be used.",
+      "also_said": [
+        "habitual",
+        "habitualized",
+        "25 to life"
+      ]
+    },
+    {
+      "spoken": "3g",
+      "formal": "Formerly Article 42.12 Section 3g; now CCP Art. 42A.054, the list of offences excluded from judge-ordered community supervision",
+      "short": "Serious violent or sex offence. No judge probation; half before parole.",
+      "long": "\"3g\" is the old name for the list of most serious offences - murder, aggravated robbery, aggravated sexual assault, injury to a child, and others - now in CCP Art. 42A.054. A judge cannot give straight probation on one, and in prison the person must serve half the sentence in actual calendar time, with good conduct time not counting, before parole eligibility.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "OUTDATED NAME STILL IN DAILY USE. Article 42.12 was repealed and recodified into Chapter 42A by H.B. 2299, 84th Leg., effective January 1, 2017. THE RECODIFICATION WAS EXPRESSLY NONSUBSTANTIVE - the enrolled bill states it 'is intended as a codification only, and no substantive change in the law is intended', and Art. 42A.002 makes any reference to the old statute a reference to the new one. So pre-2017 case law under 42.12 is still good law, and a judge or lawyer saying '42.12' on the record is speaking from habit, not making an error. The bar universally still says '3g'. Some now say '42A.054 offense'. Parole consequence verified at Gov't Code 508.145(d)(2): one-half of the sentence or 30 calendar years, whichever is less, minimum 2 years, 'without consideration of good conduct time'. Note a JURY may still recommend probation for some 42A.054 offences - the article limits JUDGE-ordered supervision.",
+      "also_said": [
+        "3G offense",
+        "42A.054 offense",
+        "3g case"
+      ]
+    },
+    {
+      "spoken": "deadly weapon finding",
+      "formal": "Affirmative finding on use or exhibition of a deadly weapon, CCP Art. 42A.054(b)-(d)",
+      "short": "Finding a weapon was used. Blocks probation, delays parole.",
+      "long": "If the judge or jury affirmatively finds a deadly weapon was used or exhibited during a felony, it goes into the judgment. The consequences are severe: no judge-ordered community supervision, and parole eligibility only after half the sentence in flat calendar time.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.054(b)-(d); parole effect at Gov't Code 508.145(d)(1)(B). Also bars mandatory supervision entirely (508.149(a)(1)). If the weapon was a firearm the judgment says so specifically.",
+      "also_said": [
+        "affirmative finding",
+        "deadly weapon",
+        "the weapon finding"
+      ]
+    },
+    {
+      "spoken": "aggravated",
+      "formal": "In Texas parole usage, a sentence carrying the 50%-flat-time parole rule - a 42A.054 offence or a case with a deadly weapon finding",
+      "short": "Slang for a sentence needing half served before parole eligibility.",
+      "long": "Inside the Texas system \"aggravated\" is shorthand for a sentence subject to the half-time flat rule - a 42A.054 (\"3g\") offence or one carrying a deadly weapon finding. It is a parole-eligibility label and is separate from offence names like aggravated assault.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.508.htm",
+      "confidence": "medium",
+      "notes": "AMBIGUOUS TERM, TWO MEANINGS. It is both (1) part of offence names in the Penal Code and (2) prison/parole slang for the 50% rule. No statute defines the slang sense - Gov't Code 508.145(d) supplies the underlying rule but never uses the word 'aggravated'. Flagged as practice usage. Judges are more likely to say '3g'.",
+      "also_said": [
+        "aggravated case",
+        "aggged"
+      ]
+    },
+    {
+      "spoken": "time served",
+      "formal": "Credit for time spent in jail between arrest and sentence, CCP Art. 42.03 Sec. 2(a)",
+      "short": "Jail time already done, subtracted from the sentence.",
+      "long": "Credit for time served is the jail time already spent on the case, from arrest until sentencing, which the judge must credit against the sentence. It also covers time successfully completed in a SAFPF or other court-ordered residential programme, and time in a mental health facility.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42.03 Sec. 2(a)(1)-(3) - the judge 'shall' give the credit; it is mandatory, not discretionary. Note it EXCLUDES confinement served as a condition of community supervision, with the residential-treatment exception in 2(a)(2). NAMING: 'credit for time served' and 'jail credit' track the statute; 'BACK TIME' is pure courthouse jargon with no official definition anywhere - it is listed here as spoken usage only, so do not present it as a legal term.",
+      "also_said": [
+        "credit for time served",
+        "jail credit",
+        "back time"
+      ]
+    },
+    {
+      "spoken": "PSI",
+      "formal": "Presentence investigation report, CCP Art. 42A.252",
+      "short": "Background report on you, prepared before the judge sentences.",
+      "long": "A PSI is a report a supervision officer prepares for the judge before sentencing - the person's history, the circumstances of the offence, victim impact, and treatment needs. It is generally required, but not when a jury assesses punishment or when the judge intends to follow a plea bargain for a prison sentence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42A.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.252(a), exceptions at (c). NAMING: the statute says presentence REPORT, not 'investigation' - 'PSI' is spoken usage (Texas appellate opinions write it too). Contents are listed at 42A.253(a) and include restitution amount, criminal and social history, a proposed supervision plan, psychological evaluation where mental impairment appears, and military service including combat deployment, PTSD and TBI. CRITICAL: 42A.253(b) - 'A presentence report is not required to contain a sentencing recommendation.' TEXAS-VS-FEDERAL TRAP: in federal court the PSR is prepared by a probation officer of the court and carries a guideline calculation and recommendation. Texas has NO sentencing guidelines, the CSCD prepares it, and no recommendation is required. A judge saying 'I'll order a PSI' usually signals sentencing is being reset several weeks out.",
+      "also_said": [
+        "presentence investigation",
+        "pre-sentence report"
+      ]
+    },
+    {
+      "spoken": "restitution",
+      "formal": "Restitution, CCP Art. 42.037",
+      "short": "Money paid to the victim for the harm you caused.",
+      "long": "Restitution is money the court orders paid to the victim for property loss or injury caused by the offence. It is compensation to the victim, not a penalty paid to the state, and if the judge declines to order it or orders only part, the reason must be stated on the record.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42.037(a)-(b). Distinct from a fine (paid to the state) and from court costs (fees for running the case)."
+    },
+    {
+      "spoken": "punishment phase",
+      "formal": "Separate hearing on punishment in a bifurcated trial, CCP Art. 37.07",
+      "short": "The second half of trial, deciding sentence after a guilty verdict.",
+      "long": "Texas splits a contested jury trial in two: the jury first decides guilt with no mention of punishment, and only if it convicts does a separate punishment hearing follow, where prior record, character and even unadjudicated bad acts proved beyond reasonable doubt can come in.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.37.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 37.07 Sec. 2(a), Sec. 3(a)(1). The bifurcated structure is standard in Texas and confuses viewers used to jurisdictions where the judge alone sentences after a single-phase trial.",
+      "also_said": [
+        "punishment hearing",
+        "the punishment phase"
+      ]
+    },
+    {
+      "spoken": "jury punishment",
+      "formal": "Election to have the jury assess punishment, CCP Art. 37.07 Sec. 2(b); CCP Art. 27.02(7)",
+      "short": "In Texas the defendant can choose the jury to set the sentence.",
+      "long": "Texas is one of very few states where a defendant can elect to have the jury, rather than the judge, assess punishment. The election must be in writing before jury selection begins. Without it, the judge sentences.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.37.htm",
+      "confidence": "high",
+      "notes": "MAJOR TEXAS-VS-OTHER-STATES DIFFERENCE. CCP Art. 37.07 Sec. 2(b). In most states sentencing is the judge's job in non-capital cases; in Texas it is the defendant's choice. Also note a jury - unlike a judge - can recommend community supervision for some 42A.054 offences.",
+      "also_said": [
+        "elect the jury",
+        "going to the jury on punishment"
+      ]
+    },
+    {
+      "spoken": "first degree felony",
+      "formal": "Felony of the first degree, Penal Code 12.32",
+      "short": "5 to 99 years or life, plus up to $10,000 fine.",
+      "long": "A first degree felony carries imprisonment in TDCJ for life, or any term of not more than 99 years or less than 5 years, plus an optional fine of up to $10,000. Murder, aggravated robbery and aggravated sexual assault are common examples.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.32(a)-(b), verbatim: 'life or for any term of not more than 99 years or less than 5 years' and 'a fine not to exceed $10,000'.",
+      "also_said": [
+        "first degree",
+        "F1"
+      ]
+    },
+    {
+      "spoken": "second degree felony",
+      "formal": "Felony of the second degree, Penal Code 12.33",
+      "short": "2 to 20 years in prison, up to a $10,000 fine.",
+      "long": "A second degree felony carries imprisonment in TDCJ for any term of not more than 20 years or less than 2 years, plus an optional fine of up to $10,000.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.33(a)-(b), verbatim.",
+      "also_said": [
+        "second degree",
+        "F2"
+      ]
+    },
+    {
+      "spoken": "third degree felony",
+      "formal": "Felony of the third degree, Penal Code 12.34",
+      "short": "2 to 10 years in prison, up to a $10,000 fine.",
+      "long": "A third degree felony carries imprisonment in TDCJ for any term of not more than 10 years or less than 2 years, plus an optional fine of up to $10,000.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.34(a)-(b), verbatim.",
+      "also_said": [
+        "third degree",
+        "F3"
+      ]
+    },
+    {
+      "spoken": "state jail felony",
+      "formal": "State jail felony, Penal Code 12.35",
+      "short": "180 days to 2 years in state jail, $10,000 fine.",
+      "long": "A state jail felony carries confinement in a state jail for not more than two years or less than 180 days, plus an optional fine of up to $10,000. It is punished instead as a third degree felony if a deadly weapon was used, or if the person has a prior conviction for certain serious offences.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.35(a)-(c). TEXAS-SPECIFIC CATEGORY - most states have no equivalent fourth tier below third degree. Served in a state jail, not prison, with no parole. 12.35 was last amended effective September 1, 2025.",
+      "also_said": [
+        "state jail",
+        "SJF"
+      ]
+    },
+    {
+      "spoken": "capital felony",
+      "formal": "Capital felony, Penal Code 12.31",
+      "short": "Death or life without parole. Life if under 18 when committed.",
+      "long": "A capital felony is punished by death or by life imprisonment without parole where the State seeks the death penalty. Where the State does not seek death, the sentence is automatic: life without parole for an adult, or life for someone who was under 18 at the time of the offence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.31(a)(1)-(2). A juvenile-at-the-time capital lifer is parole eligible after 40 calendar years (Gov't Code 508.145(b)); life without parole means literally no parole.",
+      "also_said": [
+        "capital case",
+        "capital murder"
+      ]
+    },
+    {
+      "spoken": "Class A misdemeanor",
+      "formal": "Class A misdemeanor, Penal Code 12.21",
+      "short": "Up to one year in county jail and a $4,000 fine.",
+      "long": "A Class A misdemeanor is punishable by a fine not to exceed $4,000, confinement in county jail for up to one year, or both. It is the most serious grade of misdemeanor and sits just below a state jail felony.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.21. Included because felony courts routinely reduce charges to, or take pleas on, misdemeanors. Class B is up to 180 days / $2,000 (12.22); Class C is fine only, up to $500 (12.23).",
+      "also_said": [
+        "Class A",
+        "Class B misdemeanor"
+      ]
+    },
+    {
+      "spoken": "PR bond",
+      "formal": "Personal bond - CCP Art. 17.03. \"PR\" stands for personal recognizance",
+      "short": "Released on your promise to appear, with no money up front.",
+      "long": "A personal bond releases the defendant without sureties or money up front, on a sworn promise to appear, usually with conditions attached. The defendant still owes the bond amount if they fail to appear.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "NAMING NOTE CONFIRMED BY EXHAUSTIVE SEARCH: the statute says 'personal bond' (CCP Art. 17.03, 17.04); the phrase 'personal recognizance' appears NOWHERE in the Code of Criminal Procedure - all 65 chapters were grepped. 'PR bond' is spoken shorthand inherited from the common-law recognizance. Art. 17.04(a) sets out the sworn oath the defendant signs, promising to appear 'or pay to the court the principal sum'. Restrictions in 17.03(b)-(b-2) mean many felony defendants are ineligible, including those charged with an offence involving violence.",
+      "also_said": [
+        "personal bond",
+        "personal recognizance bond"
+      ]
+    },
+    {
+      "spoken": "surety bond",
+      "formal": "Bail bond with sureties, CCP Art. 17.02, 17.08",
+      "short": "A bail bondsman guarantees your appearance for a non-refundable fee.",
+      "long": "A surety bond is a bail bond signed by the defendant and by a surety - typically a commercial bail bondsman - who guarantees the full amount if the defendant fails to appear. The fee paid to the bondsman is not refundable.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 17.02. THE PREMIUM IS NOT SET OR CAPPED BY TEXAS LAW - verified three ways: Occupations Code Ch. 1704, which licenses bondsmen, never uses the word 'premium'; the Texas Department of Insurance states it does not regulate bail bond rates; and Insurance Code 2251.003(b)(5) and 2301.003(b)(5) expressly carve out criminal court appearance bonds. The Bexar County Bail Bond Board's own rules set no rate. Available figures describe market practice only - the Texas House Research Organization (HB 1047, 83rd Leg., 2013) says a bondsman 'typically' charges 10 percent; the Texas Association of Counties 2023 handbook says 'ten or even twenty percent'. SAY 'typically about 10 percent', NEVER 'the rate is 10 percent'. Some commercial bail sites falsely claim Ch. 1704 sets or caps it - do not repeat that. BEST CARD HERE: the FEE is non-refundable and fully earned on release (Insurance Code 3503.202 requires no unearned premium reserve), but COLLATERAL such as a car title or lien must be returned within 30 days of written request (Occ. Code 1704.301). Most explainer videos conflate the two."
+    },
+    {
+      "spoken": "cash bond",
+      "formal": "Cash deposit in lieu of sureties, CCP Art. 17.02",
+      "short": "Paying the full bond in cash, refundable when the case ends.",
+      "long": "Instead of using a bondsman, the defendant may deposit the full amount of the bond in cash with the court's custodian of funds. It is refunded, less an administrative fee, once the bond conditions have been complied with.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 17.02. Key contrast with a surety bond: cash comes back, a bondsman's premium does not."
+    },
+    {
+      "spoken": "bond conditions",
+      "formal": "Conditions of release on bond, CCP Art. 17.40 and related articles",
+      "short": "Rules you must follow while out on bond awaiting trial.",
+      "long": "A magistrate may impose conditions on a bond to protect the community or the alleged victim - no contact, GPS or alcohol monitoring, curfews, drug testing, surrendering firearms. Violating them can get the bond revoked and the person taken back into custody.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 17.40(a) authorises 'any reasonable condition of bond related to the safety of a victim of the alleged offense or to the safety of the community'. ENFORCEMENT, Art. 17.40(b): the magistrate may revoke ONLY on finding by a preponderance of the evidence that the violation occurred, and on such a finding SHALL revoke and order the defendant immediately returned to custody. Specific tools have their own articles - ignition interlock or 'deep-lung device', Art. 17.441, mandatory for repeat or aggravated intoxication offences; GPS and no-contact in family violence cases, Art. 17.49; home curfew and electronic monitoring, Art. 17.43; magistrate's order for emergency protection ('MOEP'), Art. 17.292. Violating a protective order condition is itself a crime under Penal Code 25.07.",
+      "also_said": [
+        "conditions of bond",
+        "bond conditions"
+      ]
+    },
+    {
+      "spoken": "bond forfeiture",
+      "formal": "Forfeiture of bail, CCP Art. 22.01-22.02",
+      "short": "The court claims the bond money after you fail to appear.",
+      "long": "When a defendant fails to appear, the defendant's name is called at the courthouse door and, if there is no answer within a reasonable time, the court enters judgment against the defendant and any sureties for the bond amount. It can be set aside or reduced if the defendant is brought back or good cause is shown.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.22.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 22.01, 22.02. The 'called at the courthouse door' ritual is literally in the statute and makes good on-screen detail. Remittitur to the surety under Art. 22.16."
+    },
+    {
+      "spoken": "judgment nisi",
+      "formal": "The conditional judgment of forfeiture entered when a defendant fails to appear; referred to in CCP Art. 22.13(b)",
+      "short": "A provisional bond judgment - final unless good cause is shown.",
+      "long": "\"Nisi\" is Latin for \"unless\". A judgment nisi is the conditional judgment entered when a defendant skips: it states that the forfeiture becomes final unless good cause is shown why the defendant did not appear.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.22.htm",
+      "confidence": "medium",
+      "notes": "PARTIALLY SOURCED. The phrase 'judgment nisi' appears in CCP Art. 22.13(b) but is not defined in the Code; Art. 22.02 describes the mechanism (judgment 'will be made final, unless good cause be shown') without using the phrase. The Latin gloss and the definition are drawn from the two read together. Obscure but does get said aloud. The forfeiture then proceeds as a civil suit on the 'scire facias' docket (Art. 22.10) - a second piece of courtroom Latin, meaning 'cause him to know'. Limited excuses in Art. 22.13 (death of the principal; sickness or uncontrollable circumstance; incarceration within 180 days for a misdemeanour or 270 days for a felony); final judgment Art. 22.14; remittitur Art. 22.16. On forfeiture a capias issues immediately (Art. 23.05)."
+    },
+    {
+      "spoken": "capias",
+      "formal": "Capias, CCP Art. 23.01",
+      "short": "Arrest order from the court to bring you before the judge.",
+      "long": "A capias is a writ issued by the court after charges are filed, directed to any peace officer in Texas, commanding them to arrest the person and bring them before that court. It is the writ used when someone on bond or on probation stops showing up.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.23.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 23.01 - verbatim definition. Pronounced 'KAY-pee-us'. TEXAS-SPECIFIC WORD: most states just say 'bench warrant'. Distinguish from an arrest warrant, which issues before charges on probable cause; a capias issues after commitment or bail and before trial. In felony cases the district clerk issues one on each indictment (Art. 23.03(a)), and under Art. 23.07 a capias does not expire. WATCH OUT - TEXAS HAS THREE: Art. 23.01 capias (pre-trial, person ACCUSED); Art. 43.015(1) capias (after judgment and sentence, person CONVICTED); Art. 43.015(2) capias pro fine (after judgment, for unpaid fines and costs). Plain 'capias' is defined differently depending on which chapter you are in."
+    },
+    {
+      "spoken": "bench warrant",
+      "formal": "Warrant issued from the bench; in Texas practice also the writ used to bring a jailed or imprisoned person to court",
+      "short": "Judge's order to arrest you, or to bring an inmate to court.",
+      "long": "A bench warrant is an order issued by the judge from the bench. In Texas courtrooms it most often means the writ used to have someone already in jail or prison brought to court for a hearing - lawyers say a defendant is being \"bench warranted in\".",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.24.htm",
+      "confidence": "medium",
+      "notes": "REFERENCED BUT NOT DEFINED. Texas statute acknowledges the power without defining the term: CCP Art. 24.13 provides that 'Nothing in this article shall be construed as limiting the power of the courts of this state to issue bench warrants', in the context of producing a confined person in court, and Art. 24.011 uses 'bench warrant' the same way. The Code otherwise uses 'capias' (Art. 23.01) and 'attachment' (Art. 24.12). The 'bring an inmate to court' sense is therefore supported; the loose sense of 'warrant for someone who missed court' is practitioner usage - in Texas that is normally a capias. Prefer the 'capias' entry when the judge is ordering an arrest for non-appearance."
+    },
+    {
+      "spoken": "arraignment",
+      "formal": "Arraignment, CCP Art. 26.01 - held in felony cases after indictment",
+      "short": "Formal reading of the indictment where you enter your plea.",
+      "long": "In Texas, arraignment happens AFTER a grand jury indicts. Its purpose is to read the indictment to the defendant, fix identity, and take the plea. It is not the first appearance after arrest.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.26.htm",
+      "confidence": "high",
+      "notes": "MAJOR TEXAS-VS-OTHER-STATES DIFFERENCE. CCP Art. 26.01: 'In all felony cases, after indictment ... there shall be an arraignment.' In many states 'arraignment' means the first appearance within 24-72 hours of arrest. In Texas that event is the Art. 15.17 magistration. Viewers from elsewhere will misread the timeline. Supporting articles: Art. 26.02 (purpose is 'fixing his identity and hearing his plea'), Art. 26.11 (the indictment shall be read and the defendant asked whether he is guilty), Art. 26.12 (refusal to answer is entered as not guilty), Art. 26.03 (at least two entire days after service of the indictment copy, unless waived or on bail), Art. 26.011 (counsel may waive arraignment). ONE WRINKLE - DO NOT OVERSTATE THE RULE: Art. 15.17(b) uses 'arraignment' in the other sense for fine-only misdemeanours in justice and municipal court. Say that arraignment in a FELONY DISTRICT COURT follows indictment; do not say 'in Texas arraignment never means first appearance'."
+    },
+    {
+      "spoken": "magistration",
+      "formal": "The Article 15.17 hearing - duties of arresting officer and magistrate, CCP Art. 15.17",
+      "short": "First hearing after arrest: rights read, bail set.",
+      "long": "Within 48 hours of arrest a person must be taken before a magistrate, who states the accusation, gives the warnings about counsel and silence, explains how to ask for an appointed lawyer, and sets bail. This is the hearing other states call arraignment.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.15.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 15.17(a). NAMING: 'magistration' is pure practice slang with ZERO statutory basis - the article is titled 'Duties of Arresting Officer and Magistrate'. Often done by videoconference. The magistrate must give the accusation, the right to retain counsel, the right to remain silent, the right to have counsel present during any interview and to terminate it, the right to an examining trial, and the procedure for requesting appointed counsel; must allow reasonable time to consult counsel; and must admit the person to bail if allowed by law. Under Art. 17.028 the bail decision must come within 48 hours of arrest. Pair this entry with 'arraignment' - together they fix the timeline confusion.",
+      "also_said": [
+        "15.17 hearing",
+        "magistrate's warnings",
+        "magistrated"
+      ]
+    },
+    {
+      "spoken": "examining trial",
+      "formal": "Examining trial, CCP Art. 16.01",
+      "short": "Pre-indictment hearing testing whether there's enough evidence.",
+      "long": "An accused in a felony case has the right, before indictment, to a hearing before a magistrate who examines whether the accusation has substance and sets or reviews bail. The right disappears once the grand jury indicts.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.16.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 16.01. TEXAS-SPECIFIC TERM and comparatively rare in practice, but it is the closest Texas equivalent to a preliminary hearing in other states."
+    },
+    {
+      "spoken": "indictment",
+      "formal": "Indictment by a grand jury; required for felony prosecution unless waived",
+      "short": "Grand jury's formal charge - required to try a felony.",
+      "long": "An indictment is the grand jury's written charge accusing someone of a felony. Under the Texas Constitution no one may be held to answer for a penitentiary offence except on a grand jury's indictment. It takes at least nine of the twelve grand jurors to return one, and it decides only that there is enough evidence to charge - not guilt.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.1.htm",
+      "confidence": "high",
+      "notes": "Texas Constitution Art. I, Sec. 10: 'no person shall be held to answer for a criminal offense, unless on an indictment of a grand jury, except in cases in which the punishment is by fine or imprisonment, otherwise than in the penitentiary'. Nine-vote requirement verbatim from CCP Art. 20A.301. Grand jury proceedings are secret and one-sided - the defence does not present a case.",
+      "also_said": [
+        "indicted",
+        "true bill"
+      ]
+    },
+    {
+      "spoken": "no-billed",
+      "formal": "A grand jury's decision not to indict",
+      "short": "Grand jury refused to charge you. Case does not go forward.",
+      "long": "When fewer than nine grand jurors vote to indict, no indictment is returned - lawyers call this a \"no bill\" - and the case does not go forward on that charge. It is not an acquittal: no jury heard the evidence and no one was found not guilty.",
+      "source": "https://www.bexar.org/1764/Grand-Jury-and-Intake-Division",
+      "confidence": "high",
+      "notes": "NOW SOURCED TO BEXAR COUNTY'S OWN PROSECUTOR. The Bexar County District Attorney's Grand Jury and Intake Division page states it verbatim: 'If the grand jury finds probable cause to believe that a crime has been committed, it returns a 'true bill of indictment.' This allows the case to proceed. If the evidence is insufficient to support an indictment, a 'no bill' finding will be returned by the grand jury and no prosecution will take place.' Same page: 'Two grand juries are impaneled in Bexar County at all times.' STATUTORY MECHANISM, CCP Art. 20A.301 supplies the mechanism verbatim: the grand jury votes on presentment and 'if at least nine grand jurors concur in finding the bill' an indictment follows. The PHRASES 'no bill' and 'true bill' appear nowhere in CCP Chapter 20A, which I searched directly - they are practitioner usage. I also did NOT verify whether or on what terms a no-billed case can be re-presented to another grand jury, so that claim has been removed rather than guessed. CONFIRMED INDEPENDENTLY: there is NO plain-language Texas government glossary defining these terms - the State Law Library's criminal law guide is a navigation shell. Every definition in this file therefore rests on statutes and appellate opinions rather than on an official glossary, which is stronger authority but means no 'the State of Texas says it this way' citation exists. Related: Art. 20A.304(b) - if the defendant is not in custody or under bond an indictment may not be made public until the capias is served, which is the basis for a 'sealed indictment'.",
+      "also_said": [
+        "no bill",
+        "no-bill"
+      ]
+    },
+    {
+      "spoken": "dismissed",
+      "formal": "Dismissal by the State's attorney, CCP Art. 32.02",
+      "short": "Prosecutor dropped the charge, with the judge's permission.",
+      "long": "A dismissal is the prosecutor formally dropping the case. In Texas the State must file a written statement giving its reasons, and no case can be dismissed without the presiding judge's consent.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.32.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 32.02, verbatim. TERMINOLOGY NOTE: Texas uses 'motion to dismiss'; other states say 'nolle prosequi' or 'nolled'. Distinguish carefully on screen from acquittal (a fact-finder found not guilty) and from a no-bill (grand jury never charged). 'Dropped' is lay speech for dismissed.",
+      "also_said": [
+        "dropped",
+        "State's motion to dismiss"
+      ]
+    },
+    {
+      "spoken": "acquitted",
+      "formal": "Acquittal - a finding of not guilty by a judge or jury",
+      "short": "Found not guilty at trial. The case cannot be retried.",
+      "long": "An acquittal is a verdict of not guilty returned after the evidence has been heard. Unlike a dismissal or a no-bill, it is final - the Texas Constitution bars putting the person on trial again for the same offence after a verdict of not guilty.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.1.htm",
+      "confidence": "high",
+      "notes": "Texas Constitution Art. I, Sec. 14, verbatim: 'nor shall a person be again put upon trial for the same offence, after a verdict of not guilty in a court of competent jurisdiction.' Verdict form requirement at CCP Art. 37.07 Sec. 1(b). THE STATE CANNOT APPEAL AN ACQUITTAL: CCP Art. 44.01(a) is an exhaustive list of the State's appeals and acquittal is not on it; CCP Art. 1.11 - 'An acquittal of the defendant exempts him from a second trial ... however irregular the proceedings may have been.' See State v. Stanley, 201 S.W.3d 754, 759 (Tex. Crim. App. 2006): if the order is an acquittal, 'even if it is erroneous, then the State may not appeal it'. This is the entry that lets you distinguish acquitted / dismissed / no-billed cleanly on screen.",
+      "also_said": [
+        "not guilty",
+        "found not guilty"
+      ]
+    },
+    {
+      "spoken": "46B",
+      "formal": "Chapter 46B of the Code of Criminal Procedure - incompetency to stand trial",
+      "short": "The competency law. Can the defendant understand the case now?",
+      "long": "Judges say \"we're doing a 46B\" to mean competency proceedings under Chapter 46B: an examination and, if needed, a hearing on whether the defendant is presently able to understand the case and help their lawyer.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.46B.htm",
+      "confidence": "high",
+      "notes": "CCP Chapter 46B. Everything stops while competency is resolved - a common reason a case appears to stall for months on the docket.",
+      "also_said": [
+        "46B evaluation",
+        "competency evaluation"
+      ]
+    },
+    {
+      "spoken": "incompetent to stand trial",
+      "formal": "Incompetency, CCP Art. 46B.003",
+      "short": "Cannot consult with the lawyer or understand the proceedings.",
+      "long": "A person is incompetent to stand trial if they lack sufficient present ability to consult with their lawyer with a reasonable degree of rational understanding, or lack a rational and factual understanding of the proceedings. Everyone is presumed competent unless proved otherwise by a preponderance of the evidence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.46B.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 46B.003(a)-(b), verbatim. CRITICAL DISTINCTION FOR VIEWERS: competency is about the defendant's mental state NOW, during the case. It is not the insanity defence, which is about mental state at the time of the offence. They are constantly conflated.",
+      "also_said": [
+        "found incompetent",
+        "incompetency"
+      ]
+    },
+    {
+      "spoken": "competency restoration",
+      "formal": "Restoration to competency, CCP Art. 46B.071-46B.073",
+      "short": "Treatment to make someone able to stand trial again.",
+      "long": "If a defendant is found incompetent, the court orders restoration treatment aimed at making them able to understand the case and assist counsel. It can be outpatient, in a mental health facility, or in a jail-based programme, depending on the charge and dangerousness.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.46B.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 46B.071 (options), 46B.072 (outpatient on bail for felony/Class A where not a danger to others), 46B.073 (commitment / jail-based programme). Restoration is aimed at trial competence, not at curing the underlying illness.",
+      "also_said": [
+        "restored to competency",
+        "restoration"
+      ]
+    },
+    {
+      "spoken": "not guilty by reason of insanity",
+      "formal": "Insanity, Penal Code 8.01; procedure in CCP Chapter 46C",
+      "short": "Didn't know the conduct was wrong, due to severe mental illness.",
+      "long": "Insanity is an affirmative defence: at the time of the conduct, because of severe mental disease or defect, the person did not know their conduct was wrong. It is about the moment of the offence - unlike competency, which is about the present - and it is rarely successful.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.8.htm",
+      "confidence": "high",
+      "notes": "Penal Code 8.01(a), verbatim. Texas uses a narrow 'did not know his conduct was wrong' test, narrower than the volitional tests used in some states - worth flagging for out-of-state viewers. Note 8.01(b) excludes abnormality shown only by repeated criminal conduct.",
+      "also_said": [
+        "NGRI",
+        "insanity defense",
+        "46C"
+      ]
+    },
+    {
+      "spoken": "ISF",
+      "formal": "Intermediate Sanction Facility",
+      "short": "Short lockup used instead of revoking probation or parole.",
+      "long": "An ISF is a secure TDCJ-contracted facility used for short-term confinement of someone who has violated the conditions of community supervision, parole or mandatory supervision - a sanction short of full revocation. TDCJ runs it in 45-day and 90-day formats.",
+      "source": "https://www.tdcj.texas.gov/definitions/index.html",
+      "confidence": "high",
+      "notes": "Defined in TDCJ's own glossary. NO SINGLE ENABLING STATUTE - unlike SAFPF, ISFs are referenced across Gov't Code 509.001(1)(F), 509.006(e), 508.281(c) and 493.033 but never given a dedicated authorising section. Do not cite 'the ISF statute'; there isn't one.",
+      "also_said": [
+        "intermediate sanction facility"
+      ]
+    },
+    {
+      "spoken": "pretrial diversion",
+      "formal": "Pretrial intervention program - the statutory Texas name - Government Code 76.011(a)(1); fee under CCP Art. 102.0121",
+      "short": "Program that dismisses your case if you complete it successfully.",
+      "long": "Pretrial diversion, formally a pretrial intervention program, is an agreement supervised by the probation department under which a defendant completes conditions before any conviction. Complete it and the charge is dismissed. It is offered by the district attorney's office, so admission is the prosecutor's call, not the judge's.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.76.htm",
+      "confidence": "high",
+      "notes": "NAMING: statute says 'pretrial intervention'; courthouse speech says 'pretrial diversion' or 'PTD'. KEY FINDING - THERE IS NO GENERAL TEXAS STATUTE CREATING OR DEFINING PRETRIAL DIVERSION. Gov't Code 76.011(a)(1) merely lets a CSCD operate the supervision (max 2 years, 76.011(c)) and CCP Arts. 102.012 and 102.0121 merely authorise fees ($60/month supervision fee; up to $500 DA reimbursement). Nothing sets eligibility or entitles anyone to it - admission is prosecutorial discretion and essentially unreviewable, and terms vary county to county. Never write a card implying a defendant can 'apply and qualify' under a statute. Differs from deferred adjudication in that no plea is entered to the court at all, which leaves the best expunction position. Bexar-specific hook: TDCJ publishes a statutorily required Family Violence Pretrial Diversion Pilot Program Report for Bexar County.",
+      "also_said": [
+        "pretrial intervention",
+        "PTD",
+        "diversion"
+      ]
+    },
+    {
+      "spoken": "drug court",
+      "formal": "Drug court program, Government Code Chapter 123",
+      "short": "Treatment-focused court with testing and frequent check-ins with the judge.",
+      "long": "A drug court program integrates substance abuse treatment into the case itself: weekly testing, a non-adversarial approach between prosecutor and defence, a continuum of treatment services, and repeated direct interaction between the participant and the judge.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.123.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 123.001(a) sets out the essential characteristics quoted here; 123.002 lets a commissioners court establish one. This is why a drug court docket looks informal and why the judge talks directly to the participant. THE PAYOFF: on successful completion the court SHALL enter an order of nondisclosure, whether the case was a conviction or deferred (123.001(b)), subject to prior-conviction limits - but NEVER if entry into the program arose from a DWI conviction (123.001(c)). MANDATORY IN BIG COUNTIES: a county over 200,000 shall establish a drug court program, and one that does not becomes ineligible for state CSCD funding and substance abuse treatment grants (123.006); 125.005 imposes the same mandate for mental health courts. Bexar is well over that threshold. SAFPF beds also serve drug court referrals (Gov't Code 493.009(a)(2))."
+    },
+    {
+      "spoken": "specialty court",
+      "formal": "Specialty court, Government Code 121.001",
+      "short": "Special docket for a category of defendant, like veterans or drug court.",
+      "long": "A specialty court is a program-based docket for a defined group - drug court, veterans treatment court, mental health court and others. Each type has its own chapter of the Government Code, and a program cannot operate until it notifies the Office of Court Administration.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.121.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 121.001 definition; 121.002(c) notice requirement. CORRECTION TO A COMMON CITE: Subtitle K is Chapters 121, 122, 123, 124, 125, 126, 129 and 130 - there is NO Chapter 127 or 128. Do not cite 'Chapters 121-129'. BEXAR COUNTY IS VERIFIED to operate at least: Bexar County Felony Drug Court (OCA registry #215, Judge Ernie L. Glenn), Felony Reentry Court, Co-Occurring Reentry Court, Bexar County Mental Health Court, a Felony Mental Health Court, misdemeanor and felony Veterans Treatment Courts, Esperanza Court, Family Treatment Court, a DWI Court and a Community Court. Source: OCA Specialty Court Registry plus Bexar County CSCD's own programs page. SORT FELONY FROM MISDEMEANOR BEFORE NAMING ONE ON SCREEN - naming a misdemeanor court in a felony clip is the easiest way to be visibly wrong. FELONY-side (can plausibly touch a 187th case): Felony Drug Court, Felony Veterans Treatment Court, Felony Mental Health Pretrial Diversion, Esperanza Court (a felony prostitution programme in the 175th), Felony Impact Court, Reentry and Co-Occurring courts. MISDEMEANOR-side (will NOT appear in a felony district court): the County Court at Law Mental Health Court, DWI Court, misdemeanor Veterans Treatment Court, Camino, Reflejo and Community Court. What I could NOT verify is how any of them actually run - eligibility, phases, length, deferred vs post-conviction. There is also no publicly documented Bexar DA-run FELONY diversion programme; Cite and Release is misdemeanor only.",
+      "also_said": [
+        "specialty court program"
+      ]
+    },
+    {
+      "spoken": "veterans treatment court",
+      "formal": "Veterans treatment court program, Government Code Chapter 124",
+      "short": "Specialty court for military veterans, combining treatment and supervision.",
+      "long": "A veterans treatment court program handles cases involving military veterans, integrating alcohol, controlled substance and mental health treatment with supervision and a non-adversarial approach between prosecution and defence.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.124.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 124.001(a). Bexar County's specific program was not verified this session."
+    },
+    {
+      "spoken": "mental health court",
+      "formal": "Mental health court program, Government Code Chapter 125",
+      "short": "Specialty court integrating mental illness treatment into the case.",
+      "long": "A mental health court program integrates mental illness and intellectual disability treatment services into the handling of the case, with early identification of eligible participants and ongoing judicial supervision.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.125.htm",
+      "confidence": "high",
+      "notes": "Gov't Code 125.001(a). Distinct from Chapter 46B competency proceedings, which are about ability to stand trial rather than treatment programming."
+    },
+    {
+      "spoken": "capias pro fine",
+      "formal": "Capias pro fine, CCP Art. 43.015(2)",
+      "short": "Arrest warrant issued for unpaid fines and court costs.",
+      "long": "A capias pro fine is a writ issued after judgment and sentence, commanding an officer to arrest a person who has not paid fines and costs and bring them back before the court.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.43.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 43.015(2), verbatim. Note Art. 43.015(1) separately defines a post-judgment 'capias' - so 'capias' means one thing before trial (CCP Art. 23.01) and another after judgment. Latin 'pro fine' = for the fine."
+    },
+    {
+      "spoken": "court costs",
+      "formal": "Court costs and reimbursement fees, CCP Chapters 102 and 103",
+      "short": "Fees charged for processing the case. Not the same as a fine.",
+      "long": "Court costs are the statutory fees a convicted defendant is required to pay toward the cost of running the case - clerk's fees, service fees, program reimbursement fees. They are separate from a fine, which is punishment, and separate from restitution, which goes to the victim.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.102.htm",
+      "confidence": "medium",
+      "notes": "PARTIALLY SOURCED. CCP Chapters 102 and 103 enumerate the individual fees, which supports the description. The proposition that court costs are NOT punishment (unlike a fine) is Texas case law - Weir v. State, 278 S.W.3d 364 (Tex. Crim. App. 2009) - which I did not fetch this session. Keep the on-screen line to the distinction in function, not the legal characterisation."
+    },
+    {
+      "spoken": "fine",
+      "formal": "Fine as punishment, Penal Code 12.32(b)-12.35(b)",
+      "short": "Money paid to the state as punishment, on top of any confinement.",
+      "long": "A fine is money paid to the state as part of the punishment. For any felony degree in Texas the maximum fine is $10,000, and it can be imposed in addition to imprisonment.",
+      "source": "https://statutes.capitol.texas.gov/Docs/PE/htm/PE.12.htm",
+      "confidence": "high",
+      "notes": "Penal Code 12.32(b), 12.33(b), 12.34(b), 12.35(b) - all cap the felony fine at $10,000. Distinguish from court costs (fees) and restitution (paid to the victim)."
+    },
+    {
+      "spoken": "continuance",
+      "formal": "Continuance, CCP Art. 29.03",
+      "short": "Postponing the case to a later date.",
+      "long": "A continuance postpones a criminal case, on written motion by either side, for sufficient cause fully set out in the motion, and only for as long as necessary. In everyday docket speech a short postponement is called a \"reset\" or a \"pass\".",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.29.htm",
+      "confidence": "medium",
+      "notes": "BEXAR-SPECIFIC AND USEFUL: Bexar County Criminal District Court Local Rule 11.2 provides that 'Requests for resets, postponements and Motions for Continuance will be governed as per Chapter 29 of the Code of Criminal Procedure' - the local rule names resets but routes them to the continuance chapter. Art. 29.02 allows a continuance by consent in open court on good cause; Art. 29.03 requires a written motion with cause fully set out; Art. 29.08 requires it be sworn. THE LINE TO DRAW ON SCREEN: a reset is agreed paperwork handed to the court coordinator; a continuance is a sworn written motion the judge rules on. 'Reset' and 'pass' remain undefined in statute, and 'pass' is weakly attested (one Collin County court titles its reset form a 'pass slip') - do not call 'pass' standard Texas terminology.",
+      "also_said": [
+        "reset",
+        "pass",
+        "passed"
+      ]
+    },
+    {
+      "spoken": "no bond",
+      "formal": "Denial of bail. Texas Constitution Art. I, Secs. 11, 11a, 11b, 11c and - new since November 2025 - Sec. 11d",
+      "short": "Held with no bail at all, so no release before trial.",
+      "long": "\"No bond\" means bail is denied outright and the person stays in jail until trial. Texas voters approved a new constitutional provision in November 2025 that for nine serious violent and sexual offences makes denial of bail mandatory - not discretionary - if the prosecutor meets the burden at a hearing.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.1.htm",
+      "confidence": "high",
+      "notes": "MAJOR 2025 CHANGE - VERIFY BEFORE ANY CLIP OLDER THAN NOVEMBER 2025. Tex. Const. Art. I, Sec. 11d, '(Added Nov. 4, 2025.)', enacted as Proposition 3 via S.J.R. 5, 89th Leg. I confirmed the text directly in the constitution. THE SHIFT: Secs. 11a-11c say a judge MAY deny bail; Sec. 11d says a person 'shall be denied bail'. The nine offences are murder, capital murder, aggravated assault causing serious bodily injury or using a firearm/club/knife/explosive, aggravated kidnapping, aggravated robbery, aggravated sexual assault, indecency with a child, trafficking of persons, continuous trafficking. TWO DIFFERENT BURDENS, Sec. 11d(b): preponderance of the evidence for wilful nonappearance; CLEAR AND CONVINCING evidence for danger to the community, law enforcement or the victim. A judge who grants bail anyway must issue a written order with findings of fact (11d(c)(2)). Baseline remains Sec. 11 (all prisoners bailable except capital offences 'when the proof is evident'). CAVEAT: no CCP article expressly implements Sec. 11d - it appears self-executing, and Art. 17.028(a)(3) simply lets a magistrate deny bail 'in accordance with the Texas Constitution and other law'.",
+      "also_said": [
+        "denied bail",
+        "held without bond",
+        "no bail"
+      ]
+    },
+    {
+      "spoken": "bond revocation",
+      "formal": "Rearrest and new bail, CCP Art. 17.09 Sec. 3; revocation for violating a bond condition, Art. 17.40(b)",
+      "short": "Judge cancels your bond and puts you back in jail.",
+      "long": "A judge can order a defendant rearrested and require a new bond if the existing one is defective, insufficient, or for other good and sufficient cause. Separately, if the defendant breaks a condition of bond the magistrate must revoke it and return him to custody - but only after finding by a preponderance of the evidence that the violation actually happened.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 17.09 Sec. 3 (rearrest / new bond, amended by Acts 2025, 89th Leg., Ch. 339 (S.B. 9)) and Art. 17.40(b) (mandatory revocation on a proven condition violation, defendant 'immediately returned to custody'). Art. 17.09 Sec. 4 forbids raising bond because the defendant asked for a lawyer. Judges say 'bond is revoked' or 'I'm raising the bond'.",
+      "also_said": [
+        "bond increase",
+        "raise the bond",
+        "revoke the bond"
+      ]
+    },
+    {
+      "spoken": "docket call",
+      "formal": "The court session at which pending cases are called in turn so each side reports its status",
+      "short": "The judge calls each case in turn to check its status.",
+      "long": "At docket call the court works through its list of pending cases one at a time. Each case is called, the lawyers come forward, and the court finds out what is happening with it - whether it is pleading, being reset, or going to trial.",
+      "source": "https://www.bexar.org/DocumentCenter/View/20707/Bexar-County-Criminal-District-Court-Local-Rules-2025",
+      "confidence": "medium",
+      "notes": "TERM ATTESTED, NOT DEFINED. Bexar County's own Criminal District Court Local Rules 2025 have a 'Part 11. Docket Calls and Announcements' - so this is genuine local terminology, verified in the court's own rules - but Part 11 only regulates attorney attendance and never defines the phrase. The statutory backdrop is CCP Art. 33.08: 'The district courts and county courts shall have control of their respective dockets as to the settings of criminal cases' - i.e. the legislature delegates docket practice entirely to each court, which is why no statewide definition exists ('docket call' has zero hits in the Code). The plain-English gloss is practice-based. Other Texas courts publish more detail: Bexar's 226th states regular dockets are called promptly at 9:00 a.m."
+    },
+    {
+      "spoken": "announcement",
+      "formal": "The statement each side makes at a setting about whether the case is ready to proceed",
+      "short": "Telling the judge whether you're ready or need more time.",
+      "long": "When a case is called, each side gives an announcement - typically \"ready\", \"not ready\", or an agreed reset. It is how the court sorts cases that are moving from cases that need another setting.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.35.htm",
+      "confidence": "medium",
+      "notes": "PARTLY SOURCED - the phrase 'announce ready' does have a statutory hook. CCP Art. 35.01: 'When a case is called for trial and the parties have ANNOUNCED READY FOR TRIAL, the names of those summoned as jurors in the case shall be called'; CCP Art. 28.01 Sec. 1(5) likewise refers to matters raised 'before the defendant announces ready for trial'. Bexar County's Criminal District Court Local Rules 2025 head Part 11 'Docket Calls and Announcements'. So the term is real and attested in both statute and local rules - but neither DEFINES it, and the three-way 'ready / not ready / agreed reset' gloss is practice-based. Other counties publish the practice explicitly (Harris: attorneys must announce ready or not ready on call of the docket; Travis: parties must announce ready or file a written motion for continuance).",
+      "also_said": [
+        "announce ready",
+        "announcements"
+      ]
+    },
+    {
+      "spoken": "instructed verdict",
+      "formal": "Motion for an instructed verdict of not guilty - also called a directed verdict",
+      "short": "Judge ends the case: the State's evidence is legally insufficient.",
+      "long": "A motion for instructed verdict asks the judge to acquit without letting the jury decide, on the ground that the State's evidence is legally insufficient to support a conviction. If it is granted the case is over - an acquittal is final and the State cannot appeal it.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.44.htm",
+      "confidence": "high",
+      "notes": "TEXAS WORD PREFERENCE: both terms are correct, but Texas criminal practice says 'instructed verdict' and civil practice says 'directed verdict' (Tex. R. Civ. P. 268). At the Court of Criminal Appeals 'instructed verdict' outnumbers 'directed verdict' roughly 660 to 256, and 'instructed verdict of not guilty' 124 to 17. Safe caption: 'motion for instructed verdict (also called a directed verdict)'. Mostly a common-law motion rather than a statutory one, with one statutory instance at CCP Art. 38.17 (where two witnesses are required by law and the requirement is not met, 'the court shall instruct the jury to render a verdict of acquittal, and they are bound by the instruction'). FINALITY: CCP Art. 44.01(a) does not list acquittals among the State's permitted appeals, and CCP Art. 1.11 exempts an acquitted defendant from a second trial 'however irregular the proceedings may have been'.",
+      "also_said": [
+        "directed verdict",
+        "motion for instructed verdict"
+      ]
+    },
+    {
+      "spoken": "complainant",
+      "formal": "Complainant - the Texas term for the person alleged to have been the victim of the offence",
+      "short": "Texas's word for the alleged victim in the case.",
+      "long": "Texas courts say \"the complainant\" where television says \"the victim\". The word is deliberately neutral: calling someone the victim assumes the offence happened, which is the very thing the trial is meant to decide. \"Affiant\" is whoever swore the sworn statement, usually the officer.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.15.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 15.051 refers to a complainant as 'a person who charges or seeks to charge in a complaint the commission of an offense'; see also Arts. 15.04 and 15.05. HIGH VALUE FOR OUT-OF-STATE VIEWERS - many will not realise 'complainant' means the alleged victim and may think it is a separate person or a bureaucratic role.",
+      "also_said": [
+        "the complainant",
+        "affiant"
+      ]
+    },
+    {
+      "spoken": "judicial confession",
+      "formal": "Judicial confession - the sworn document satisfying the evidence requirement of CCP Art. 1.15",
+      "short": "Signed sworn statement admitting the indictment is true.",
+      "long": "In Texas a guilty plea by itself cannot convict you of a felony - the State must still put evidence of guilt into the record. In practice that is a one-page sworn document in which the defendant swears the indictment is true, which is why the judge asks whether he signed it and understood it.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.1.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 1.15: 'in no event shall a person charged be convicted upon his plea without sufficient evidence to support the same', and the evidence may be stipulated on a written waiver. ONE OF THE SHARPEST TEXAS-VS-ELSEWHERE DIFFERENCES IN THIS FILE - federal pleas and most states' pleas require no such evidence, so a viewer will not understand why paperwork is being offered into evidence at what looks like a simple guilty plea.",
+      "also_said": [
+        "stipulation of evidence",
+        "judicial confession and stipulation"
+      ]
+    },
+    {
+      "spoken": "11.07",
+      "formal": "Article 11.07 of the Code of Criminal Procedure - post-conviction habeas corpus for a final felony conviction",
+      "short": "Habeas petition challenging a final felony conviction after prison.",
+      "long": "Texas lawyers use the article number as a noun - \"he filed an eleven-oh-seven\". It is the post-conviction habeas route for someone serving a prison sentence on a final felony conviction, and it is decided by the Court of Criminal Appeals in Austin, not by the trial judge.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.11.htm",
+      "confidence": "high",
+      "notes": "CLEAN LINE FOR SCREEN: Art. 11.07 = you went to prison, and the Court of Criminal Appeals decides; Art. 11.072 = you got community supervision, and the trial court decides. HUGE TEXAS-VS-OTHER-STATES GAP - most states say 'post-conviction petition' or 'PCR'; a viewer hearing a bare number has no idea it means habeas corpus.",
+      "also_said": [
+        "eleven oh seven",
+        "11.072",
+        "writ"
+      ]
+    },
+    {
+      "spoken": "deep lung device",
+      "formal": "Deep-lung breath analysis mechanism - the ignition interlock, CCP Arts. 17.441 and 42A.408",
+      "short": "Breathalyzer wired to your car's ignition. Statute's actual words.",
+      "long": "It sounds invented, but \"deep-lung breath analysis mechanism\" is the statute's own phrase for an ignition interlock - a breath tester wired to the car so it will not start if alcohol is detected. It is mandatory for repeat and aggravated intoxication offences.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 17.441(a) (bond) and Art. 42A.408(a) (community supervision) both use 'deep-lung breath analysis mechanism' verbatim. On probation it must stay installed not less than 50 percent of the supervision period. DISTINCTIVELY TEXAN PHRASING - elsewhere it is just called an IID or interlock, so the phrase will sound bizarre to non-Texans and is worth a card for that reason alone.",
+      "also_said": [
+        "ignition interlock",
+        "interlock",
+        "IID"
+      ]
+    },
+    {
+      "spoken": "BIPP",
+      "formal": "Battering Intervention and Prevention Program, CCP Art. 42A.504(c)(1); programme established under CCP Art. 42.141 and accredited by TDCJ-CJAD",
+      "short": "Court-ordered classes for domestic violence offenders. Not anger management.",
+      "long": "BIPP is an accredited battering intervention and prevention programme a judge can order as a condition of community supervision in a family violence case. It is specifically not anger management and not general counselling, and the defendant must start within 60 days.",
+      "source": "https://www.tdcj.texas.gov/divisions/cjad/bipp.html",
+      "confidence": "high",
+      "notes": "CCP Art. 42A.504(c)(1) authorises it; the programme itself is established by CCP Art. 42.141 and accredited by TDCJ's Community Justice Assistance Division with the Texas Council on Family Violence. Must be provided free if the defendant cannot pay (42A.504(d)). Judges usually announce it alongside the mandatory $100 payment to a family violence centre (42A.504(b)). Said as a word, rhyming with 'flip'. TEXAS-SPECIFIC ACRONYM - and it surprises people that the prison system accredits the classes. It is NOT in the Health and Safety Code.",
+      "also_said": [
+        "battering intervention"
+      ]
+    },
+    {
+      "spoken": "MOEP",
+      "formal": "Magistrate's Order for Emergency Protection, CCP Art. 17.292",
+      "short": "Emergency no-contact order issued at your first court appearance.",
+      "long": "A MOEP is an emergency protective order a magistrate issues at the first appearance after a family violence, assault, stalking or trafficking arrest. It is mandatory where there was serious bodily injury or a deadly weapon, and the alleged victim does not need to be present or to ask for it.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.17.htm",
+      "confidence": "high",
+      "notes": "Said aloud as 'mope'. CCP Art. 17.292. Duration 61-91 days, or 91-121 days in a deadly weapon or serious bodily injury case; it also suspends any handgun licence. THREE DIFFERENT ORDERS GET CALLED 'PROTECTIVE ORDER' AND JUDGES USE THE PHRASE LOOSELY FOR ALL THREE: (1) the MOEP under Art. 17.292; (2) a CCP Chapter 7B order for sexual assault, trafficking or stalking - NOTE this was Chapter 7A until it was renumbered effective January 1, 2021, so older references and forms say 7A; (3) a Family Code Title 4 family violence protective order, two years by default. Violating one is a separate crime under Penal Code 25.07.",
+      "also_said": [
+        "emergency protective order",
+        "protective order"
+      ]
+    },
+    {
+      "spoken": "outcry witness",
+      "formal": "Outcry witness, CCP Art. 38.072",
+      "short": "First adult a child told about the abuse.",
+      "long": "In a child abuse case the first adult the child told about the abuse may repeat in court what the child said, even though that is normally inadmissible hearsay. The State must give 14 days' notice and the judge holds a reliability hearing outside the jury's presence first.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.38.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 38.072 - applies to a child under 18 or a person with a disability, and the outcry witness must be an adult other than the defendant. TEXAS-SPECIFIC: this is a named Texas hearsay exception and 'outcry' is Texas terminology. Related provisions on child testimony at Arts. 38.071 and 38.074. Only relevant in child sexual and physical abuse prosecutions, but central when it is."
+    },
+    {
+      "spoken": "pen packet",
+      "formal": "Penitentiary packet - certified TDCJ records offered to prove prior convictions",
+      "short": "Certified prison records proving your prior convictions.",
+      "long": "A pen packet is a certified bundle of TDCJ records - judgment, photograph, fingerprints - offered during the punishment phase to prove that the defendant is the same person named in those older convictions. It comes in without a records custodian because the statute makes it self-authenticating.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42.09 Sec. 8(b-1): 'A document certified under Subsection (b) is self-authenticated for the purposes of Rules 901 and 902, Texas Rules of Evidence' - that is why no witness from Huntsville is needed. The phrase 'pen packet' is practitioner usage, not statutory, but it is thoroughly entrenched in Texas appellate opinions including San Antonio's Fourth Court. Bexar's District Clerk separately prepares 'penitentiary packets to be sent with the defendant to the prison upon conviction'.",
+      "also_said": [
+        "penitentiary packet",
+        "pen pack"
+      ]
+    },
+    {
+      "spoken": "Morton Act",
+      "formal": "The Michael Morton Act, CCP Art. 39.14 - Texas's criminal discovery statute",
+      "short": "Texas open-file law. Prosecutors must hand over their evidence.",
+      "long": "The Michael Morton Act is Texas's open-file discovery law, named after a man who served nearly 25 years because a prosecutor withheld evidence. Lawyers usually just say \"39.14\". Its disclosure duty for favourable evidence is broader than the federal Brady rule.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.39.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 39.14; enacted as S.B. 1611, 83rd Leg. (2013), indexed by the Legislature under the subject 'MICHAEL MORTON ACT'. Art. 39.14(h) codifies the Brady duty in broader terms: the State 'shall disclose ... any exculpatory, impeachment, or mitigating document, item, or information' - with no materiality threshold and no need for the defence to request it. I did not separately fetch Brady v. Maryland, so present the comparison as read off the Texas text.",
+      "also_said": [
+        "39.14",
+        "Michael Morton Act",
+        "open file"
+      ]
+    },
+    {
+      "spoken": "motion to quash",
+      "formal": "Motion to set aside, or exception to, an indictment or information - CCP Art. 27.02(1)",
+      "short": "Attack on the indictment itself, not the evidence.",
+      "long": "A motion to quash attacks the charging document rather than the evidence - arguing the indictment fails to allege an offence, is barred by limitations, or is defective in form. Practically, if it succeeds the State usually just re-indicts.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.27.htm",
+      "confidence": "high",
+      "notes": "NAMING: the Code never uses the word 'quash'. CCP Art. 27.02(1) calls it 'A motion to set aside or an exception to an indictment or information for some matter of form or substance'. Grounds are enumerated at Art. 27.08 (substance) and Art. 27.09 (form, including that it was 'not returned by a lawfully chosen or empaneled grand jury'). TIMING TRAP: Art. 1.14(b) - failing to object before trial waives and forfeits the objection, and it cannot be raised on appeal. Carry both names in any on-screen card.",
+      "also_said": [
+        "motion to set aside the indictment",
+        "exception to the indictment"
+      ]
+    },
+    {
+      "spoken": "any legal reason",
+      "formal": "Allocution before sentencing, CCP Art. 42.07 - the question whether the defendant has anything to say why sentence should not be pronounced",
+      "short": "Ritual question before sentencing. Only three answers count legally.",
+      "long": "Just before pronouncing sentence the judge asks whether there is any legal reason the sentence should not be pronounced. It sounds like an invitation to speak, but Texas law recognises only three valid answers: the defendant has been pardoned, he is presently incompetent, or he is not the person convicted. Defence counsel almost always answers \"no legal reason\".",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.42.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 42.07. THIS IS NOT THE FEDERAL ALLOCUTION RIGHT - Fed. R. Crim. P. 32(i)(4) gives a genuine right to address the court in mitigation, whereas Art. 42.07 is a narrow legal challenge. I did not separately fetch the federal rule, so state the contrast carefully. Related: Art. 42.03 Sec. 1(a) requires sentence be pronounced in the defendant's presence, and Sec. 1(b) puts the victim impact statement strictly AFTER sentencing, with the court reporter forbidden to transcribe it - which is why victim statements are missing from transcripts.",
+      "also_said": [
+        "legal reason why sentence should not be pronounced",
+        "allocution"
+      ]
+    },
+    {
+      "spoken": "the Court's Charge",
+      "formal": "Charge of the court - the written jury instructions, CCP Arts. 36.14-36.16",
+      "short": "Texas's name for the written jury instructions.",
+      "long": "Texas says \"the charge of the court\" where most places say \"jury instructions\". It is a physical document of the law the jury must apply, and in Texas the judge delivers it BEFORE closing arguments, so the lawyers argue against the instructions the jury has already received.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.36.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 36.14 requires the written charge be delivered before argument begins - the reverse of federal practice, where instructions usually follow argument. The charge goes to the jury room. Bexar County's own juror information page uses the capitalised phrase: 'After the Charge of the Court, the lawyers have the opportunity to summarize the evidence in their closing arguments.' TEXAS DIFFERENCE CONFIRMED IN BOTH THE NAME AND THE ORDERING.",
+      "also_said": [
+        "the charge",
+        "charge of the court"
+      ]
+    },
+    {
+      "spoken": "published to the jury",
+      "formal": "Publication of admitted exhibits to the jury; see CCP Art. 36.25",
+      "short": "Actually showing admitted evidence to the jury.",
+      "long": "\"Published\" has nothing to do with publishing. Evidence goes through four steps that sound like one: marked (labelled), offered (formally tendered), admitted (the judge says yes - only now is it evidence), and published (actually shown, read or played to the jury).",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.36.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 36.25: 'There shall be furnished to the jury upon its request any exhibits admitted as evidence.' The four-step sequence is the most frequently spoken exchange in any trial and 'published' is the word that most reliably confuses lay viewers. No Texas-vs-other-states difference - this entry earns its place purely on confusion value.",
+      "also_said": [
+        "publish",
+        "marked",
+        "offered",
+        "admitted"
+      ]
+    },
+    {
+      "spoken": "blue warrant",
+      "formal": "Courthouse slang for a parole pre-revocation warrant issued under Government Code Sec. 508.251",
+      "short": "Parole violation hold. Usually no bond, so no release.",
+      "long": "A blue warrant is a hold placed on someone accused of violating parole. No judge issues it - the parole division does - and it usually carries no bond, so a defendant can make bail on the new criminal charge and still not walk out of the jail.",
+      "source": "https://www.tdcj.texas.gov/divisions/pd/warrants.html",
+      "confidence": "medium",
+      "notes": "SLANG ONLY - FLAGGED. The phrase 'blue warrant' appears nowhere on TDCJ's site or in statute; TDCJ's own term is 'pre-revocation warrant'. Every source using 'blue warrant' was a defence or bail-bond blog, which I did not rely on. Present it as courthouse slang for a pre-revocation warrant under Gov't Code Sec. 508.251, and do NOT attribute the phrase to TDCJ or to a statute. The mechanism is certain and appears constantly; the wording is what is uncertain.",
+      "also_said": [
+        "pre-revocation warrant",
+        "parole hold"
+      ]
+    },
+    {
+      "spoken": "expunction",
+      "formal": "Expunction of criminal records, CCP Chapter 55A",
+      "short": "Erases the record entirely. Only if never convicted.",
+      "long": "An expunction destroys the records of an arrest and case. It is generally available only to people who were not convicted - acquitted, dismissed, or no-billed. It is the stronger of the two Texas record remedies.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.55A.htm",
+      "confidence": "high",
+      "notes": "CHAPTER NUMBER CHANGED - CITE 55A, NOT 55. Expunction was recodified into CCP Chapter 55A by Acts 2023, 88th Leg., Ch. 765 (H.B. 4504), effective January 1, 2025; CR.55 now returns a 404. ONE-LINER FOR SCREEN: expunction erases, nondisclosure hides. Successful deferred adjudication generally gets nondisclosure, not expunction.",
+      "also_said": [
+        "expunged",
+        "expungement"
+      ]
+    },
+    {
+      "spoken": "nondisclosure",
+      "formal": "Order of nondisclosure of criminal history record information, Government Code Chapter 411, Subchapter E-1",
+      "short": "Seals the record from employers. Police still see it.",
+      "long": "An order of nondisclosure seals a record rather than destroying it. The public and most employers cannot see it, but law enforcement, prosecutors and licensing agencies still can. This is the usual remedy after successfully completing deferred adjudication.",
+      "source": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.411.htm",
+      "confidence": "high",
+      "notes": "Gov't Code Ch. 411, Subch. E-1. CCP Art. 42A.111(e) requires the judge discharging a deferred adjudication either to grant nondisclosure or to tell the defendant when he becomes eligible. Drug court graduates get one by statute, but never on a DWI (Gov't Code 123.001(c)). Contrast with expunction, which destroys the record - and note that deferred adjudication is NOT an expunction, which is the most common viewer misconception about it.",
+      "also_said": [
+        "order of nondisclosure",
+        "sealed"
+      ]
+    },
+    {
+      "spoken": "bond pending appeal",
+      "formal": "Bail pending appeal, CCP Art. 44.04(b)",
+      "short": "No bail while appealing if sentence is ten years or more.",
+      "long": "A defendant who is convicted and appeals cannot be released on bond if the punishment is ten years or more, or if the offence is on the 42A.054 list - the statute says he shall immediately be placed in custody. This is why someone can be taken away in handcuffs on the spot even though the case is going up on appeal.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.44.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 44.04(b), which uses the phrase 'shall immediately be placed in custody'. Explains an on-camera moment that otherwise looks arbitrary. Related: a motion for new trial must be filed within 30 days of sentencing in open court (not of the verdict), and is overruled by operation of law if the judge does not rule within 75 days - Texas Rules of Appellate Procedure 21.4 and 21.8.",
+      "also_said": [
+        "appeal bond",
+        "bond on appeal"
+      ]
+    },
+    {
+      "spoken": "sex offender registration",
+      "formal": "Sex offender registration program, CCP Chapter 62",
+      "short": "Required registry. Deferred adjudication still triggers it.",
+      "long": "Registration duties run for ten years after discharge or release for most reportable offences, and for life for a sexually violent offence. Critically, deferred adjudication counts - there is no conviction, but the duty to register still attaches.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.62.htm",
+      "confidence": "high",
+      "notes": "CCP Art. 62.101(a) (duty ends when the person dies, for a sexually violent offence) and 62.101(c) (ten years from the later of discharge or release). Art. 62.001(5) defines 'reportable conviction or adjudication' to INCLUDE deferred adjudication - the single most misunderstood point for viewers, and it must be admonished at the plea under CCP Art. 26.13(a)(5). Judges commonly pair it with the child safety zone, no going within 1,000 feet of premises where children commonly gather (Art. 42A.453(c)), sex offender treatment (42A.452) and a DNA sample (42A.451).",
+      "also_said": [
+        "registration",
+        "have to register",
+        "child safety zone"
+      ]
+    },
+    {
+      "spoken": "shuffle",
+      "formal": "Jury shuffle - reshuffling of the jury panel, CCP Art. 35.11",
+      "short": "Either side can demand the jury panel be reshuffled.",
+      "long": "Either side may demand once, without giving any reason, that the entire jury panel's seating order be randomly reshuffled. It matters because lawyers strike jurors in seating order, so the shuffle can move who is likely to end up on the jury.",
+      "source": "https://statutes.capitol.texas.gov/Docs/CR/htm/CR.35.htm",
+      "confidence": "medium",
+      "notes": "MECHANISM STATUTORY, WORD IS NOT. CCP Art. 35.11 provides the reshuffling right, but the word 'shuffle' appears nowhere in the statute - it is slang left over from the pre-1991 practice of physically shuffling juror name cards, and it is judicially entrenched in dozens of appellate opinions. A DISTINCTLY TEXAN ODDITY worth explaining to outsiders. Related: ten peremptory strikes per side in a non-capital felony (Art. 35.15(b)), and Texas codified Batson at Art. 35.261 with an unusual remedy - the court 'shall call a new array' rather than merely reseating the juror. 'Venire' is real practitioner usage but the statute says 'general panel' and 'array'. I did not verify how often shuffles actually happen.",
+      "also_said": [
+        "jury shuffle",
+        "shuffle the panel"
+      ]
+    }
+  ]
+}

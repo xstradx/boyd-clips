@@ -1,0 +1,20 @@
+{
+ "weights": {
+  "plea_script": -1.8,
+  "appeal_rights": -3.5,
+  "sentence_admin": -0.5,
+  "discourse_reset": -9.6,
+  "bond_live": 12.6,
+  "direct_address": 25.0
+ },
+ "n_pairs": 93,
+ "cv": 0.7688172043010753,
+ "patterns": {
+  "plea_script": "\\b(plea bargain|did you review|you review|did you understand|you understand it|understand it|with your attorney|your attorney did|attorney did|is there anything|there anything else|your plea|you guilty|find you|entitled|sign)\\b",
+  "appeal_rights": "\\b(right to appeal|to appeal|appeal|certification|trial court certification|court certification|waive)\\b",
+  "sentence_admin": "\\b(sentence you|sentence you to|the court will|court will|agreement|the state|community|up to|fine|years in the)\\b",
+  "discourse_reset": "\\b(all right so|all right and|right so|right and|all right thank|right thank you)\\b",
+  "bond_live": "\\b(bond|set|on your|got|out of|put)\\b",
+  "direct_address": "\\b(you are|another|based|also|which)\\b"
+ }
+}
