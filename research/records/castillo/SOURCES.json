@@ -1,0 +1,266 @@
+{
+  "_note": "Acquired 2026-08-12 by live fetch. Every string below was read off a fetched document or API response. Nothing here is reconstructed from memory. Do not add a field without a fetched source.",
+  "case": {
+    "trial_cause_number_as_printed_on_judgment": "DC2023CR8866",
+    "trial_cause_number_as_printed_on_notice_of_appeal": "2023CR8866",
+    "trial_cause_number_as_printed_by_appellate_clerk": "2023-CR-8866",
+    "_cause_number_warning": "Three different renderings appear on official documents. Match the rendering to the document being shown on the card.",
+    "appellate_cause_number": "04-26-00430-CR",
+    "appellate_court": "Fourth Court of Appeals, San Antonio, Texas",
+    "trial_court": "187th Judicial District Court, Bexar County, Texas",
+    "judge": "Honorable Stephanie R. Boyd",
+    "incident_trn": "9257239004",
+    "state_id_no": "TX-08776432"
+  },
+  "corrections_to_brief": [
+    {
+      "field": "booking number",
+      "brief_said": "B202527680",
+      "truth": "B202310850",
+      "evidence": "POST portal-txbexar.tylertech.cloud/app/JailSearchService/search queryString=B202527680 returns exactly 1 hit: WILLIAMS, KEVIN ARTHUR, SO 874064, arson, booked 2025-07-22. Castillo's 2023 booking is B202310850, jailID 2001168.",
+      "severity": "must not ship - it is another man's booking number"
+    },
+    {
+      "field": "appeal filed date",
+      "brief_said": "12 June 2026",
+      "truth": "Notice of appeal filed in trial court 05/22/2026; filed in court of appeals 06/01/2026. 06/12/2026 is the date the 'Case Information Sheet from trial court clerk' was filed.",
+      "evidence": "search.txcourts.gov Case.aspx?cn=04-26-00430-CR&coa=coa04 event list"
+    },
+    {
+      "field": "sentence",
+      "brief_said": "not stated",
+      "truth": "TWELVE (12) years TDCJ on each count, running CONCURRENT. Effective sentence 12 years.",
+      "evidence": "Judgment of Conviction by Jury, Count 1 and Count 2, both 'THIS SENTENCE SHALL RUN: CONCURRENT WITH: COUNT 1 & COUNT 2'",
+      "trap": "The COA docket page's 'Punishment: 24 years TDCJ' field is an aggregation artifact (12+12) and contradicts both judgments. Never put 24 on a card."
+    },
+    {
+      "field": "surrender date",
+      "brief_said": "27 March 2023",
+      "truth": "Arrest date 03/27/2023; booked into Bexar Adult Detention Center 03/28/2023 at 04:11 AM.",
+      "evidence": "ViewJailingService Jailings(2001168)"
+    }
+  ],
+  "documents": [
+    {
+      "id": "judgment_count1",
+      "file": "pages/p09_0_PAGE0009.png",
+      "title": "JUDGMENT OF CONVICTION BY JURY",
+      "source_url": "https://search.txcourts.gov/SearchMedia.aspx?MediaVersionID=132d54fb-8bdd-4a23-bf67-32bba27362b0&coa=coa04&DT=Other&MediaID=b8e8d94a-057b-4926-a587-2250825a81d2",
+      "attribution_line": "Judgment of Conviction by Jury — 187th District Court, Bexar County — Cause DC2023CR8866",
+      "cost": "free, no login",
+      "scan_spec": "1696x2192 px bitonal (1-bit) TIFF, ~200 dpi, extracted from the PDF with pypdf page.images",
+      "verbatim": {
+        "caption": "NO. DC2023CR8866 COUNT 1 / INCIDENT NO./ TRN: 9257239004 / THE STATE OF TEXAS § IN THE DISTRICT COURT / V. § 187TH DISTRICT COURT / ROBERT CASTILLO § BEXAR COUNTY, TEXAS / STATE ID NO.: TX-08776432 §",
+        "judge_presiding": "Judge Presiding : Stephanie R Boyd",
+        "date_sentence_imposed": "Date Sentenced Imposed: 05/20/2026",
+        "attorney_for_state": "Attorney for State: MEGHAN GALLOWAY",
+        "attorney_for_defendant": "Attorney for Defendant: David L. McLane",
+        "offense": "Offense for which Defendant Convicted: MANSLAUGHTER",
+        "charging_instrument": "Indicted by Grand Jury (OCA)",
+        "statute": "Statute for Offense: 19.04 PC",
+        "date_of_offense": "Date of Offense: 03/25/2023",
+        "plea": "Plea to Offense: Not Guilty to Jury",
+        "deadly_weapon": "Findings on Deadly weapon: Deadly Weapon Finding",
+        "degree": "Degree of Offense: 2nd Degree Felony",
+        "foreperson": "Foreperson: Sierra Ray",
+        "verdict_of_jury": "We, the Jury, find the defendant, Robert Castillo, “Guilty” of the offense of manslaughter as charged in Count 1 of the indictment.",
+        "verdict_punishment": "We, the Jury, having found that the Defendant is guilty of the offense of manslaughter, as charged in Count 1 of the indictment, now return this verdict as to his punishment. We assess his punishment at confinement in the Institutional Division of the Texas Department of Criminal Justice for a term of TWELVE (12) years. In addition, we assess NO FINE.",
+        "confinement": "Punishment and Place of Confinement: 12 Term YEARS Texas Department of Criminal Justice Institutional Division / TDCJ, CORRECTIONAL INSTITUTIONS DIVISION",
+        "concurrency": "THIS SENTENCE SHALL RUN: CONCURRENT WITH: COUNT 1 & COUNT 2",
+        "fine": "Fine: $ 0.00",
+        "court_costs": "Court Costs: $ 290.00",
+        "jail_credit": "Total Jail Time Credit: 6 DAYS",
+        "closing_recital": "This cause was called for trial by jury and the parties appeared. The State appeared by her District Attorney as named above.",
+        "counsel": "Counsel/Waiver of Counsel (select one) ☒ Defendant appeared with counsel."
+      }
+    },
+    {
+      "id": "judgment_count1_findings",
+      "file": "pages/p11_0_PAGE0011.png",
+      "title": "Execution of Sentence / special findings, signed by Judge Boyd",
+      "verbatim": {
+        "execution": "The Court ORDERS Defendant's sentence EXECUTED. The Court FINDS that Defendant is entitled to the jail time credit indicated above.",
+        "special_findings_heading": "Furthermore, the following special findings or orders apply:",
+        "felony_finding": "The Court enters an affirmative finding that Defendant has been found guilty of a felony.",
+        "deadly_weapon_finding": "We unanimously find that the defendant used or exhibited a deadly weapon, namely, a motor vehicle, during the commission of the offense of manslaughter as charged in Count 1.",
+        "date_entered": "Date Judgment Entered: 05/20/2026",
+        "signature_block": "Judge Presiding / Stephanie R Boyd / 187th District Court / BEXAR COUNTY, TEXAS"
+      },
+      "note": "Carries Judge Boyd's actual wet signature. Highest-credibility single frame in the whole set."
+    },
+    {
+      "id": "judgment_count2",
+      "file": "pages/p12_0_PAGE0012.png",
+      "title": "JUDGMENT OF CONVICTION BY JURY — COUNT 2",
+      "verbatim": {
+        "caption": "NO. DC2023CR8866 COUNT 2",
+        "offense": "Offense for which Defendant Convicted: 540111 - FAIL-STOP & RENDER AID-DEATH",
+        "statute": "Statute for Offense: 550.021 TRC",
+        "degree": "Degree of Offense: 2nd Degree Felony",
+        "verdict_of_jury": "We, the Jury, find the defendant, Robert Castillo, “Guilty” of the offense of failing to comply with the duty to give information and render aid after being involved in an accident involving personal injury or death under Sections 550.021(a)(4), 550.021(c)(1)(A), and 550.023 of the Texas Transportation Code, as charged in Count 2 of the indictment.",
+        "confinement": "12 Term YEARS Texas Department of Criminal Justice Institutional Division",
+        "concurrency": "THIS SENTENCE SHALL RUN: :CONCURRENT WITH: COUNT 1 & 2",
+        "court_costs": "Court Costs: $ 340.00"
+      }
+    },
+    {
+      "id": "notice_of_appeal",
+      "file": "pages/p02_0_PAGE0002.png",
+      "title": "NOTICE OF APPEAL",
+      "verbatim": {
+        "efile_stamp": "FILED / 5/22/2026 12:22 PM / Gloria A. Martinez / Bexar County District Clerk / Accepted By: Sobeida Grohman / Bexar County - 187th District Court",
+        "caption": "CAUSE NO. 2023CR8866 / STATE OF TEXAS § IN THE DISTRICT COURT / v. § 187TH JUDICIAL DISTRICT / ROBERT CASTILLO § BEXAR COUNTY, TEXAS",
+        "body": "ROBERT CASTILLO, Defendant in the above-styled and numbered cause, gives this Notice of Appeal to the Fourth Court of Appeals of Texas from the judgment of conviction and punishment rendered against him in this case.",
+        "signature": "/s/ David L. McLane / David L. McLane / Attorney for Defendant / Texas Bar No. 00795517",
+        "certificate_of_service": "I certify that a true and correct copy of the above document was served on the Bexar County District Attorney's office, through the electronic filing manager on May 22, 2026."
+      },
+      "redact_before_broadcast": ["Office Phone: (210) 736-9966", "Cell Phone: (210) 913-1706", "Fax: (210) 547-7932", "dlmclanelaw@yahoo.com", "14855 Blanco Rd. Ste. 435"]
+    },
+    {
+      "id": "certificate_of_notice_of_appeal",
+      "file": "pages/p01_0_PAGE0001.png",
+      "title": "CRIMINAL APPEALS — CERTIFICATE OF NOTICE OF APPEAL TO THE FOURTH COURT OF APPEALS",
+      "verbatim": {
+        "line3": "The Honorable Stephanie R Boyd presided.",
+        "line4": "The above named defendant was charge with offense(s) of MANSLAUGHTER; 540111 - FAIL-STOP & RENDER AID-DEATH ; .",
+        "line5": "State's appeal attorney: Joe Gonzales 300 Dolorosa, Suite 4025, Bexar County Justice Center, San Antonio, Texas,78205 (210)335-2413 SBN: 24030360",
+        "line8": "The sentence was (IMPOSED) on 05/20/2026; 05/20/2026.",
+        "line10": "Name and Address of Court Reporter(s) who reported the evidence: CINDY SPICER 05-20-2026, 05-20-2026, 05-19-2026, 05-18-2026, 05-15-2026, 05-14-2026, 05-13-2026, 05-12-2026, 05-11-2026; 02-15-2025; MARIA FATTHAHI 10-31-2024; ANGELA YOUNG 04-11-2023",
+        "attestation": "WITNESS MY HAND THIS 1st day of June, 2026 / Gloria A. Martinez / BEXAR COUNTY DISTRICT CLERK / BY: Eva Estrada, DEPUTY"
+      },
+      "note": "Line 10 independently confirms the trial ran 05-11-2026 through 05-20-2026 — nine reported days.",
+      "do_not_show": "Box 7 has 'Jury trial on punishment only' checked. That contradicts the judgments (Plea to Offense: Not Guilty to Jury; jury guilt verdict recited). Clerk data-entry error. Do not put that checkbox on screen."
+    },
+    {
+      "id": "coa_order",
+      "file": "pdf/COA04_order_2026-08-07.pdf",
+      "title": "Fourth Court of Appeals ORDER, August 7, 2026 (PER CURIAM)",
+      "verbatim": {
+        "caption": "Fourth Court of Appeals / San Antonio, Texas / August 7, 2026 / No. 04-26-00430-CR / Robert CASTILLO, Appellant / v. / The STATE of Texas, Appellee / From the 187th Judicial District Court, Bexar County, Texas / Trial Court No. 2023-CR-8866 / Honorable Stephanie R. Boyd, Judge Presiding",
+        "body": "Cynthia Spicer Lewis's notification of late reporter's record is hereby GRANTED IN PART. The court reporter's records are due on August 20, 2026. Further requests for extension of time will be disfavored. Generally, further extensions will be allowed only for good cause shown, and the total period of extension will be limited to no more than 60 days from the date the record was originally due in regular appeals and 20 days in accelerated appeals. See TEX. R. APP. P. 35.3(c).",
+        "closing": "It is so ORDERED August 7, 2026. / PER CURIAM / ATTESTED TO: Caitlin A. McCamish, Clerk of Court"
+      },
+      "note": "This is the live status of the case as of today — the appeal is open, the reporter's record is not yet complete. Any card asserting a final appellate outcome would be false."
+    },
+    {
+      "id": "coa_letterhead",
+      "file": "pdf/COA04_clerks-record-filed_2026-07-13.pdf",
+      "title": "Fourth Court of Appeals letterhead — Clerk's Record filed notice, July 13 2026",
+      "verbatim": {
+        "letterhead": "COURT OF APPEALS / REBECA C. MARTINEZ, CHIEF JUSTICE / IRENE RIOS, LORI I. VALENZUELA, LORI MASSEY BRISSETTE, ADRIAN A. SPEARS II, H. TODD MCCRAY, VELIA J. MEZA, JUSTICES / FOURTH COURT OF APPEALS DISTRICT / CADENA-REEVES JUSTICE CENTER, 300 DOLOROSA, SUITE 3200, SAN ANTONIO, TEXAS 78205-3037 / CAITLIN A. MCCAMISH, CLERK OF COURT",
+        "body": "RE: Court of Appeals Number: 04-26-00430-CR / Trial Court Case Number: 2023-CR-8866 / Style: Robert Castillo v. The State of Texas / The Clerk's Record in the above styled and numbered cause has this date been filed."
+      }
+    }
+  ],
+  "jail_records": {
+    "source": "POST https://portal-txbexar.tylertech.cloud/app/JailSearchService/search then GET /app/ViewJailingService//Jailings({jailID}) — free, no login, no CAPTCHA, verified 2026-08-12",
+    "booking_2023": {
+      "jailID": 2001168,
+      "BookingNumber": "B202310850",
+      "BookingDateString": "03/28/2023",
+      "BookingTime": "4:11:00 AM",
+      "ReleaseDateString": "04/01/2023",
+      "ReleaseTime": "12:18:00 PM",
+      "ArrestDateString": "3/27/2023",
+      "DefendantCurrentName": "CASTILLO, ROBERT",
+      "DefendantSONum": "965702",
+      "Facility": "Bexar Adult Detention Center",
+      "charge": {
+        "ChargeDescription": "COLLISION INVOLVING DEATH",
+        "WarrantNumber": "1830086",
+        "Disposition": "Released on Bond",
+        "ArrestingAgency": "San Antonio Police Department",
+        "OffenseDateString": "03/25/2023"
+      },
+      "_design_note": "The charge at intake reads COLLISION INVOLVING DEATH, not manslaughter. The charge language changing between booking and indictment is itself a story beat and is documented, not invented."
+    },
+    "booking_2026": {
+      "jailID": 2451009,
+      "BookingNumber": "B202620365",
+      "BookingDateString": "05/20/2026",
+      "BookingTime": "1:18:00 AM",
+      "ReleaseDateString": "06/25/2026",
+      "ReleaseTime": "5:08:00 AM",
+      "charges": ["MANSLAUGHTER", "540111 - FAIL-STOP & RENDER AID-DEATH"],
+      "WarrantNumber": "2026W10248943",
+      "Disposition": "Transferred To",
+      "ArrestingAgency": "Bexar County Sheriff's Office"
+    },
+    "mugshots": "HasMugshotFront / HasMugshotLeft / HasMugshotRight all false on both bookings. Bexar publishes no booking photo. Verified 2026-08-12.",
+    "redact": ["DefendantDOBString 12/09/1993 — legally exempt under TRAP 9.10(c)(4) but recommend age-only on screen"]
+  },
+  "news": [
+    {
+      "outlet": "KSAT 12 (ksat.com)",
+      "headline": "Driver of Tesla that jumped curb, killed man on sidewalk surrenders to police, records show",
+      "byline": "Mary Claire Patton, Digital Journalist",
+      "published": "March 28, 2023, 12:51 PM",
+      "url": "https://www.ksat.com/news/local/2023/03/28/driver-of-tesla-that-jumped-curb-killed-man-on-sidewalk-surrenders-to-police-records-show/",
+      "quotable": [
+        "Robert Castillo, 29, is charged with failing to stop and render aid, a second-degree felony.",
+        "Castillo was driving a Tesla Model 3 around 1:25 a.m. on March 25 when he jumped a curb near the intersection of S. Alamo and Probrandt streets and struck 36-year-old Erik Moody, who died at the scene, police said.",
+        "According to the affidavit, Castillo and the passenger reported hearing gunshots as they drove away and said someone in the other vehicle was shooting at them.",
+        "Records show he is being held on a $100,000 bond."
+      ],
+      "note": "Spells the cross street 'Probrandt'. The street is Probandt. Quote the outlet's spelling verbatim if the card shows their text, or use the record's own wording instead."
+    },
+    {
+      "outlet": "San Antonio Report (sanantonioreport.org)",
+      "headline": "San Antonio records two more hit-and-run pedestrian fatalities",
+      "byline": "Robert Rivard",
+      "published": "April 2, 2023 (updated April 3, 2023)",
+      "url": "https://sanantonioreport.org/san-antonio-records-two-more-hit-and-run-pedestrian-fatalities/",
+      "quotable": ["Erik Michael Moody, 36", "pronounced dead at the scene from skull injuries"],
+      "note": "Only source found that prints the victim's full middle name. Nonprofit newsroom — check its Creative Commons terms before reproducing at length."
+    },
+    {
+      "outlet": "KENS 5",
+      "headline": "Man hit and killed by Tesla driver remembered at his favorite Southtown spot",
+      "url": "https://www.kens5.com/article/news/local/man-hit-and-killed-by-tesla-driver-southtown-spot/273-035f4f8a-3bf0-4cb1-b565-dae9169efbfb",
+      "status": "NOT RETRIEVED. curl with a browser UA returns HTTP 403; WebFetch times out at 60s. Headline and URL are from search-result metadata only. Do not put its text on a card until the page is actually read."
+    }
+  ],
+  "legal_authority": {
+    "redaction_rule": {
+      "cite": "Tex. R. App. P. 9.10 (Privacy Protection for Documents Filed in Criminal Cases), Texas Rules of Appellate Procedure last amended February 6, 2026",
+      "url": "https://www.txcourts.gov/media/1463134/texas-rules-of-appellate-procedure-02062026.pdf",
+      "sensitive_data": "(1) a driver's license number, passport number, social security number, tax identification number or similar government-issued personal identification number; (2) bank account number, credit card number, and other financial account number; (3) a birth date, a home address, and the name of any person who was a minor at the time the offense was committed.",
+      "criminal_exemptions": "The redaction requirement does not apply to: (2) An arrest or search warrant; (3) A charging document and an affidavit filed in support of any charging document; (4) A defendant's date of birth; (5) A defendant's address; and (6) Any government issued number intended to identify the defendant associated with a criminal filing, except for the defendant's social security number or driver's license number.",
+      "consequence": "Castillo's DOB (12/09/1993) and STATE ID NO. TX-08776432 are expressly exempt. The document as published is already rule-compliant — nothing on these pages needs redaction to be lawful."
+    },
+    "juror_rule": {
+      "cite": "Tex. Code Crim. Proc. art. 35.29 (Personal Information About Jurors), 2025 text",
+      "url": "https://law.justia.com/codes/texas/code-of-criminal-procedure/title-1/chapter-35/article-35-29/",
+      "text": "(a) Except as provided by Subsections (b) and (c), information collected by the court or by a prosecuting attorney during the jury selection process about a person who serves as a juror, including the juror's home address, home telephone number, social security number, driver's license number, and other personal information, is confidential and may not be disclosed by the court, the prosecuting attorney, the defense counsel, or any court personnel.",
+      "consequence": "The statute covers information collected during jury selection, not the judgment. The foreperson's name 'Sierra Ray' is printed on the public judgment and is outside 35.29. Blur it anyway — a named private juror on a monetised channel is a harassment vector with no editorial upside."
+    }
+  },
+  "redaction_map_for_cards": {
+    "hard_blur": [
+      "Sierra Ray (jury foreperson name, judgment header) — editorial, not legal",
+      "David L. McLane cell phone (210) 913-1706 and personal email dlmclanelaw@yahoo.com — editorial",
+      "any home address if a clerk's-record page is ever obtained"
+    ],
+    "safe_to_show": [
+      "cause numbers, TRN, STATE ID NO.",
+      "judge, prosecutor, defence counsel names and bar numbers",
+      "all verdict, sentence, charge and statute text",
+      "clerk and deputy-clerk names on the file stamp",
+      "court reporter names",
+      "the defendant's name and age"
+    ],
+    "never_show": [
+      "any 'appeal denied' or 'sentence upheld' framing — the appeal is live as of 2026-08-07",
+      "'24 years' — contradicted by both judgments",
+      "booking number B202527680 — belongs to a different man",
+      "the 'Jury trial on punishment only' checkbox — clerk error"
+    ]
+  },
+  "not_obtainable_free": {
+    "indictment": "Lives in the Clerk's Record, filed at the COA 07/13/2026 but not published on the case page (only the transmittal letter is). Bexar's Odyssey portal gates general case search behind reCAPTCHA (Dashboard/29). Its document endpoints exist — /Portal/DocumentViewer/DisplayDoc returns HTTP 500 rather than 404, so the viewer is present — but reaching a document id requires passing the CAPTCHA. Paid route: Bexar District Clerk, $1.00 per plain page plus $5.00 per certified document, by written request (fee schedule bexar.org/3716). Not purchased.",
+    "reporters_record": "Not complete. COA order 08/07/2026 extends the due date to 08/20/2026.",
+    "appellate_briefs": "Case page reads 'No briefs.' as of 2026-08-12.",
+    "mugshot": "Bexar publishes none (verified false on both bookings). KSAT published one credited to Bexar County Jail; sourcing it means sourcing KSAT's copy, not the county's.",
+    "resear-chtx": "research.txcourts.gov returns HTTP 403 to an unauthenticated client."
+  }
+}

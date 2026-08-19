@@ -365,3 +365,54 @@ def magistrate_detail(booking_number: str) -> dict[str, Any]:
         charges.append(current)
 
     return {"booking_number": booking_number, "charges": charges}
+
+
+def case_detail(encrypted_case_id: str, case_load_url: str | None = None) -> dict[str, Any]:
+    """Full Register of Actions for one case, including bond and arrest dates.
+
+    The ROA is NOT session-bound as spec/RECORDS-API.md claimed — it works, but
+    only if the same cookie jar that ran a search is carried in, and only after
+    GETting the case's own ROA page so the session is scoped to that case.
+
+    The payload carries what the docket grid does not: `BondInformation.Bonds[]`
+    with `ArrestDate` and `InmateReleaseDate`, plus DispositionInformation and
+    CauseInformation. Those two dates are the deterministic bridge to the jail
+    system's SO number — see priors.resolve_from_case().
+    """
+    cookies: dict[str, str] = {}
+
+    def _cap(url: str, data: bytes | None = None, extra: dict | None = None) -> bytes:
+        hdrs = {"User-Agent": UA, "Referer": f"{PORTAL}/Portal/Home/Dashboard/26"}
+        if cookies:
+            hdrs["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
+        hdrs.update(extra or {})
+        _throttle(url)
+        req = urllib.request.Request(url, data=data, headers=hdrs)
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            for header in resp.headers.get_all("Set-Cookie") or []:
+                name, _, rest = header.partition("=")
+                cookies[name.strip()] = rest.split(";")[0]
+            return resp.read()
+
+    _cap(f"{PORTAL}/Portal/Home/Dashboard/26")
+    if case_load_url:
+        _cap(PORTAL + case_load_url)          # scopes the session to this case
+    raw = _cap(
+        f"{PORTAL}/app/RegisterOfActionsService/CaseSummariesSlim"
+        f"?key={encrypted_case_id}&mode=portalembed",
+        extra={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"})
+    return _strip_pii(json.loads(raw))
+
+
+def case_arrest_windows(detail: dict[str, Any]) -> list[dict[str, str]]:
+    """Pull every (arrest, release) pair out of a ROA payload."""
+    out = []
+    for b in (detail.get("BondInformation") or {}).get("Bonds") or []:
+        bond = b.get("Bond") or {}
+        a, r = bond.get("ArrestDate"), bond.get("InmateReleaseDate")
+        if a or r:
+            out.append({"arrest": a, "release": r,
+                        "amount": b.get("BondAmount"),
+                        "type": (bond.get("BondTypeId") or {}).get("Description"),
+                        "bond_number": bond.get("BondNumber")})
+    return out

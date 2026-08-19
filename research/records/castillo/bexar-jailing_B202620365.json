@@ -1,0 +1,13 @@
+{
+  "@odata.context":"https://dpwa-txbexar.tylertech.cloud/app/ViewJailingService/$metadata#Jailings/$entity","JailingID":2451009,"BookingNumber":"B202620365","NodeId":98100,"ArrestAgency":null,"BookingDateString":"05/20/2026","BookingDate":"2026-05-19T23:00:00-06:00","BookingTimeString":"1/1/1900 1:18:00 AM","BookingTime":"1900-01-01T01:18:00-06:00","ReleaseDateString":"06/25/2026","ReleaseDate":"2026-06-24T23:00:00-06:00","ReleaseTimeString":"1/1/1900 5:08:00 AM","ReleaseTime":"1900-01-01T05:08:00-06:00","ArrestDateString":"5/19/2026","ArrestDate":"2026-05-18T23:00:00-06:00","DefendantCurrentName":"CASTILLO, ROBERT","DefendantRace":"White","DefendantGender":"Male","DefendantHeightFeet":"5","DefendantHeightInches":"8","DefendantWeight":"200","DefendantHair":"Brown","DefendantEyes":"Brown","DefendantSONum":"965702","DefendantDOBString":"12/09/1993","DefendantDescription":"White Male 5' 8\" 200 lbs","DefendantDOB":"1993-12-09T00:00:00-06:00","DefendantAddressString":" \\n","DefendantAddress":[
+    " "
+  ],"DefendantDLState":null,"DefendantDL":null,"Aliases":[
+    
+  ],"Charges":[
+    {
+      "WarrantNumber":"2026W10248943","IssuingAuthority":null,"Disposition":"Transferred To","ArrestingAgency":"Bexar County Sheriff's Office","BondType":null,"FineAmount":0.0,"CostsAmount":0.0,"PaidAmount":0.0,"ChargeDescription":"MANSLAUGHTER","TotalCost":0.0,"OffenseDateString":"03/25/2023","OffenseDate":"2023-03-24T23:00:00-06:00","ArrestDateString":"05/19/2026","ArrestDate":"2026-05-18T23:00:00-06:00"
+    },{
+      "WarrantNumber":"2026W10248943","IssuingAuthority":null,"Disposition":"Transferred To","ArrestingAgency":"Bexar County Sheriff's Office","BondType":null,"FineAmount":0.0,"CostsAmount":0.0,"PaidAmount":0.0,"ChargeDescription":"540111 - FAIL-STOP & RENDER AID-DEATH","TotalCost":0.0,"OffenseDateString":"03/25/2023","OffenseDate":"2023-03-24T23:00:00-06:00","ArrestDateString":"05/19/2026","ArrestDate":"2026-05-18T23:00:00-06:00"
+    }
+  ],"HasMugshotFront":false,"HasMugshotLeft":false,"HasMugshotRight":false,"Facility":"Bexar Adult Detention Center"
+}

@@ -1,0 +1,11 @@
+{
+  "@odata.context":"https://dpwa-txbexar.tylertech.cloud/app/ViewJailingService/$metadata#Jailings/$entity","JailingID":2001168,"BookingNumber":"B202310850","NodeId":98100,"ArrestAgency":null,"BookingDateString":"03/28/2023","BookingDate":"2023-03-27T23:00:00-06:00","BookingTimeString":"1/1/1900 4:11:00 AM","BookingTime":"1900-01-01T04:11:00-06:00","ReleaseDateString":"04/01/2023","ReleaseDate":"2023-03-31T23:00:00-06:00","ReleaseTimeString":"1/1/1900 12:18:00 PM","ReleaseTime":"1900-01-01T12:18:00-06:00","ArrestDateString":"3/27/2023","ArrestDate":"2023-03-26T23:00:00-06:00","DefendantCurrentName":"CASTILLO, ROBERT","DefendantRace":"White","DefendantGender":"Male","DefendantHeightFeet":"5","DefendantHeightInches":"8","DefendantWeight":"200","DefendantHair":"Brown","DefendantEyes":"Brown","DefendantSONum":"965702","DefendantDOBString":"12/09/1993","DefendantDescription":"White Male 5' 8\" 200 lbs","DefendantDOB":"1993-12-09T00:00:00-06:00","DefendantAddressString":" \\n","DefendantAddress":[
+    " "
+  ],"DefendantDLState":null,"DefendantDL":null,"Aliases":[
+    
+  ],"Charges":[
+    {
+      "WarrantNumber":"1830086","IssuingAuthority":null,"Disposition":"Released on Bond","ArrestingAgency":"San Antonio Police Department","BondType":null,"FineAmount":0.0,"CostsAmount":0.0,"PaidAmount":0.0,"ChargeDescription":"COLLISION INVOLVING DEATH               ","TotalCost":0.0,"OffenseDateString":"03/25/2023","OffenseDate":"2023-03-24T23:00:00-06:00","ArrestDateString":"03/27/2023","ArrestDate":"2023-03-26T23:00:00-06:00"
+    }
+  ],"HasMugshotFront":false,"HasMugshotLeft":false,"HasMugshotRight":false,"Facility":"Bexar Adult Detention Center"
+}
