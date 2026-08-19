@@ -1,0 +1,49 @@
+{
+ "source": "bigsoundbank.com",
+ "licence": "CC0 / public-domain equivalent; commercial use permitted, attribution not required (stated on source pages)",
+ "verified": "2026-08-11",
+ "files": {
+  "gavel_2blow": {
+   "file": "clean/gavel_2blow.wav",
+   "from": "raw/gavel_1589.mp3",
+   "duration_s": 0.690792,
+   "true_peak_dbfs": -2.9,
+   "note": "two strikes, 322 ms apart, levels within 1.1 dB"
+  },
+  "gavel_1blow": {
+   "file": "clean/gavel_1blow.wav",
+   "from": "raw/gavel_1588.mp3",
+   "duration_s": 0.31775,
+   "true_peak_dbfs": -2.8,
+   "note": "single strike"
+  },
+  "gavel_3blow": {
+   "file": "clean/gavel_3blow.wav",
+   "from": "raw/gavel_1590.mp3",
+   "duration_s": 1.1605,
+   "true_peak_dbfs": -2.9,
+   "note": "three strikes, 313/325 ms"
+  },
+  "whoosh_a": {
+   "file": "clean/whoosh_a.wav",
+   "from": "raw/whoosh_1800.mp3",
+   "duration_s": 0.886729,
+   "true_peak_dbfs": -7.4,
+   "note": "least post-peak energy (32%) - closest to terminating on arrival"
+  },
+  "whoosh_b": {
+   "file": "clean/whoosh_b.wav",
+   "from": "raw/whoosh_1795.mp3",
+   "duration_s": 0.913604,
+   "true_peak_dbfs": -5.0,
+   "note": "44% post-peak, longer body"
+  },
+  "whoosh_c": {
+   "file": "clean/whoosh_c.wav",
+   "from": "raw/whoosh_1802.mp3",
+   "duration_s": 0.372833,
+   "true_peak_dbfs": -7.5,
+   "note": "shortest (0.37s), tightest for a fast element"
+  }
+ }
+}
