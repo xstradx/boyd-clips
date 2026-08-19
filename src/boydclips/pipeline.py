@@ -19,14 +19,28 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from . import discover, render
+from . import diarize, discover, momentrun, render, thumbnail
 from .analyze import Analyzer, RefusalError
 from .config import SPEC_VERSION, Config, load_config
 from .publish import publish_pair
 from .state import Store
-from .transcribe import get_transcript, hhmmss
+from .transcribe import Word, get_transcript, hhmmss
 
 log = logging.getLogger("boydclips")
+
+
+class TooShortError(RuntimeError):
+    """The case is under the long-form floor once dead air is removed.
+
+    Raised before the encode. run_daily() already treats a production failure
+    as "skip this case, keep the docket pending", which is the right handling:
+    a case that is mostly silence is not a failure of the run, it is a case
+    that should not be published.
+    """
+
+
+class PausedError(RuntimeError):
+    """The tray switch is RED. See tools/boyd-toggle.ps1."""
 
 
 def setup_logging(cfg: Config, verbose: bool = False) -> None:
@@ -188,39 +202,197 @@ class Pipeline:
         )
         meta = {"title": docket.title, "docket_date": docket.docket_date, "url": docket.url}
 
+        lf_cfg = self.cfg.require("output.longform")
+        sh_cfg = self.cfg.require("output.short")
+
+        pad_before = lf_cfg.get("pad_before_s", 4.0)
+        pad_after = lf_cfg.get("pad_after_s", 3.0)
+
+        # A recessed-and-recalled hearing is one case in several sittings; the
+        # long-form has to carry all of them or it ends on the recess with the
+        # ruling missing. See Store.case_windows.
+        windows = self.store.case_windows(docket.video_id, case["start_s"]) or [
+            (case["start_s"], case["end_s"])
+        ]
+
+        # Packaging runs AFTER the sittings are merged, not before.
+        #
+        # It used to run first, so `package()` only ever saw the first sitting
+        # and the title and description described a case that had not finished.
+        # Thompson's shipped description stopped at "so the claim could be
+        # checked" — never mentioning that nothing was found or that he got
+        # five years, both of which are in sitting 2. 20 cases in the bank are
+        # split this way, so this was not a one-off.
+        #
+        # The case handed to the packager spans the first sitting's start to
+        # the last sitting's end; `transcript.text_between` then covers every
+        # sitting, and the recess gap between them costs a little transcript
+        # the model can see but does not act on.
+        pkg_case = dict(case)
+        pkg_case["start_s"] = windows[0][0]
+        pkg_case["end_s"] = windows[-1][1]
+
         log.info("  package: writing titles and description")
-        pkg = self.analyzer.package(transcript, case, meta, SPEC_VERSION)
+        pkg = self.analyzer.package(transcript, pkg_case, meta, SPEC_VERSION)
         if not pkg["hook_verified"]:
             log.warning(
                 "  package: hook line not found verbatim in transcript — "
                 "CONTENT_SPEC §6 requires titles the clip proves. Flagging for review."
             )
+        lf_windows = [
+            (max(0.0, s - pad_before), e + pad_after) for s, e in windows
+        ]
+        lf_start = lf_windows[0][0]
+        lf_end = lf_windows[-1][1]
+        used_s = sum(e - s for s, e in lf_windows)
 
-        lf_cfg = self.cfg.require("output.longform")
-        sh_cfg = self.cfg.require("output.short")
-
-        lf_start = max(0.0, case["start_s"] - lf_cfg.get("pad_before_s", 4.0))
-        lf_end = case["end_s"] + lf_cfg.get("pad_after_s", 3.0)
+        if len(lf_windows) > 1:
+            log.info(
+                "  case: %d sittings — %s (recessed and recalled; all are rendered)",
+                len(lf_windows),
+                ", ".join(f"{hhmmss(s)}–{hhmmss(e)}" for s, e in lf_windows),
+            )
 
         log.info(
-            "  download: section %s–%s (%.1f min, not the full %.1f hr stream)",
+            "  download: section %s–%s (%.1f min span, %.1f min used, "
+            "not the full %.1f hr stream)",
             hhmmss(lf_start), hhmmss(lf_end),
-            (lf_end - lf_start) / 60, docket.duration_s / 3600,
+            (lf_end - lf_start) / 60, used_s / 60, docket.duration_s / 3600,
         )
         source, offset = render.download_section(
             docket.video_id, lf_start, lf_end, work / f"{case_key.replace(':', '_')}.mp4"
         )
 
         crop = None
+        bg_crop = None
         if sh_cfg.get("autocrop", True):
             crop = render.detect_content_crop(source)
             log.info("  framing: %s", f"letterbox stripped -> {crop}" if crop
                      else "no baked-in letterbox detected")
+            # A backdrop can use a crop the foreground cannot — see render_short.
+            bg_crop = crop or render.detect_content_crop(source, min_agreement=0.25)
+            if bg_crop and not crop:
+                log.info("  framing: backdrop de-letterboxed -> %s", bg_crop)
 
-        log.info("  render: long-form")
+        # CONTENT_SPEC §2: "Dead air longer than 4 seconds is removed. Shorter
+        # gaps stay — courtroom pauses carry weight and cutting them makes
+        # proceedings feel falsified."
+        #
+        # This was implemented in render.detect_silences/plan_silence_trim and
+        # used only by scripts/build_thompson_longform.py — the daily path
+        # concatenated the raw sitting windows and shipped them. Measured on
+        # the render that path produced: 179.6s of silence in runs over 4s
+        # across 838s (21.4%), including a 75s run, and it opened on 4.8s of
+        # nothing. Every automated long-form was rendered against the spec
+        # rather than to it. The one-off script is now the pipeline's
+        # behaviour, with its constants and its refusals.
+        lf_pieces = [render.Segment(s, e) for s, e in lf_windows]
+        raw_s = sum(p.duration for p in lf_pieces)
+
+        if lf_cfg.get("trim_dead_air", True):
+            dead_air_s = float(lf_cfg.get("dead_air_s", 4.0))
+            silences = render.detect_silences(
+                source,
+                noise_db=float(lf_cfg.get("silence_noise_db", -30.0)),
+                min_silence_s=dead_air_s,
+            )
+            lf_pieces = render.plan_silence_trim(
+                lf_pieces, silences, offset,
+                min_silence_s=dead_air_s,
+                # A hard zero-length join between two rooms of silence reads as
+                # a glitch; a third of a second reads as an edit.
+                keep_s=float(lf_cfg.get("silence_keep_s", 0.35)),
+                # Looser than on a short deliberately: at 1.0s this refused a
+                # legitimate cut because the fragment between two dead runs was
+                # 0.80s, and a 6.5s dead run survived into an 11-minute video.
+                min_piece_s=float(lf_cfg.get("silence_min_piece_s", 0.5)),
+                edge_keep_s=0.05,
+            )
+            kept_s = sum(p.duration for p in lf_pieces)
+            log.info(
+                "  trim: dead air >%.0fs removed — %.0fs -> %.0fs (-%.0fs, %.1f%%) "
+                "across %d pieces",
+                dead_air_s, raw_s, kept_s, raw_s - kept_s,
+                (100 * (raw_s - kept_s) / raw_s) if raw_s else 0.0, len(lf_pieces),
+            )
+
+        planned_s = sum(p.duration for p in lf_pieces)
+
+        # The min/max duration bounds were documented in config and enforced
+        # nowhere — STATE.md flagged the 1200s cap as unenforced and a 33.9
+        # minute long-form went through it. Checked before the encode, because
+        # the encode is the expensive part.
+        floor_s = float(lf_cfg.get("min_duration_s", 120))
+        cap_s = float(lf_cfg.get("max_duration_s", 1200))
+
+        # A MOMENT is a short, not a long-form, so the long-form floor does not
+        # apply to it. See claude/MOMENTS.md: the unit is the 30-60 seconds
+        # where she goes off, and 58 seconds failing a 120-second floor is the
+        # floor being asked the wrong question, not the clip being too short.
+        #
+        # The long-form is still written — it is the same cut, unpadded — so
+        # every downstream consumer (thumbnail, manifest, publish ordering)
+        # keeps working. What a moment CANNOT do is carry the long-form half of
+        # the funnel on its own; stitching several into a compilation is the
+        # open product question, recorded in MOMENTS.md.
+        is_moment = case.get("source") == "moments"
+        if planned_s < floor_s and not is_moment:
+            raise TooShortError(
+                f"{case_key}: {planned_s:.0f}s after trimming is under the "
+                f"{floor_s:.0f}s floor — nothing rendered"
+            )
+        if planned_s < floor_s:
+            log.info("  render: %.0fs moment — long-form floor of %.0fs does not "
+                     "apply, this is a short", planned_s, floor_s)
+        if planned_s > cap_s:
+            log.warning(
+                "  render: long-form %.0fs exceeds the %.0fs cap — trimming to the cap "
+                "on a piece boundary", planned_s, cap_s,
+            )
+            capped: list[render.Segment] = []
+            budget = cap_s
+            for piece in lf_pieces:
+                if budget <= 0:
+                    break
+                if piece.duration <= budget:
+                    capped.append(piece)
+                    budget -= piece.duration
+                else:
+                    # Cut mid-piece rather than dropping it whole: dropping the
+                    # last piece is what loses the ruling.
+                    capped.append(render.Segment(piece.start_s, piece.start_s + budget))
+                    budget = 0
+            lf_pieces = capped
+            planned_s = sum(p.duration for p in lf_pieces)
+
+        starts = [p.start_s for p in lf_pieces]
+        if starts != sorted(starts):
+            raise ValueError(
+                f"{case_key}: long-form pieces are out of chronological order — "
+                "refusing to render reordered proceedings (CONTENT_SPEC §2)"
+            )
+
+        # The branded sting. render_longform has accepted an `intro` since it
+        # was written and nothing ever passed one, so every automated long-form
+        # went out unbranded — the same silent-degradation shape as the missing
+        # watermark and the missing thumbnail.
+        #
+        # NOTE, deliberately recorded: CONTENT_SPEC §2 specifies a cold open
+        # with "no intro, no branding". Nathan asked for the sting on
+        # 2026-08-17 and that governs, but the spec now disagrees with the
+        # build and one of the two should be amended.
+        intro = None
+        if lf_cfg.get("intro_enabled", True):
+            intro = render.resolve_intro(lf_cfg.get("intro_path"))
+            if intro is None:
+                log.warning("  render: intro enabled but no sting found — going out unbranded")
+            else:
+                log.info("  render: intro %s", intro.name)
+
+        log.info("  render: long-form (%d pieces, %.0fs)", len(lf_pieces), planned_s)
         lf_path = review_dir / "longform.mp4"
         lf_duration = render.render_longform(
-            source, offset, [render.Segment(lf_start, lf_end)], lf_cfg, lf_path, crop=crop
+            source, offset, lf_pieces, lf_cfg, lf_path, crop=crop, intro=intro,
         )
         lf_clip_id = self.store.save_clip(
             case_key, "longform", lf_path, lf_duration,
@@ -269,6 +441,37 @@ class Pipeline:
         log.info("  render: short (%d beats, %.1fs)", len(segments),
                  sum(s.duration for s in segments))
 
+        # THE THOMPSON LOOK (short_v3): full-bleed duo, no black anywhere.
+        #
+        # Each tile is cropped to the exact aspect of the half-canvas it fills
+        # (1080x960 = 1.125:1) and centred on its subject, rather than being
+        # letterboxed into the slot. render_short has had a `duo_fill` mode and
+        # a `tile_crops` argument since that build; the daily path never
+        # selected it, so every automated short came out as split_stack — the
+        # tiles floating on a blurred backdrop with black above and below,
+        # which is the thing Nathan asked to get rid of.
+        #
+        # Falls back to the old behaviour when the two tiles cannot be measured
+        # (a Zoom grid, a screen-share): a duo_fill built from a bad rectangle
+        # is worse than a letterbox.
+        sh_cfg = dict(sh_cfg)
+        tile_windows = None
+        tiles = render.detect_tile_crops(source)
+        if tiles:
+            w_px, h_px = sh_cfg.get("resolution", [1080, 1920])
+            slot_aspect = w_px / (h_px / 2)
+            focus = sh_cfg.get("tile_focus", [0.5, 0.5])
+            zoom = float(sh_cfg.get("tile_zoom", 1.0))
+            tile_windows = (
+                render.plan_fill_window(tiles[0], slot_aspect, tuple(focus), zoom),
+                render.plan_fill_window(tiles[1], slot_aspect, tuple(focus), zoom),
+            )
+            sh_cfg["vertical_mode"] = "duo_fill"
+            log.info("  framing: duo_fill — %s | %s (slot aspect %.3f)",
+                     tile_windows[0], tile_windows[1], slot_aspect)
+        else:
+            log.info("  framing: tiles not measurable — falling back from duo_fill")
+
         # choose_vertical_layout honours an explicit vertical_mode, so the
         # margin always matches the layout render_short will actually build.
         mode, caption_margin = render.choose_vertical_layout(source, crop, sh_cfg)
@@ -285,15 +488,42 @@ class Pipeline:
                     shifted = type(w)(t=elapsed + (w.t - seg.start_s), w=w.w)
                     words.append(shifted)
                 elapsed += seg.duration
+            # Speaker-anchored captions: the text sits beside whoever is
+            # talking, which is the last piece of the approved Thompson short.
+            # v3 hand-wrote the turns for four beats; diarize.py derives them.
+            turns = None
+            if cap_cfg.get("slot_margins"):
+                try:
+                    raw = diarize.diarize(source)
+                    if raw:
+                        # diarize works in the downloaded file's timeline;
+                        # segments and map_words_to_timeline are in SOURCE
+                        # time, so shift before mapping or every turn lands
+                        # `offset` seconds early.
+                        mapped = render.map_words_to_timeline(
+                            [Word(t=t + offset, w=who) for t, who in raw], segments
+                        )
+                        if mapped:
+                            turns = [(0.0, mapped[0].w)] + [
+                                (m.t, m.w) for m in mapped[1:]
+                            ]
+                            log.info("  captions: %d speaker turns anchored", len(turns))
+                except Exception as exc:
+                    # A caption in the wrong slot is cosmetic; losing the short
+                    # is not. Fall back to a single margin.
+                    log.warning("  captions: diarisation unavailable (%s)", exc)
+
             ass_path = render.build_ass(
                 words, 0.0, elapsed, cap_cfg,
                 self.cfg.get("packaging.short.end_card"),
                 review_dir / "captions.ass",
+                turns=turns,
             )
 
         sh_path = review_dir / "short.mp4"
         sh_duration = render.render_short(
-            source, offset, segments, sh_cfg, ass_path, sh_path, crop=crop
+            source, offset, segments, sh_cfg, ass_path, sh_path,
+            crop=crop, bg_crop=bg_crop, tile_crops=tile_windows,
         )
         sh_clip_id = self.store.save_clip(
             case_key, "short", sh_path, sh_duration, pkg["short_title"], "", SPEC_VERSION
@@ -307,11 +537,28 @@ class Pipeline:
         }
 
         try:
-            render.extract_thumbnail(
-                source, max(0.0, case["hook_start_s"] - offset), review_dir / "thumbnail.jpg"
+            hook_at = max(0.0, case["hook_start_s"] - offset)
+            render.extract_thumbnail(source, hook_at, review_dir / "thumbnail.jpg")
+            # publish.py attaches `thumbnail_quote.jpg`; nothing in the pipeline
+            # ever wrote one. The builders existed and were never wired in, so
+            # every upload would have gone out on whatever frame YouTube picked
+            # — against spec/PACKAGING.md, which is the house style and the one
+            # measurable difference between this channel and a competitor doing
+            # 414K on the same judge.
+            #
+            # thumbnail.build produces the construction Nathan approved on
+            # Thompson (2026-08-17): traced judge over the courtroom plate,
+            # feathered and unstroked, arrow, quote split white -> yellow.
+            white, yellow = split_thumbnail_quote(pkg)
+            thumbnail.build(
+                source, hook_at, white, yellow,
+                review_dir / "thumbnail_quote.jpg",
+                self.cfg.get("packaging.thumbnail", {}),
             )
+            log.info("  thumbnail: house style -> thumbnail_quote.jpg  (%r / %r)",
+                     white, yellow)
         except Exception as exc:  # a missing thumbnail must not fail the run
-            log.debug("  thumbnail extraction skipped: %s", exc)
+            log.warning("  thumbnail: house-style thumbnail not produced (%s)", exc)
 
         self._write_manifest(review_dir, docket, case, pkg, result)
         return result
@@ -365,7 +612,95 @@ class Pipeline:
         log.info("  rendered -> %s", result["review_dir"])
         return result
 
+    def run_moment(self, key: str, dry_run: bool = False) -> dict[str, Any] | None:
+        """Render one judged MOMENT — the thing this channel actually sells.
+
+        See claude/MOMENTS.md. The unit is the 30-60 seconds where Judge Boyd
+        stops doing procedure and starts talking, not the hearing it sits in.
+
+        No re-analysis happens here, exactly as in run_case(): the moment must
+        already have been mined AND judged, so an operator cannot use this to
+        bypass the judge's is_boyd / safe_to_publish verdicts.
+
+        Unlike run_case() this does NOT require the docket to be in the store.
+        Four of the five moments cut on 2026-08-18 came from dockets the case
+        pipeline never scored — the archive holds 352 transcripts and the DB
+        holds 44 dockets — so refusing unknown dockets would reject most of the
+        catalogue. Metadata is probed on demand instead.
+        """
+        judged_path = self.cfg.root / "state" / "moments_judged.json"
+        if not judged_path.exists():
+            log.error("no state/moments_judged.json — run scripts/judge_moments.py first")
+            return None
+        judged = json.loads(judged_path.read_text(encoding="utf-8"))
+        rec = judged.get(key)
+        if rec is None:
+            near = [k for k in judged if k.startswith(key.split(":")[0])]
+            log.error("unknown moment %s%s", key,
+                      f" — same docket has {near}" if near else "")
+            return None
+
+        try:
+            case = momentrun.moment_to_case(rec)
+        except momentrun.MomentError as exc:
+            log.error("moment %s is not renderable: %s", key, exc)
+            return None
+
+        video_id = key.split(":")[0]
+        row = self.store.get_docket_row(video_id)
+        if row is not None:
+            docket = discover.Docket(
+                video_id=row["video_id"], title=row["title"],
+                duration_s=row["duration_s"] or 0.0,
+                docket_date=row["docket_date"] or "", session="unknown")
+        else:
+            log.info("  docket %s is not in the store — probing metadata", video_id)
+            meta = discover.probe(video_id)
+            title = meta.get("title") or video_id
+            docket = discover.Docket(
+                video_id=video_id, title=title,
+                duration_s=float(meta.get("duration") or 0.0),
+                docket_date=discover.parse_docket_date(title),
+                session=discover.parse_session(title))
+            # Register it so the render's DB writes have a foreign key to land
+            # on. INSERT OR IGNORE, so this is safe to repeat.
+            self.store.add_docket(docket.video_id, docket.title,
+                                  docket.docket_date, docket.duration_s)
+
+        # clips.case_key is a foreign key to cases.case_key, so the moment has
+        # to exist as a case row before produce() saves a clip against it.
+        # Without this the whole render completes and then dies on
+        # "FOREIGN KEY constraint failed" with the encode already paid for.
+        self.store.save_case(docket.video_id, case, None)
+
+        log.info("moment %s — out-of-pocket %s, %.0fs", key,
+                 case.get("out_of_pocket"), case["end_s"] - case["start_s"])
+        log.info('  hook: "%s"', (case.get("hook_quote") or "")[:110])
+
+        if dry_run:
+            log.info("  [dry-run] would render %.0f-%.0fs of %s",
+                     case["start_s"], case["end_s"], video_id)
+            return None
+
+        result = self.produce(docket, case)
+        log.info("  rendered -> %s", result["review_dir"])
+        return result
+
     def run_daily(self, limit: int | None = None, dry_run: bool = False) -> list[dict[str, Any]]:
+        # The tray switch suspends boyd-clips processes with NtSuspendProcess
+        # rather than killing them. Left RED on 2026-08-14, it froze the next
+        # run mid-download: a process that looked alive, a .part file that
+        # never grew, and no error anywhere in the log. Nothing in the output
+        # distinguished "suspended" from "slow", and it cost a day. Refuse to
+        # start instead of starting something that cannot finish.
+        paused = self.cfg.path("paths.state_db").parent / "paused.flag"
+        if paused.exists():
+            raise PausedError(
+                f"{paused} is present — the tray switch is RED and this run would be "
+                "suspended mid-download rather than fail. "
+                "Resume with: powershell -File tools/boyd-toggle.ps1"
+            )
+
         new = self.discover()
         if not new:
             log.info("nothing new to process")
@@ -389,6 +724,17 @@ class Pipeline:
                 continue
 
             eligible = [c for c in scored if c["eligible"]]
+
+            # Re-rank the cases that already cleared safety and the rubric.
+            #
+            # Ranking is the rubric's total_score and nothing else.
+            #
+            # A second ranker (notoriety) and a third (banger) both used to sit
+            # here. Both are retired to research/retired/ — see spec/SPEC.md §3.
+            # Each was hand-fitted against a handful of cases, neither was ever
+            # validated against a published outcome, and together they made the
+            # order impossible to explain. One scorer that reads the transcript
+            # and answers concrete questions replaces all three.
             if not eligible:
                 log.info("  no case cleared the gates — nothing to publish today")
                 self.store.mark_docket(docket.video_id, "no_eligible_cases")
@@ -588,6 +934,47 @@ class Pipeline:
                     elif f.is_dir():
                         shutil.rmtree(f, ignore_errors=True)
         log.info("cleanup: removed %d stale work file(s)", removed)
+
+
+def split_thumbnail_quote(pkg: dict[str, Any]) -> tuple[str, str]:
+    """Split the thumbnail quote into its white and yellow halves.
+
+    spec/PACKAGING.md §Thumbnails rule 4: "The emotionally loaded half of the
+    sentence goes yellow, the setup stays white — `This` / `cop was lying!`.
+    Split mid-sentence, not by line."
+
+    Which half is the loaded one is a judgement about meaning, so it comes from
+    the packaging model as `thumbnail_quote_yellow` and is accepted only when it
+    is a real suffix of the quote — otherwise the two fields disagree and the
+    rendered thumbnail would not be the quote the manifest records.
+
+    The fallback is a word-count midpoint. It is mechanical and will sometimes
+    colour the wrong clause, so it warns rather than passing itself off as the
+    house style.
+    """
+    quote = (pkg.get("thumbnail_quote") or "").strip()
+    if not quote:
+        raise ValueError("packaging produced no thumbnail_quote")
+
+    yellow = (pkg.get("thumbnail_quote_yellow") or "").strip()
+    if yellow and quote.endswith(yellow) and len(yellow) < len(quote):
+        return quote[: -len(yellow)].strip(), yellow
+
+    if yellow:
+        log.warning(
+            "  thumbnail: thumbnail_quote_yellow (%r) is not a suffix of "
+            "thumbnail_quote (%r) — falling back to a midpoint split", yellow, quote,
+        )
+    else:
+        log.warning(
+            "  thumbnail: packaging returned no thumbnail_quote_yellow — "
+            "splitting at the midpoint, which may colour the wrong clause "
+            "(spec/PACKAGING.md rule 4)"
+        )
+
+    words = quote.split()
+    cut = max(1, len(words) // 2)
+    return " ".join(words[:cut]), " ".join(words[cut:])
 
 
 # Schema enum values are machine tokens; naive title-casing put literal

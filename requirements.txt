@@ -12,3 +12,10 @@ google-auth-oauthlib>=1.2.0
 # External binaries, not pip-installable — see README:
 #   yt-dlp   (keep current; YouTube extraction breaks on old versions)
 #   ffmpeg / ffprobe
+
+# Thumbnail cut-out (spec/PACKAGING.md house style). Undeclared until 2026-08-18,
+# when a NumPy 2.x bump silently broke onnxruntime 1.18 and the house-style
+# thumbnail stopped being produced — the run logged a warning and carried on.
+rembg>=2.0.50
+onnxruntime>=1.19.0   # 1.18.x is compiled against NumPy 1.x and dies on NumPy 2
+numpy>=2.0

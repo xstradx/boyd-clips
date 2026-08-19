@@ -4,6 +4,7 @@
     boyd discover               list new dockets, touch nothing else
     boyd run [--dry-run]        the daily pipeline
     boyd run --case <case_key>  render one specific defendant's case
+    boyd run --moment <key>     render one judged MOMENT (the real product)
     boyd docket [--days N]      Boyd's upcoming hearings, before they air
     boyd who <name>             jail record + custody status for a defendant
     boyd archive                snapshot the county's expiring 7-day jail data
@@ -11,6 +12,9 @@
     boyd reject <case_key>      record rejection with a reason
     boyd stats                  reliability ledger and promotion readiness
     boyd bank                   banked runner-up cases
+    boyd repeats                defendants who came back — the BACK AGAIN lane
+    boyd oncamera <case_key>    is anyone in the other Zoom window?
+    boyd moments [--top N]      where Judge Boyd chews somebody out
     boyd auth youtube           one-time OAuth
     boyd cleanup                remove stale scratch files
 """
@@ -28,6 +32,10 @@ from pathlib import Path
 from .config import load_config
 from .pipeline import Pipeline, setup_logging
 from .publish import YouTubePublisher, publish_pair
+from . import moments as _moments
+from .oncamera import analyse, detect_layout, sample_frames
+from .transcribe import Transcript
+from .repeats import find_episodes, qualifying
 from .state import Store
 
 
@@ -118,7 +126,10 @@ def cmd_discover(args: argparse.Namespace) -> int:
 def cmd_run(args: argparse.Namespace) -> int:
     pipe = Pipeline()
     setup_logging(pipe.cfg, args.verbose)
-    if args.case:
+    if getattr(args, "moment", None):
+        one = pipe.run_moment(args.moment, dry_run=args.dry_run)
+        results = [one] if one else []
+    elif args.case:
         one = pipe.run_case(args.case, dry_run=args.dry_run)
         results = [one] if one else []
     else:
@@ -290,6 +301,133 @@ def cmd_bank(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_repeats(args: argparse.Namespace) -> int:
+    """Defendants who appear across two or more dockets.
+
+    The measured 1.36x format on the niche's #1 channel, buildable entirely
+    from material already scored and on disk. See src/boydclips/repeats.py for
+    the measurement and config analysis.repeat_defendant for the gate.
+    """
+    cfg = load_config()
+    store = Store(cfg.path("paths.state_db"))
+    rc = dict(cfg.get("analysis.repeat_defendant", {}) or {})
+    if args.all:
+        rc = {**rc, "enabled": True, "min_best_score": 0.0,
+              "require_all_safety_pass": False}
+    eps = qualifying(store.conn, rc) if not args.all else [
+        e for e in find_episodes(store.conn) if e.dockets >= 2]
+    if not eps:
+        print("no repeat defendants found"
+              + ("" if rc.get("enabled", False)
+                 else "  (analysis.repeat_defendant.enabled is false)"))
+        store.close()
+        return 0
+    total = sum(e.total_s for e in eps) / 60
+    print(f"{len(eps)} repeat defendants — {total:.0f} min of scored material\n")
+    for e in eps[: args.limit]:
+        flag = "" if e.all_safe else "  [!] a hearing failed safety"
+        print(f"  {e.defendant[:26]:28s} {len(e.hearings)}x across "
+              f"{e.dockets} dockets   best {e.best_score:5.1f}   "
+              f"{e.total_s/60:5.1f} min{flag}")
+        if args.verbose:
+            for h in e.hearings:
+                print(f"        {h['case_key']:26s} score {h['total_score'] or 0:5.1f}  "
+                      f"{(h['proceeding_type'] or '?')[:34]}")
+    store.close()
+    return 0
+
+
+def cmd_oncamera(args: argparse.Namespace) -> int:
+    """Sample a few frames and report whether anyone is actually on camera.
+
+    The rubric reads a transcript and cannot see an empty tile, so a contested
+    sentencing full of lawyers and witnesses can score 90 while the feed is a
+    black Zoom name card. This costs about 6 x 0.5s of video and answers that
+    before anything is downloaded. See src/boydclips/oncamera.py.
+    """
+    cfg = load_config()
+    store = Store(cfg.path("paths.state_db"))
+    case = store.get_case(args.case_key)
+    store.close()
+    if not case:
+        print(f"no such case: {args.case_key}")
+        return 1
+    out = cfg.path("paths.out") / "oncam" / args.case_key.replace(":", "_")
+    frames = sorted(out.glob("f*.png")) if not args.refresh else []
+    if len(frames) < 2:
+        frames = sample_frames(case["video_id"], case["start_s"],
+                               case["end_s"], n=args.frames, out_dir=out)
+    if len(frames) < 2:
+        print("could not sample frames — is the stream still public?")
+        return 1
+    v = analyse(frames, detect_layout(frames))
+    for t in v.tiles:
+        print(f"  {t.name:6} detail {t.detail:8.1f}  black {t.dark:5.2f}  "
+              f"faces {t.faces}   {'LIVE' if t.live else 'DEAD'}")
+    print(f"\n{args.case_key}  {case.get('defendant') or '?'}")
+    print(f"  {'USABLE' if v.usable else 'NOT USABLE'} — {v.reason}")
+    print(f"  frames in {out}")
+    return 0 if v.usable else 2
+
+
+def cmd_moments(args: argparse.Namespace) -> int:
+    """Rank every cached transcript for the moments Judge Boyd goes off.
+
+    The product is a MOMENT, not a case — see src/boydclips/moments.py for the
+    two dead ends that preceded this and why frequency mining cannot find a
+    riff. Pure text: no model, no network, no video.
+    """
+    import textwrap
+    cfg = load_config()
+    work = cfg.path("paths.work")
+    files = sorted(work.glob("*/*.transcript.json"))
+    if args.video:
+        files = [f for f in files if args.video in f.name]
+    if not files:
+        print(f"no cached transcripts under {work}")
+        return 1
+
+    loaded, texts = [], []
+    for f in files:
+        try:
+            t = Transcript.from_json(f.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        turns = _moments.judicial_turns(t)
+        if turns:
+            loaded.append(t)
+            texts.extend(txt for _a, _b, txt in turns)
+    if not texts:
+        print(f"{len(files)} transcripts read, no judge riffs found")
+        return 0
+
+    idf = _moments.build_idf(texts)
+    found: list = []
+    for t in loaded:
+        found.extend(_moments.scan(t, idf))
+    found.sort(key=lambda m: -m.score)
+    print(f"{len(files)} transcripts, {len(texts)} riff-length turns, "
+          f"{len(found)} moments\n")
+    for i, m in enumerate(found[: args.top], 1):
+        print(f"{i:>3}. {m.score:6.1f}  {m.words:>4}w  {m.video_id} @{m.clock}"
+              + (f"   {', '.join(m.labels[:4])}" if m.labels else ""))
+        print(f"     {m.url}")
+        print(textwrap.fill(m.text[:400], 92, initial_indent="     > ",
+                            subsequent_indent="       "))
+        print()
+
+    if args.json:
+        out = Path(args.json)
+        out.write_text(json.dumps([{
+            "video_id": m.video_id, "start_s": m.start_s, "end_s": m.end_s,
+            "score": m.score, "novelty": m.novelty, "you_rate": m.you_rate,
+            "i_rate": m.i_rate, "labels": m.labels, "words": m.words,
+            "url": m.url, "text": m.text} for m in found], indent=2),
+            encoding="utf-8")
+        print(f"wrote {len(found)} moments to {out}")
+    return 0
+
+
 def cmd_auth(args: argparse.Namespace) -> int:
     cfg = load_config()
     if args.platform == "youtube":
@@ -318,6 +456,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("discover").set_defaults(func=cmd_discover)
 
     run = sub.add_parser("run")
+    run.add_argument("--moment", help="render a judged moment, e.g. zHchVGBX9iA:10721")
     run.add_argument("--dry-run", action="store_true",
                      help="analyse and select, but download and render nothing")
     run.add_argument("--limit", type=int, default=None,
@@ -366,6 +505,27 @@ def build_parser() -> argparse.ArgumentParser:
     auth = sub.add_parser("auth")
     auth.add_argument("platform", choices=["youtube", "tiktok", "instagram"])
     auth.set_defaults(func=cmd_auth)
+
+    repeats = sub.add_parser("repeats")
+    repeats.add_argument("--limit", type=int, default=40)
+    repeats.add_argument("--verbose", "-v", action="store_true",
+                         help="list each hearing in the episode")
+    repeats.add_argument("--all", action="store_true",
+                         help="ignore the score and safety gate")
+    repeats.set_defaults(func=cmd_repeats)
+
+    oncam = sub.add_parser("oncamera")
+    oncam.add_argument("case_key")
+    oncam.add_argument("--frames", type=int, default=6)
+    oncam.add_argument("--refresh", action="store_true",
+                       help="re-sample instead of reusing kept frames")
+    oncam.set_defaults(func=cmd_oncamera)
+
+    mom = sub.add_parser("moments")
+    mom.add_argument("--top", type=int, default=20)
+    mom.add_argument("--video", help="restrict to one docket id")
+    mom.add_argument("--json", help="also write every moment to this path")
+    mom.set_defaults(func=cmd_moments)
 
     sub.add_parser("cleanup").set_defaults(func=cmd_cleanup)
     return p

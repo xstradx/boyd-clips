@@ -112,6 +112,21 @@ class YouTubePublisher:
             _, response = request.next_chunk()
 
         vid = response["id"]
+
+        # The house style (spec/PACKAGING.md) is a quote thumbnail, and nothing
+        # was ever applying it — videos went up on whatever frame YouTube chose.
+        # Never fatal: custom thumbnails need a phone-verified channel, and a
+        # rejected thumbnail must not lose an upload that already succeeded.
+        thumb = kw.get("thumbnail")
+        if thumb and Path(thumb).is_file():
+            try:
+                service.thumbnails().set(
+                    videoId=vid,
+                    media_body=MediaFileUpload(str(thumb), mimetype="image/jpeg"),
+                ).execute()
+            except Exception as exc:
+                self._thumbnail_error = str(exc)
+
         return PublishResult(
             platform=self.name,
             remote_id=vid,
@@ -224,6 +239,26 @@ def publish_pair(
         )
         return report
 
+    # An unaudited API project does not upload "as private" — it uploads to a
+    # video that is LOCKED private, cannot be appealed, and cannot be made
+    # public by hand (support.google.com/youtube/answer/7300965). The clip is
+    # then recorded as published, and the duplicate guard above will refuse to
+    # upload it ever again. So the cost of getting this wrong is not a wasted
+    # request, it is a case permanently spent on a video nobody can watch.
+    #
+    # This is deliberately a refusal and not a warning: `assisted` mode reads
+    # like a safe way to try the API, and it is the exact mode in which this
+    # failure is invisible until someone opens the channel.
+    if cfg.get("publish.youtube.enabled") and not cfg.get("publish.youtube.api_audited", False):
+        report["skipped"].append(
+            "REFUSING to upload: publish.youtube.api_audited is false. Videos sent "
+            "through videos.insert from an unaudited project are locked private with "
+            "no appeal, and this pipeline would then refuse to re-upload them. "
+            "Either pass the YouTube API compliance audit and set api_audited: true, "
+            "or publish through a path that is not the API."
+        )
+        return report
+
     publishers = build_publishers(cfg)
     if not publishers:
         report["skipped"].append("no platforms enabled in publish.*")
@@ -239,12 +274,16 @@ def publish_pair(
             )
         else:
             privacy = privacy_for(cfg, "youtube", mode)
+            # The house-style thumbnail sits beside the clip; scripts/make_thumbnail.py
+            # writes it there. Falls back to nothing if it was never generated.
+            thumb = Path(longform["file_path"]).parent / "thumbnail_quote.jpg"
             result = yt.publish(
                 Path(longform["file_path"]),
                 longform["title"],
                 longform["description"],
                 privacy,
                 tags=cfg.get("packaging.longform.tags", []),
+                thumbnail=thumb if thumb.is_file() else None,
             )
             store.record_publication(
                 longform["clip_id"], result.platform, result.remote_id, result.url, result.privacy

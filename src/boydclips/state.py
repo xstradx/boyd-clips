@@ -108,6 +108,16 @@ class Store:
         self._conn.executescript(SCHEMA)
         self._conn.commit()
 
+    @property
+    def conn(self) -> sqlite3.Connection:
+        """Read-only access for modules that only query.
+
+        Anything that WRITES must go through tx() so it lands in a
+        transaction; this exists so read-only analysis (repeats.py) does not
+        have to reach into a private attribute.
+        """
+        return self._conn
+
     def close(self) -> None:
         self._conn.close()
 
@@ -224,6 +234,43 @@ class Store:
         scored.json cache exists but its DB rows were never written."""
         return list(self._conn.execute(
             "SELECT case_key FROM cases WHERE video_id = ?", (video_id,)))
+
+    def case_windows(self, video_id: str, start_s: float) -> list[tuple[float, float]]:
+        """Every window in the docket belonging to the same case, in order.
+
+        A hearing that is recessed and recalled later in the docket is ONE case
+        heard in two sittings, but the segmenter sees two runs of transcript and
+        writes two rows. Rendering only the row it was handed produces a
+        long-form that stops at the recess — Louis Fletcher Thompson,
+        2022 CR0273, was published as 6698-6958 (260s) when the judge's ruling
+        is in the second sitting at 8279-8843, so the clip ended on "have a
+        seat and we'll see" and never showed the outcome.
+
+        Identity is the cause number, not adjacency: two sittings can be an hour
+        apart with a dozen unrelated cases between them. Dockets where the
+        cause number was never parsed ("unknown") fall back to the single
+        window — grouping every unknown in a docket would merge strangers.
+        """
+        row = self._conn.execute(
+            "SELECT cause_number FROM cases WHERE video_id = ? AND start_s = ?",
+            (video_id, start_s),
+        ).fetchone()
+        cause = row["cause_number"] if row else None
+        if not cause or cause == "unknown":
+            hit = self._conn.execute(
+                "SELECT start_s, end_s FROM cases WHERE video_id = ? AND start_s = ?",
+                (video_id, start_s),
+            ).fetchone()
+            return [(float(hit["start_s"]), float(hit["end_s"]))] if hit else []
+
+        return [
+            (float(r["start_s"]), float(r["end_s"]))
+            for r in self._conn.execute(
+                "SELECT start_s, end_s FROM cases "
+                "WHERE video_id = ? AND cause_number = ? ORDER BY start_s",
+                (video_id, cause),
+            )
+        ]
 
     def get_docket_row(self, video_id: str) -> sqlite3.Row | None:
         """The stored docket for a case, so a single case can be rendered
