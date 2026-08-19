@@ -1,0 +1,53 @@
+{
+ "source": "C:\\Users\\natha\\OneDrive\\Desktop\\Boyd Clips\\boyd-brand\\logo_transparent.png",
+ "canvas": [
+  1413,
+  540
+ ],
+ "elements": {
+  "T1": {
+   "file": "T1.png",
+   "size": [
+    389,
+    382
+   ],
+   "origin": [
+    2,
+    157
+   ]
+  },
+  "T2": {
+   "file": "T2.png",
+   "size": [
+    389,
+    382
+   ],
+   "origin": [
+    398,
+    157
+   ]
+  },
+  "T3": {
+   "file": "T3.png",
+   "size": [
+    381,
+    382
+   ],
+   "origin": [
+    795,
+    157
+   ]
+  },
+  "star": {
+   "file": "star.png",
+   "size": [
+    619,
+    540
+   ],
+   "origin": [
+    794,
+    0
+   ]
+  }
+ }
+}

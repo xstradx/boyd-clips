@@ -1,0 +1,316 @@
+{
+  "_what_this_is": "A voice DIRECTOR's marked script for scripts/castillo_open.txt. Build input, not a report. Every field is a note a director would give a human narrator in the room, expressed numerically so a render pipeline can consume it. Terminal-move values are semitones measured on the final stressed syllable vs the first half of the final word, matching the metric used in research/reference/competitor/voice/contour_shape.py.",
+  "_reference_target": {
+    "source": "measured off Audit the Court narrator, ek3, n=12 sentence-final words, praat pitch_ceiling=170",
+    "terminal_move_st_median": -0.31,
+    "terminal_move_st_q1": -1.31,
+    "terminal_move_st_q3": 1.08,
+    "note": "The spread IS the finding. He does not end two sentences the same way."
+  },
+  "_this_plan_distribution": {
+    "terminal_move_st_median": -0.3,
+    "terminal_move_st_q1": -1.4,
+    "terminal_move_st_q3": 0.9,
+    "shape_counts": {
+      "FULL": 4,
+      "HALF": 3,
+      "SUSPENSION": 4,
+      "THROWAWAY": 2
+    },
+    "adjacent_identical_endings": 0,
+    "departure_from_reference": "q3 +0.9 st vs reference +1.08 st: slightly less rise at the top of the range because three of thirteen sentences here are structural landings carrying a card change, which the reference sample (continuous mid-video narration, no cuts) did not have. Median and q1 match the reference."
+  },
+  "_ending_taxonomy": {
+    "FULL": "land the period. Clear fall on the final stressed syllable, -1.4 to -2.5 st. Closes a beat.",
+    "HALF": "step down. -0.3 to -0.9 st. The workhorse. Story keeps moving.",
+    "SUSPENSION": "hold it up. Level to +1.0 st, NO fall, then the pause. Says 'there is more'. This is the shape synthetic speech almost never produces at a period, and its absence is what turns a factual passage into a list.",
+    "THROWAWAY": "undercut. Drop level AND loudness, speed up through the tail so the last words are de-emphasised entirely. GVAA calls this 'undercutting'. Used on facts that are context, not story."
+  },
+  "_pause_law": {
+    "max_pause_s": 0.52,
+    "median_pause_s": 0.3,
+    "note": "Hard constraint from the reference. The authority comes from the CONTOUR, not from long pauses. Do not use a 1s dramatic pause on the landings; the reference narrator never exceeds 0.52 s in 150 s of speech. This contradicts the TV-magazine 'signature dramatic pause' style."
+  },
+  "_breath_plan": {
+    "total": 4,
+    "duration_s": [
+      0.32,
+      0.46
+    ],
+    "placement_rule": "Breathe before a NEW BEAT, not at every period. Placed before S4 (new day), S6 (new topic: priors), S9 (new phase: trial), S13 (the button).",
+    "caution": "INTERSPEECH 2024 measured inserted breaths lowering MOS 3.35 -> 3.27. If breaths are synthesised rather than performed, omit them; the placement rule only pays off when the breath is part of the take."
+  },
+  "_pronunciation": [
+    {
+      "token": "Bexar",
+      "say": "BAIR (rhymes with bear)",
+      "avoid": "BEX-AR, BAY-har, Bahar",
+      "source": "https://www.bexar.org/FAQ.aspx?QID=832 - the county's own FAQ: 'Bexar (now colloquially pronounced \"Bear\") County. A common mispronunciation is \"BEX-AR\"'",
+      "confidence": "verified"
+    },
+    {
+      "token": "surety",
+      "say": "SHOOR-uh-tee",
+      "avoid": "SURE-tee, soo-RET-ee",
+      "confidence": "UNVERIFIED-from-priors - resolve on YouGlish/Forvo before render"
+    },
+    {
+      "token": "187th",
+      "say": "the one eighty-seventh",
+      "avoid": "the one hundred and eighty-seventh (over-formal for local speech)",
+      "confidence": "UNVERIFIED-from-priors - resolve by pulling a bailiff/judge utterance out of the project's own courtroom audio, which is the local informant a narrator would go find"
+    },
+    {
+      "token": "Erik Michael Moody",
+      "say": "one unit, single mild stress on MOO-dy, no stress on Erik or Michael",
+      "confidence": "craft rule"
+    }
+  ],
+  "sentences": [
+    {
+      "id": "S1",
+      "text": "On the night of March 25th, 2023, a man was struck and killed on South Alamo Street in San Antonio, Texas.",
+      "hero": "killed",
+      "refuse_stress": [
+        "March",
+        "25th",
+        "2023",
+        "South Alamo",
+        "San Antonio",
+        "Texas"
+      ],
+      "ending": "THROWAWAY",
+      "terminal_move_st": -1.3,
+      "note": "The date and the city are context, not news. Undercut 'in San Antonio, Texas' - faster and quieter than the line before it. A synthetic read stresses the date because it is numeric and the city because it is capitalised; that is the tell.",
+      "pause_after_s": 0.26,
+      "breath_before": false
+    },
+    {
+      "id": "S2",
+      "text": "Erik Michael Moody, thirty-six years old, was found on the sidewalk outside the Blue Star complex.",
+      "hero": "sidewalk",
+      "refuse_stress": [
+        "Erik",
+        "Michael",
+        "thirty-six",
+        "Blue Star"
+      ],
+      "ending": "SUSPENSION",
+      "terminal_move_st": 1.0,
+      "note": "Three-part name spoken as ONE unit. 'thirty-six years old' rides through as an appositive at speed. End up - the next line is the payload.",
+      "pause_after_s": 0.3,
+      "breath_before": false
+    },
+    {
+      "id": "S3",
+      "text": "The driver did not stop.",
+      "hero": "not",
+      "refuse_stress": [
+        "driver",
+        "stop"
+      ],
+      "ending": "FULL",
+      "terminal_move_st": -2.2,
+      "note": "Land the period. Hardest fall in the first act. Five words, one idea, no decoration.",
+      "pause_after_s": 0.5,
+      "breath_before": false
+    },
+    {
+      "id": "S4",
+      "text": "Two days later, Robert Castillo, twenty-nine, surrendered to the Bexar County Sheriff's Office.",
+      "hero": "surrendered",
+      "refuse_stress": [
+        "Two days",
+        "Robert",
+        "twenty-nine",
+        "Bexar",
+        "County",
+        "Sheriff's",
+        "Office"
+      ],
+      "ending": "SUSPENSION",
+      "terminal_move_st": 1.1,
+      "note": "Throw the whole institution away. 'Bexar County Sheriff's Office' is one fast unstressed compound. End up - the bond is coming.",
+      "pause_after_s": 0.24,
+      "breath_before": true
+    },
+    {
+      "id": "S5",
+      "text": "He was booked on a charge of collision involving death, and released five days later on a one hundred thousand dollar corporate surety bond.",
+      "hero": "released",
+      "refuse_stress": [
+        "collision involving death",
+        "one hundred thousand",
+        "corporate",
+        "surety"
+      ],
+      "ending": "FULL",
+      "terminal_move_st": -1.4,
+      "note": "'a one hundred thousand dollar corporate surety bond' is a single compound noun read at speed with one mild stress on 'bond'. Do NOT stress 'hundred thousand' - a working narrator says a figure the way someone says it who deals in those figures.",
+      "pause_after_s": 0.38,
+      "breath_before": false
+    },
+    {
+      "id": "S6",
+      "text": "Castillo had been arrested twice before, in 2011 and 2013, both times as a teenager.",
+      "hero": "twice",
+      "refuse_stress": [
+        "2011",
+        "2013",
+        "teenager"
+      ],
+      "ending": "HALF",
+      "terminal_move_st": -0.2,
+      "note": "The years are throwaway. 'both times as a teenager' rides down in level but the pitch does not resolve - it sets up S7.",
+      "pause_after_s": 0.24,
+      "breath_before": true
+    },
+    {
+      "id": "S7",
+      "text": "There was nothing in the decade before the crash.",
+      "hero": "nothing",
+      "refuse_stress": [
+        "decade",
+        "crash"
+      ],
+      "ending": "SUSPENSION",
+      "terminal_move_st": 0.9,
+      "note": "Money line. Leaving it unresolved is what makes it land. A resolving fall here editorialises.",
+      "pause_after_s": 0.52,
+      "breath_before": false
+    },
+    {
+      "id": "S8",
+      "text": "A grand jury indicted him on two felony counts: manslaughter, and failure to stop and render aid.",
+      "hero": "manslaughter",
+      "refuse_stress": [
+        "grand jury",
+        "two",
+        "felony"
+      ],
+      "ending": "FULL",
+      "terminal_move_st": -1.5,
+      "note": "TWO-ITEM LIST. Do not run up-up-down; that is the checklist read. First item takes the weight and sits level; second item is longer, slower, and resolves down. Vary the LENGTH of the two items, not just the pitch.",
+      "pause_after_s": 0.42,
+      "breath_before": false
+    },
+    {
+      "id": "S9",
+      "text": "His trial began on May 11th, 2026, in the 187th District Court, before Judge Stephanie Boyd.",
+      "hero": "trial",
+      "refuse_stress": [
+        "May 11th",
+        "2026",
+        "187th",
+        "District Court",
+        "Stephanie",
+        "Boyd"
+      ],
+      "ending": "HALF",
+      "terminal_move_st": -0.25,
+      "note": "This sentence is ~90% throwaway and that is the professional read. Everything after 'trial began' is a docket line delivered at speed by someone who reads docket lines. A synthetic read gives the date, the court number AND the judge each their own stress - three tells in one sentence.",
+      "pause_after_s": 0.26,
+      "breath_before": true
+    },
+    {
+      "id": "S10",
+      "text": "It ran eight days, and Castillo testified in his own defense.",
+      "hero": "testified",
+      "refuse_stress": [
+        "eight days",
+        "Castillo",
+        "defense"
+      ],
+      "ending": "SUSPENSION",
+      "terminal_move_st": 1.2,
+      "note": "Biggest rise in the piece. It buys the turn into the defense theory.",
+      "pause_after_s": 0.24,
+      "breath_before": false
+    },
+    {
+      "id": "S11",
+      "text": "His attorneys argued mistake of fact, necessity, and duress.",
+      "hero": "duress",
+      "refuse_stress": [
+        "attorneys",
+        "argued"
+      ],
+      "ending": "HALF",
+      "terminal_move_st": -0.3,
+      "note": "THREE-ITEM LIST of legal terms. Deliver as terms of art, not as revelations. 'mistake of fact' level, 'necessity' level but SHORTER, 'duress' longer and resolving. Item durations must differ by more than 15% or it reads as a list.",
+      "pause_after_s": 0.28,
+      "breath_before": false
+    },
+    {
+      "id": "S12",
+      "text": "He said he was being shot at.",
+      "hero": "shot",
+      "refuse_stress": [
+        "said",
+        "being"
+      ],
+      "ending": "THROWAWAY",
+      "terminal_move_st": -1.1,
+      "note": "The most sensational line in the script gets the LEAST performance. Undercut it. Attribution ('he said') is the shield - the narrator does not own this claim and must not sound like they do. Dramatising it is the difference between a documentary read and a true-crime-podcast read.",
+      "pause_after_s": 0.46,
+      "breath_before": false
+    },
+    {
+      "id": "S13",
+      "text": "On May 19th, the jury returned its verdict.",
+      "hero": "verdict",
+      "refuse_stress": [
+        "May 19th",
+        "jury",
+        "returned"
+      ],
+      "ending": "FULL",
+      "terminal_move_st": -2.4,
+      "note": "The button. Deepest fall in the piece and the only one that is allowed to feel final. Date is throwaway.",
+      "pause_after_s": 0.0,
+      "breath_before": true
+    }
+  ],
+  "_chunking_for_render": {
+    "rule": "Chunk on BEAT boundaries, not on sentence count, so the ending shape of the last sentence in a chunk is never the shape of a chunk boundary artifact.",
+    "chunks": [
+      [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      [
+        "S4",
+        "S5"
+      ],
+      [
+        "S6",
+        "S7"
+      ],
+      [
+        "S8"
+      ],
+      [
+        "S9",
+        "S10"
+      ],
+      [
+        "S11",
+        "S12"
+      ],
+      [
+        "S13"
+      ]
+    ]
+  },
+  "_wild_line_rule": {
+    "source": "letsgovo.co voiceover jargon - 'Wild': the voice actor delivering the same line multiple times in a row with DIFFERENT inflection",
+    "rule": "Takes must be deliberately different, not repeated hopefully. For each of S3, S7, S12, S13 render at minimum one FULL, one HALF and one SUSPENSION variant and choose against this sheet - do not render three identical-intent takes and pick the luckiest."
+  },
+  "_rate_law": {
+    "speaking_rate_wpm_including_pauses": 177,
+    "inter_sentence_pause_budget_s": 4.1,
+    "required_articulation_rate_wpm": 190.4,
+    "why_this_matters": "The reference 176-177 WPM is SPEAKING rate, measured over audio that already contains its pauses. If a render is set to 177 WPM of articulation and then pauses are added on top, the piece runs long AND reads slower than the reference. Articulation must run at 190.4 WPM for the assembled 171 words plus 4.1 s of pause to land at 58.0 s and score 177 WPM speaking rate."
+  }
+}

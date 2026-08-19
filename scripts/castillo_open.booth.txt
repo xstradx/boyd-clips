@@ -1,0 +1,86 @@
+CASTILLO OPEN - BOOTH COPY (marked for direction)
+Companion to scripts/castillo_open.direction.json. 171 words / 58.0 s.
+Articulation 190.4 WPM + 4.10 s of inter-sentence pause = 177 WPM speaking rate.
+
+MARKS
+  [WORD]   hero - the one operative word in the sentence. Everything else serves it.
+  (word)   throwaway - de-emphasised, faster, quieter. Undercut it.
+  /        breath (4 total, 0.32-0.46 s each)
+  v        FULL cadence - land the period
+  \        HALF cadence - step down, keep moving
+  ^        SUSPENSION - hold it up, do NOT resolve, then pause
+  ~        THROWAWAY ending - drop level and speed through the tail
+  .30      pause after, in seconds. Nothing exceeds 0.52.
+
+--------------------------------------------------------------------
+
+S1  (On the night of March 25th, 2023,) a man was struck and [KILLED]
+    on (South Alamo Street) (in San Antonio, Texas.)  ~ -1.3   .26
+
+S2  (Erik Michael Moody, thirty-six years old,) was found on the
+    [SIDEWALK] (outside the Blue Star complex.)  ^ +1.0   .30
+
+S3  The driver did [NOT] stop.  v -2.2   .50
+
+/   S4  (Two days later,) (Robert Castillo, twenty-nine,) [SURRENDERED]
+    (to the Bexar County Sheriff's Office.)  ^ +1.1   .24
+    >> Bexar = BAIR, rhymes with bear. Never BEX-AR.
+
+S5  He was booked on a charge of (collision involving death,) and
+    [RELEASED] (five days later) on (a one-hundred-thousand-dollar
+    corporate surety bond.)  v -1.4   .38
+
+/   S6  Castillo had been arrested [TWICE] before, (in 2011 and 2013,)
+    (both times as a teenager.)  \ -0.2   .24
+
+S7  There was [NOTHING] in the (decade before the crash.)  ^ +0.9   .52
+
+S8  (A grand jury indicted him on two felony counts:) [MANSLAUGHTER],
+    and failure to stop and render aid.  v -1.5   .42
+    >> Two-item list. Item 1 level and short. Item 2 longer and resolving.
+    >> Vary the LENGTH, not only the pitch. Never up-up-down.
+
+/   S9  His [TRIAL] began (on May 11th, 2026, in the 187th District Court,
+    before Judge Stephanie Boyd.)  \ -0.25   .26
+    >> ~90% throwaway and that is the professional read. Date, court
+    >> number and judge are a docket line, said by someone who says
+    >> docket lines. Three separate stresses here = three tells.
+
+S10 (It ran eight days,) and Castillo [TESTIFIED] (in his own defense.)
+    ^ +1.2   .24
+
+S11 (His attorneys argued) mistake of fact, necessity, and [DURESS.]
+    \ -0.3   .28
+    >> Terms of art, not revelations. Item durations must differ by
+    >> more than 15% or it reads as a list.
+
+S12 He said he was being [SHOT] at.  ~ -1.1   .46
+    >> The most sensational line gets the LEAST performance. "He said"
+    >> is the shield. Dramatising it is the podcast read, not the
+    >> documentary read.
+
+/   S13 (On May 19th,) the jury returned its [VERDICT.]  v -2.4
+    >> The button. Deepest fall in the piece and the only ending
+    >> allowed to feel final.
+
+--------------------------------------------------------------------
+STANDING NOTES
+
+Don't sing it. No two adjacent sentences share an ending shape, and
+across 13 sentences the four shapes run 4 FULL / 3 HALF / 4 SUSPENSION
+/ 2 THROWAWAY. Terminal-move distribution: median -0.3 st, q1 -1.4,
+q3 +0.9 (reference human narrator: -0.31 / -1.31 / +1.08).
+
+Land the period only three times. S3, S8, S13. Everywhere else the
+sentence hands off rather than closes.
+
+Never stress a token because it is capitalised or numeric. Dates,
+years, ages, dollar figures, street names, county names, court numbers
+and the judge's name are all throwaway in this script. That habit is
+the single loudest tell.
+
+Say names as one unit. "Erik Michael Moody" is one word with one mild
+stress. "The Bexar County Sheriff's Office" is one word. "A one hundred
+thousand dollar corporate surety bond" is one word.
+
+Pauses stay short. Max 0.52 s. Authority is in the contour, not the gap.
