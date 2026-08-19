@@ -16,7 +16,7 @@ SPEC_VERSION = "1.1.0"
 
 # Must match the `scores` object in analyze.SCORE_SCHEMA.
 RUBRIC_DIMENSIONS = frozenset(
-    {"human_stakes", "dramatic_turn", "judge_moment", "self_contained", "hook_strength"}
+    {"pushback", "boyd_register", "receipt", "consequence", "hook_strength"}
 )
 
 

@@ -44,10 +44,86 @@ output:
 
   longform:
     # The full case, trimmed. Horizontal, source aspect preserved.
+    #
+    # BOTH bounds are enforced in pipeline.produce(), before the encode.
+    # They were documented here and enforced nowhere until 2026-08-17: a 33.9
+    # minute long-form went through a 1200s cap. Under the floor the case is
+    # skipped; over the cap it is trimmed on a piece boundary, cutting
+    # mid-piece rather than dropping the last piece — dropping the last piece
+    # is what loses the ruling.
     min_duration_s: 120
-    max_duration_s: 1200
+    # 3480s = 58 min.
+    #
+    # RE-MEASURED 2026-08-18 against the FULL catalogues of all 7 channels
+    # clipping this docket (3,645 videos), not a filtered era of one. The
+    # earlier figures in this block were wrong in two different ways and both
+    # are recorded here so they are not re-derived.
+    #
+    # WRONG #1 — "0-10m 0.57x ... 30-35m 1.69x, monotonic". Measured on 1,785
+    # videos from 3 channels. The 1.69x does not replicate; on 3,645 videos the
+    # 30-35m band is 1.23x.
+    #
+    # WRONG #2 — "@courtroomtime 50-58m 1.35x" was n=89 from a hand-picked
+    # pre-Oct-2025 era. Across all 553 of their videos the 50-58m band is
+    # 1.06x and 58-70m is 1.04x. The 1.35x was an artefact of the filter.
+    #
+    # WRONG #3 (mine, same day) — pooling all 7 channels showed duration flat
+    # past 20m (1.04x). That pooling was itself the error: it averages across
+    # channels whose house runtimes differ by 4x. WITHIN each channel the
+    # effect is real and large. Do not pool channels for duration again.
+    #
+    # WITHIN-CHANNEL, decile-normalised, full catalogues:
+    #   Court Trials TV (n=899, the #1 channel in this niche, 134K subs):
+    #     0-10m 0.55x | 10-20m 0.92x | 20-30m 1.62x | 30-40m 2.53x
+    #     raw medians 6.2K | 11K | 20K | 32K | 40m+ 47K  — monotonic, no ceiling
+    #     found inside their catalogue.
+    #   Courtroom Time (n=553, 46K subs, median runtime 56m):
+    #     10-20m 0.66x | 20-30m 1.21x | 30-40m 0.65x | 40-58m ~1.06x | 58-70m 1.04x
+    #
+    # WHAT ACTUALLY HOLDS: the FLOOR. Under 20 minutes is punished on 6 of 7
+    # channels. The CEILING is not established by any channel's own data — no
+    # band above 20m is punished anywhere. 3480 is kept because nothing
+    # contradicts it, NOT because 58 minutes was shown to be the peak.
+    #
+    # CONFOUND, measured and material (see analysis.repeat_defendant below):
+    # on Court Trials TV the share of videos that are RETURN APPEARANCES rises
+    # with duration — 33% at 0-20m, 51% at 20-30m, 62% at 30-40m — and the
+    # repeat format out-performs one-offs INSIDE every band (1.20x / 1.24x /
+    # 1.84x). Part of what reads as "longer is better" on the biggest channel
+    # is "multi-hearing episodes are better". Treat duration as a floor and the
+    # repeat format as the lever.
+    max_duration_s: 3480
     pad_before_s: 4.0        # start slightly before the first word
     pad_after_s: 3.0
+
+    # Branded sting in front of the case. render_longform accepted an `intro`
+    # from the start and nothing ever passed one, so every automated long-form
+    # shipped unbranded.
+    #
+    # Defaults to boyd-brand/sting_v2.mp4 — 2.6s, 1920x1080, WITH audio. The
+    # _SLOW variants are 5.1-7.7s and silent, and a silent intro forces a
+    # synthesised audio branch just to keep concat happy.
+    #
+    # CONTENT_SPEC §2 asks for a cold open with "no intro, no branding".
+    # Nathan's 2026-08-17 instruction governs; the spec should be amended.
+    intro_enabled: true
+    intro_path:              # blank = search the known brand folders
+
+    # CONTENT_SPEC §2: "Dead air longer than 4 seconds is removed. Shorter gaps
+    # stay — courtroom pauses carry weight and cutting them makes proceedings
+    # feel falsified."
+    #
+    # Until 2026-08-17 the daily path concatenated the raw sitting windows and
+    # never called the trimmer, which existed. Measured on what it produced:
+    # 179.6s of silence in runs over 4s across 838s (21.4%), one run of 75s,
+    # and a cold open onto 4.8s of nothing. These constants are the ones the
+    # Thompson rebuild was verified against — zero remaining runs over 4s,
+    # opening silence 4.8s -> 0.81s.
+    trim_dead_air: true
+    dead_air_s: 4.0          # the spec's threshold, not a tuned number
+    silence_noise_db: -30.0
+    silence_keep_s: 0.35     # left at each end of a removed run; 0 reads as a glitch
+    silence_min_piece_s: 0.5 # stutter guard, looser than a short's deliberately
     resolution: [1920, 1080]
     fps: 30
     crf: 20
@@ -79,19 +155,83 @@ output:
     blur_darken: 0.55
 
     # Burned-in captions, driven by word-level timings from the transcript.
+    #
+    # These numbers are MEASURED off 12 current high-view vertical shorts
+    # (yt-dlp + frame differencing at native fps), not chosen. The headline
+    # finding is negative and drove the whole style: caption state changes take
+    # exactly ONE frame in 340+ of ~350 measured transitions. No scale ramp, no
+    # fade, no slide. Per-word karaoke highlight appeared in 1 of 9 captioned
+    # winners and was the weakest performer in the set.
+    #
+    # Geometry from lawbyMike (4 videos, 12-19M views each, the leader in the
+    # legal niche): x-height 37-39px at 1080x1920, outline 12-14px black plus a
+    # small hard shadow, 2-4 words per card (mode 3), median card 500-567ms.
+    # THE THOMPSON CAPTION STYLE (short_v3), which Nathan approved.
+    #
+    # This block used to hold Montserrat at 64 with max_lines 1. That was never
+    # what shipped in the approved short — that came from
+    # scripts/build_thompson_v3.py, which carried its own caption dict. So the
+    # daily path and the approved reference had silently diverged, and every
+    # automated short was captioned in a style nobody signed off on.
+    #
+    # Cap height is MEASURED, not chosen: rendered cap = 0.514 x font_size,
+    # identical for Arial Black and Anton. The old 74px font put 38px of
+    # visible letter against a 72px floor (BBC/EBU-TT-D vertical 3.75%,
+    # cross-checked against W3C IMSC1.3). Anton at 140 clears it. At that size
+    # Arial Black overflows the safe band at ~9 chars/line and Anton at ~13,
+    # which is where max_chars_per_line comes from.
     captions:
       enabled: true
-      font: "Arial Black"
-      font_size: 74
+      font: "Anton"                  # assets/fonts/Anton-Regular.ttf
+      font_size: 140
       primary_color: "&H00FFFFFF"    # ASS BGR order: white
-      highlight_color: "&H0000D7FF"  # amber, applied to the active word
+      highlight_color: "&H0000D7FF"
       outline_color: "&H00000000"
-      outline: 5
+      outline: 6
       shadow: 2
-      margin_v: 420                  # px from bottom of the 1920px canvas
-      max_chars_per_line: 22
+      margin_v: 700                  # overridden per-layout by produce()
+      max_chars_per_line: 13         # Anton overflows the safe band past this
+      max_words_per_card: 3
       max_lines: 2
       uppercase: true
+      # Colour-only per-word emphasis. MEASURED: scaling one word inside a line
+      # makes libass re-lay out the whole block — pop_color drifts 33px left and
+      # 65px wide on every word, colour-only drifts 0/0/0.
+      animation: pop_color
+      pop_scale: 115
+      pop_ms: 60
+      card_fade_ms: 0                # hard cut — 340+ of ~350 measured
+                                     # transitions in the winner set are a
+                                     # single frame. No fade, no slide.
+
+      # Speaker-anchored captions — the text sits beside whoever is talking.
+      #
+      # Margins are px from the bottom of the 1920 canvas, measured against the
+      # safe band (text must stay inside y 288..1248). In duo_fill the
+      # defendant owns the TOP half and Boyd the BOTTOM half, so the defendant's
+      # slot is the larger margin.
+      #
+      # Turns come from src/boydclips/diarize.py (SpeechBrain ECAPA speaker
+      # embeddings). Note "defendant" here means "not Boyd" — an attorney
+      # speaking lands in the same slot, which is correct for placement even
+      # though it is not literally the defendant.
+      slot_margins:
+        defendant: 1020
+        boyd: 700
+
+    # Colour grade, applied to the PICTURE only — before the captions burn in,
+    # so caption white is never lifted or clipped.
+    #
+    # `eq=brightness` raises every pixel including the ones already near white,
+    # so the jail scrubs and the overhead lights blow out and the frame reads
+    # washed rather than bright. The curve lifts shadows and midtones instead
+    # and pulls the top end down to 0.97, so highlights roll off and the whites
+    # survive.
+    color:
+      enabled: true
+      curve: "0/0.02 0.25/0.31 0.5/0.57 0.75/0.80 1/0.97"
+      saturation: 1.10
+      contrast: 1.05
 
 transcription:
   # YouTube auto-captions are free and available on this channel. Whisper is
@@ -147,7 +287,11 @@ analysis:
     min_total_score: 50
     safety_must_pass: true
     min_audio_quality: 3       # 1-5, judged from transcript coherence
-    requires_self_contained: true
+    # Retired. The product is now one defendant across ALL their appearances,
+    # so a chapter that only makes sense beside the others is the format, not a
+    # defect. Replaced by requires_pushback: a compliant defendant is what
+    # actually kills a clip (present in 8/8 winners, 1/6 losers).
+    requires_pushback: true
 
     # A long-form with no short gets no discovery traffic — the short is the
     # entire distribution mechanism. Cases that score well but cannot be cut
@@ -162,21 +306,187 @@ analysis:
     # re-score. One extra call, placed where a wrong answer costs the most.
     recheck_selection: true
 
+  # ---- Notoriety re-ranking --------------------------------------------
+  # Does an audience for this case already exist BEFORE we publish?
+  #
+  # The rubric below reads the docket transcript, so it cannot tell a case the
+  # city is following from a status conference. Measured on this channel
+  # (2026-08-17, yt-dlp against @TexasTrialTracker/videos): every video over
+  # 10K views is a named, press-covered capital murder trial — 72K, 62K, 37K —
+  # while routine docket clips, which is what this pipeline makes, sit at
+  # 1.4K–4.6K. About 20x between the two.
+  #
+  # Deliberately NOT a rubric weight: the weights sum to 100 and are mirrored
+  # in prompts/score_cases.md, so adding one silently dilutes the rest, and
+  # notoriety is a property of the AUDIENCE rather than of the clip. It ranks
+  # cases that have ALREADY passed safety and the rubric. It cannot promote
+  # anything past a gate — SAFETY_RULES stays in front of it, because this axis
+  # points at the most sensational cases about real presumed-innocent people.
+  #
+  # !! NOT IMPLEMENTED !! Verified 2026-08-18: the string "notoriety" appears
+  # in this file and NOWHERE else in the repository. Zero call sites in
+  # src/boydclips/. `enabled: true` does nothing; check_coverage makes no
+  # network call; rubric_weight is never read. This block is a note, not a
+  # rule. Either wire it into analyze.score() or delete it.
+  #
+  # Its underlying claim IS supported and got stronger on 2026-08-18: this
+  # channel's 7 named-trial videos have a median of 16,000 views against
+  # 3,000 for its 7 Boyd docket clips (5.3x), and the trial coverage carries
+  # 90% of all channel views. That is the strongest signal measured on OUR
+  # OWN data. It is also still only 14 videos.
+  notoriety:
+    enabled: false   # was true, which was misleading — nothing reads it
+
+    # One YouTube search per eligible case. Local news coverage is the primary
+    # signal — KSAT/KENS sending a camera means the city is already watching.
+    # Turn off to rank on charge severity alone (no network calls).
+    check_coverage: true
+
+    # Toward 1.0 trusts the rubric; toward 0.0 chases notoriety.
+    #
+    # 0.7 — deliberately rubric-heavy, corrected down from 0.5 on 2026-08-17.
+    # The Boyd-only rows say fame is NOT the discriminator: the one clip with a
+    # genuinely famous local defendant (IZZY93, named in the title) did 3.0K
+    # and lost 3x to an anonymous "Drug Dealer BEGS" at 9.8K. What separates
+    # 9.8K from 1.4K is liberty decided on camera and a defendant reacting —
+    # which human_stakes and dramatic_turn already measure. This axis breaks
+    # ties; it does not run the selection.
+    rubric_weight: 0.7
+
+  # ---- Repeat-defendant lane -------------------------------------------
+  # The highest-leverage format measured anywhere in this niche, and the only
+  # one that needs NO new source material — the docket already contains the
+  # same people two, five, nineteen times.
+  #
+  # MEASURED 2026-08-18 on Court Trials TV Network (899 videos, 134K subs, the
+  # #1 channel in the niche and holder of 29 of the top 40 videos):
+  #   return-appearance titles ("BACK AGAIN", "Watch Both Cases", "UPDATE",
+  #   "N Hearings"): median 15,000 views, n=348
+  #   one-off titles:                       median 11,000 views, n=551
+  #   = 1.36x overall, at essentially the same runtime (17m vs 15m), and it
+  #   holds INSIDE every duration band: 1.20x (0-20m), 1.24x (20-30m),
+  #   1.84x (30-40m). So it is not a duration proxy.
+  #   Their #2, #3, #8, #9, #10 and #15 videos are all return appearances.
+  #
+  # NOT universal: on Courtroom Time only 3% of the catalogue is this format
+  # and it shows no lift (1.01x). It is a Court-Trials-TV play. They are the
+  # channel worth copying, so it is adopted deliberately, not by default.
+  #
+  # INVENTORY ALREADY ON DISK (state/pipeline.db, 727 cases / 50 dockets):
+  #   48 defendants appear across 2+ dockets = 155 cases
+  #   33 of those clear the gate today (best score >= 50, every hearing
+  #      safety_pass) = ~430 minutes of already-scored, already-cleared material
+  #   Robert Castillo alone: 19 hearings across 12 dockets, 1,304 minutes
+  #
+  # `boyd repeats` lists them. Selection prefers a qualifying repeat episode
+  # over a same-score one-off; it never promotes anything past the safety gate.
+  repeat_defendant:
+    enabled: true
+
+    # A defendant must appear in at least this many DISTINCT dockets to
+    # qualify. Two separate hearings on the same day are one appearance —
+    # the format's value is the return, not the runtime.
+    min_dockets: 2
+
+    # At least one of their hearings must clear the normal score gate. The
+    # weak hearings are still included in the episode as setup; they just
+    # cannot be the reason it was picked.
+    min_best_score: 50
+
+    # Every hearing in the episode must have passed safety independently.
+    # A single failing hearing drops that hearing, not the episode — unless
+    # it is the one that carries the score.
+    require_all_safety_pass: true
+
+    # Rank multiplier applied to a qualifying repeat episode's total score
+    # when choosing the day's pick. 1.36 is the measured lift, used verbatim
+    # rather than rounded so its provenance stays obvious. Set to 1.0 to
+    # rank repeats level with one-offs.
+    rank_multiplier: 1.36
+
+    # Hearings are always concatenated in chronological order across dockets.
+    # Never reorder — the whole point of the format is watching someone come
+    # back worse, and a reordered episode manufactures a story arc.
+    chronological: true
+
   # Weighted rubric. Must sum to 100. Mirrored in prompts/score_cases.md —
   # if you change a weight here, change it there too or scoring drifts.
+  # Weights follow the winner-vs-loser counts in spec/SPEC.md §2, measured on
+  # @courtroomtime's top 8 videos against their bottom 6. Numbers in the
+  # comments are "videos containing this beat", winners of 8 / losers of 6.
+  #
+  # These are a STARTING POSITION. No clip this pipeline made has a recorded
+  # view count yet, so re-fit them once the ledger has real outcomes.
   rubric_weights:
-    human_stakes: 25           # real consequence for a real person
-    dramatic_turn: 25          # something actually changes on camera
-    judge_moment: 20           # Boyd says something decisive or memorable
-    self_contained: 15         # comprehensible with zero outside context
-    hook_strength: 15          # is there a line that works at second 0
+    pushback: 30               # 8/1 — someone contradicts Boyd. The single
+                               # strongest separator found. Their worst video
+                               # has tears, a remand and a life sentence and
+                               # died, because the defendant agreed with
+                               # everything. Compliance kills a clip.
+    boyd_register: 25          # 8/1 — sarcasm, mockery, the flat hammer.
+                               # "guess what" 21x in winners, 1x in losers.
+                               # NOT volume: she raises her voice in 1 of 8.
+    receipt: 20                # 6/0 — she quotes a document back at them.
+                               # Zero losers have it.
+    consequence: 15            # 6/2 — cuffs, custody, ejection, on camera.
+    hook_strength: 10          # is there a line that works at second 0
 
 packaging:
+  # ---- Thumbnail --------------------------------------------------------
+  # The construction Nathan approved on Thompson, 2026-08-17: the secondary
+  # subject over the courtroom plate on the left, the judge traced out and
+  # composited on the right with a feathered, UNSTROKED edge, a red arrow from
+  # empty space down into the secondary subject, and the quote in a top band
+  # split white -> yellow. Pixel constants are in scripts/make_thumbnail_v2.py,
+  # measured from research/reference/competitor/THUMBNAILS.md.
+  #
+  # src/boydclips/thumbnail.py builds this from the video itself, so the daily
+  # run reproduces the approved construction rather than a frame grab.
+  thumbnail:
+    # Which half of the 2-up holds the judge. ASSUMPTION, not a measurement:
+    # taken from JgvW7oCQxuI, where the right tile is the taller one (640x500
+    # vs 640x360) and holds Boyd. If the court's Zoom layout ever flips, this
+    # silently puts the wrong person in the hero slot — check a render after
+    # any layout change.
+    subject_side: right
+
+    # Arrow tip, in frame fractions. Held at the value used on the approved
+    # Thompson render: empty space above the defendant, pointing down-left
+    # into him, with his face clear.
+    #
+    # Measured caveat, deliberately recorded: across 60 thumbnails the red
+    # arrow is NOISE — 4/6 winners and 4/4 losers have one. It is here because
+    # it is the chosen style, not because the data supports it.
+    arrow_tip: [0.30, 0.46]
+
+    # Automatic arrow placement, off deliberately. Tried and measured: the
+    # matte traces every person in the plate, and the topmost head belonged to
+    # a standing bystander rather than the defendant, which put the arrow in
+    # the headline and then on the judge's hair. It needs face detection to be
+    # trustworthy. Turn on only to experiment.
+    measure_arrow: false
+
+    # A single grab at the hook lands on a motion-blurred frame often enough to
+    # matter. Sample this window and keep the sharpest by edge energy.
+    search_window_s: 6.0
+    frame_samples: 9
+
   # Title/description/hashtag templates. {placeholders} are filled by the LLM
   # packaging step against the schema in prompts/package_post.md.
+  #
+  # HOUSE STYLE, Nathan 2026-08-12: spec/PACKAGING.md, measured from Audit the
+  # Court. Titles sit in a 50-65 character band with a hard 70 ceiling. The old
+  # 100/90 limits here predate that decision and were letting the model ship
+  # 122-character titles; analyze.package() now also warns below the floor,
+  # which truncation cannot fix.
+  title_min_chars: 50
+
   longform:
+    # NOTE: title_template is not read by any code path — the title comes from
+    # the model via prompts/package_post.md. Kept only as documentation of the
+    # pre-2026-08-12 format.
     title_template: "{hook_line} | Judge Boyd, {court_short}"
-    title_max_chars: 100
+    title_max_chars: 70
     description_template: |
       {summary}
 
@@ -201,7 +511,7 @@ packaging:
 
   short:
     title_template: "{hook_line}"
-    title_max_chars: 90
+    title_max_chars: 70
     # {longform_url} is injected AFTER the long-form publishes. This is the
     # funnel — the short exists to route viewers to the full case.
     description_template: |
@@ -223,6 +533,29 @@ publish:
   # Per-platform switches. Credentials come from config/.env — never here.
   youtube:
     enabled: true
+
+    # HAS THIS GOOGLE CLOUD PROJECT PASSED THE YOUTUBE API COMPLIANCE AUDIT?
+    #
+    # Leave false until the audit is actually granted. It is not a formality
+    # and it is not the same thing as OAuth working.
+    #
+    # developers.google.com/youtube/v3/docs/videos/insert:
+    #   "All videos uploaded via the videos.insert endpoint from unverified API
+    #    projects created after 28 July 2020 will be restricted to private
+    #    viewing mode."
+    #
+    # support.google.com/youtube/answer/7300965:
+    #   "For videos that have been locked as private due to upload via an
+    #    unverified API service, you will not be able to appeal."
+    #
+    # So the failure is not "it uploads as private and you flip it" — the video
+    # is LOCKED private, cannot be appealed, and cannot be made public by hand.
+    # The only remedies are to re-upload through the site or to pass the audit.
+    # Uploading from an unaudited project therefore spends a case to produce a
+    # video nobody can ever see, and publish.py's duplicate guard then refuses
+    # to re-upload it. publish_pair() hard-refuses while this is false.
+    api_audited: false
+
     privacy_manual: "private"
     privacy_assisted: "private"
     privacy_auto: "public"

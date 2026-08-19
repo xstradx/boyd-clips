@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from .censor import censor
 from .config import Config, prompt_text
 from .llm import BackendError, RefusalError, build_backend  # noqa: F401  (re-exported)
 from .transcribe import Transcript, hhmmss
@@ -138,15 +139,22 @@ SCORE_SCHEMA: dict[str, Any] = {
                     "scores": {
                         "type": "object",
                         "properties": {
-                            "human_stakes": _SCORE_DIM,
-                            "dramatic_turn": _SCORE_DIM,
-                            "judge_moment": _SCORE_DIM,
-                            "self_contained": _SCORE_DIM,
+                            # The five beats that separated 8 winning videos
+                            # from 6 losing ones on @courtroomtime, who clip
+                            # this same judge. Replaces human_stakes /
+                            # dramatic_turn / judge_moment / self_contained —
+                            # abstract ratings the model had to interpret, and
+                            # which scored a routine plea-deadline hearing 92.
+                            # See spec/SPEC.md §2.
+                            "pushback": _SCORE_DIM,
+                            "boyd_register": _SCORE_DIM,
+                            "receipt": _SCORE_DIM,
+                            "consequence": _SCORE_DIM,
                             "hook_strength": _SCORE_DIM,
                         },
                         "required": [
-                            "human_stakes", "dramatic_turn", "judge_moment",
-                            "self_contained", "hook_strength",
+                            "pushback", "boyd_register", "receipt",
+                            "consequence", "hook_strength",
                         ],
                         "additionalProperties": False,
                     },
@@ -183,12 +191,21 @@ PACKAGE_SCHEMA: dict[str, Any] = {
         "summary": {"type": "string"},
         "longform_title": {"type": "string"},
         "short_title": {"type": "string"},
+        "thumbnail_quote": {"type": "string"},
+        # spec/PACKAGING.md §Thumbnails rule 4 — the emotionally loaded half of
+        # the quote is yellow and the setup stays white, split mid-sentence.
+        # Which half is loaded is a judgement about meaning, so the model makes
+        # it here rather than the renderer guessing with a word count. Must be
+        # a verbatim SUFFIX of thumbnail_quote; pipeline.split_thumbnail_quote
+        # rejects anything else and says so.
+        "thumbnail_quote_yellow": {"type": "string"},
         "title_support_quote": {"type": "string"},
         "guilt_posture_check": {"type": "string"},
     },
     "required": [
         "hook_line", "summary", "longform_title", "short_title",
-        "title_support_quote", "guilt_posture_check",
+        "thumbnail_quote", "thumbnail_quote_yellow", "title_support_quote",
+        "guilt_posture_check",
     ],
     "additionalProperties": False,
 }
@@ -342,10 +359,37 @@ class Analyzer:
         )
         pkg = self._call("package_post", user, PACKAGE_SCHEMA)
 
-        lf_max = self.cfg.get("packaging.longform.title_max_chars", 100)
-        sh_max = self.cfg.get("packaging.short.title_max_chars", 90)
+        # CONTENT_SPEC §9 — every string returned here is a text surface, and
+        # text surfaces are censored even though the audio is not. Done before
+        # the length checks so the asterisks are inside the character count.
+        for field in (
+            "hook_line", "summary", "longform_title", "short_title",
+            "thumbnail_quote", "title_support_quote",
+        ):
+            if isinstance(pkg.get(field), str):
+                pkg[field] = censor(pkg[field])
+
+        lf_max = self.cfg.get("packaging.longform.title_max_chars", 70)
+        sh_max = self.cfg.get("packaging.short.title_max_chars", 70)
         pkg["longform_title"] = _trim_title(pkg["longform_title"], lf_max)
         pkg["short_title"] = _trim_title(pkg["short_title"], sh_max)
+
+        # PACKAGING.md band is 50-65, hard ceiling 70. Trimming already enforces
+        # the ceiling; a short title is the model ignoring the floor and cannot
+        # be fixed by truncation, so surface it rather than silently shipping it.
+        floor = self.cfg.get("packaging.title_min_chars", 50)
+        pkg["title_lengths"] = {
+            "longform": len(pkg["longform_title"]),
+            "short": len(pkg["short_title"]),
+        }
+        pkg["title_band_ok"] = all(
+            floor <= n <= 70 for n in pkg["title_lengths"].values()
+        )
+        if not pkg["title_band_ok"] and self.log:
+            self.log.warning(
+                "title outside the 50-70 band: longform=%d short=%d",
+                pkg["title_lengths"]["longform"], pkg["title_lengths"]["short"],
+            )
 
         # CONTENT_SPEC §6: the hook must be a line actually spoken. Verify it
         # against the transcript rather than trusting the model's own claim.
@@ -401,8 +445,14 @@ def _check_gates(case: dict[str, Any], gates: dict[str, Any]) -> tuple[bool, str
         return False, f"score {case['total_score']} below minimum {gates['min_total_score']}"
     if case["audio_quality"] < gates.get("min_audio_quality", 0):
         return False, f"audio quality {case['audio_quality']} below minimum"
-    if gates.get("requires_self_contained") and case["scores"]["self_contained"]["score"] < 60:
-        return False, "not self-contained without outside context"
+    # `requires_self_contained` is retired: the format is now one defendant
+    # across ALL their appearances, so a chapter that only makes sense next to
+    # the others is the product rather than a defect. The gate now asks for
+    # PUSHBACK instead, which is the single strongest measured separator
+    # (present in 8 of 8 winners, 1 of 6 losers) — a compliant defendant is
+    # what actually kills a clip. See spec/SPEC.md §2.
+    if gates.get("requires_pushback") and case["scores"]["pushback"]["score"] < 40:
+        return False, "no pushback — defendant complies throughout (banked)"
     if gates.get("requires_shortable") and not case.get("shortable"):
         # Not a quality judgement — the case is banked, not discarded. It just
         # cannot carry a publishing day on its own, because the short is what

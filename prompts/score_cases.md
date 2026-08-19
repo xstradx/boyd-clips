@@ -67,63 +67,89 @@ output. The court already handled the asymmetry you might be worried about.
 
 ---
 
-## PART 2 — SCORING
+## PART 2 - SCORING
 
-Score only cases that passed the safety gate. Each dimension is 0–100. The
-weighted total decides the day's pick.
+You are not rating how *important* a hearing is. You are answering whether it
+will hold a stranger's attention. Those are different questions, and the second
+one is the job.
 
-### human_stakes — weight 25
-How much actually turns on this for the person in front of the judge.
+Everything below was derived by reading the transcripts of the 8 biggest and 6
+smallest videos on a channel that clips THIS SAME JUDGE. Counts are "videos
+containing this beat" - winners of 8 / losers of 6.
 
-- 90–100: liberty directly at stake and decided here — bond revoked, sentence
-  imposed, probation terminated.
-- 60–89: a real consequence is set in motion — conditions imposed, a warning
-  with teeth, a deadline that will bite.
-- 30–59: procedural but consequential — a reset with a stated cost.
-- 0–29: pure scheduling.
+Score each 0-100. Quote the transcript verbatim in every `justification` field. If you cannot
+quote it, the score is low - that is the point of the field.
 
-### dramatic_turn — weight 25
-Does something *change* on camera, and can you point to the moment.
+### pushback - weight 30  (winners 8/8, losers 1/6)
 
-- 90–100: a clear reversal — the judge changes course, the defendant admits
-  something, a hidden fact surfaces and redirects the hearing.
-- 60–89: escalating tension that resolves.
-- 30–59: mild friction, no real movement.
-- 0–29: flat.
+Does someone push back at Judge Boyd? A defendant or attorney contradicting her,
+arguing, interrupting, making excuses, refusing to accept what she says.
 
-> A case where the outcome was obvious from the first sentence scores low here
-> even if the outcome is severe.
+**This is the strongest signal there is.** The lowest-performing video in the
+sample has tears, a remand and a life sentence in it - and it died, because the
+defendant agreed with everything and the judge stayed gentle. A compliant
+defendant kills a clip no matter how serious the case.
 
-### judge_moment — weight 20
-Does Judge Boyd say something decisive, clarifying, or genuinely memorable.
+- 90+: sustained disagreement, several exchanges, he will not let it go
+- 60:  a couple of real objections or excuses
+- 20:  "yes ma'am" to everything
+- 0:   the defendant barely speaks
 
-- 90–100: a quotable line that carries the whole case — an explanation of *why*
-  she is ruling as she is, delivered plainly.
-- 60–89: firm, clear, well-articulated ruling.
-- 30–59: routine administration.
-- 0–29: barely speaks.
+### boyd_register - weight 25  (winners 8/8, losers 1/6)
 
-> Score what lands with a viewer. Boyd's directness is the channel's draw — a
-> blunt, quotable line scores high, and so does a patient explanation that
-> reframes the case. Both are "a judge moment". Do not penalise her for being
-> sharp.
+Is Boyd sarcastic, mocking, cutting, or does she put someone in their place?
 
-### self_contained — weight 15
-Can someone with no legal background and no prior context follow it.
+**She is not loud.** In ~65,000 words of winning transcript she raises her voice
+ONCE. Do not score volume. Score the flat, unhurried, devastating register:
 
-- 90–100: fully comprehensible cold. The stakes are stated aloud in the clip.
-- 60–89: needs one sentence of context, which the title can carry.
-- 30–59: needs real explanation.
-- 0–29: incomprehensible without the docket.
+  "Are you doing this for the YouTube? Because we don't have a record right
+   except for the YouTube."
+  "Instead of coming to me crying 'please don't send me to prison' - so why
+   shouldn't I send you to prison?"
+  "I cannot understand a word you're saying. You're mumbling and you're
+   speaking in run-on sentences."
+  "Then why do you keep bringing children in the world that you financially
+   cannot support?"
 
-### hook_strength — weight 15
-Is there a line that works as the literal first frame, with zero setup.
+Also score her extended riffs - the vivid hypothetical that goes on for 40+
+words (the grocery store, KFC, the middle of a movie). Present in 5/8 winners
+and 0/6 losers.
 
-Identify the strongest candidate and quote it **verbatim** with its timestamp.
-If nothing in the case works as a cold open, score below 30 — a case that has
-to be explained before it lands has no short.
+Rhetorical tells: "guess what" (21 times across winners, once across losers),
+"Mhm", "excuse me", "stop interrupting me".
+
+### receipt - weight 20  (winners 6/8, losers 0/6)
+
+Does she produce evidence and read it back at them? Zero losing videos have this.
+
+  "Well, they found it in your purse. That's what the police report says,
+   'cause it says right here."
+  "Correct me if I'm wrong. When we were here last time, I said you're allowed
+   for medical appointments. Did I say for anything else?"
+
+Score high when someone's account is contradicted by a document she is holding.
+
+### consequence - weight 15  (winners 6/8, losers 2/6)
+
+Does something physically happen to someone on camera? Handcuffs, taken into
+custody, ejected from the courtroom, a sentence pronounced to their face.
+
+  "Deputy Laura, could you do me a favor - could you place the handcuffs on
+   him please."
+
+A ruling read out with nothing visible happening scores low. The camera has to
+see it land.
+
+### hook_strength - weight 10
+
+Is there a single line that works at second 0 with no setup? Put it in
+`hook_quote` verbatim and its timestamp in `hook_start_s`.
 
 ---
+
+**Do not** reward: how serious the charge is, how sad the story is, how long the
+hearing runs, or how much the defendant talks in total. A long monologue from a
+compliant defendant scores near zero on every axis above.
 
 ## PART 3 — SHORTABILITY
 

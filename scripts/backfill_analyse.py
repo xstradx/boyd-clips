@@ -74,6 +74,16 @@ def main() -> int:
                             session=r.get("session") or "unknown")
         log.info("[%d/%d] %s %s (%d words)", i, len(todo), r["date"],
                  r["video_id"], r["words"])
+        # Register the docket BEFORE analysing it.
+        #
+        # cases.video_id is a foreign key to dockets.video_id. run_daily()
+        # inserts the row during discovery, but this script calls
+        # analyze_docket() directly — so without this every save_case() dies
+        # with "FOREIGN KEY constraint failed". Observed 2026-08-11: 40/40
+        # dockets analysed successfully and NONE reached the database, losing
+        # 7.1 hours of results to the DB layer while scored.json was fine.
+        # INSERT OR IGNORE, so re-running is harmless.
+        pipe.store.add_docket(d.video_id, d.title, d.docket_date, d.duration_s)
         try:
             scored = pipe.analyze_docket(d)
         except RefusalError as exc:
