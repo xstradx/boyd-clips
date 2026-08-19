@@ -9,14 +9,19 @@ file starts precisely at the requested timestamp.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import subprocess
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
+from .censor import censor
 from .transcribe import Word
+
+log = logging.getLogger("boydclips.render")
 
 # Generous margin around the requested case so head/tail padding and any
 # keyframe slop have material to work with.
@@ -26,6 +31,11 @@ SECTION_MARGIN_S = 20.0
 # the captions need beneath it.
 STACK_TOP_Y = 120
 CAPTION_BAND_MIN = 180
+
+# Clearance under a bottom-anchored tile stack. The captions no longer live in
+# the band below the stack — the platform safe zone puts them over the picture —
+# so this is breathing room, not a caption band.
+STACK_BOTTOM_MARGIN = 100
 
 # Minimum content aspect for tile stacking.
 #
@@ -101,7 +111,12 @@ def _run(cmd: Sequence[str], cwd: Path | None = None, timeout: int = 3600) -> No
         raise RuntimeError(f"command failed: {cmd[0]}\n{tail}")
 
 
-def detect_content_crop(source: Path, sample_start: float = 5.0, sample_s: float = 25.0) -> str | None:
+def detect_content_crop(
+    source: Path,
+    sample_start: float = 5.0,
+    sample_s: float = 25.0,
+    min_agreement: float = 0.6,
+) -> str | None:
     """Find the real content rectangle inside a letterboxed source.
 
     The court's Zoom recordings are letterboxed *inside* their own 16:9 frame —
@@ -109,39 +124,242 @@ def detect_content_crop(source: Path, sample_start: float = 5.0, sample_s: float
     below. Scaling that whole frame into a 9:16 canvas leaves the courtroom at
     a fraction of the screen and fills the rest with blurred black.
 
+    Sampled one frame per second across the WHOLE clip and reduced by mode, not
+    by cropdetect's own accumulator. `reset=0` unions every frame it sees, so a
+    single full-bleed frame — a screen-share, a flash, a layout change — widens
+    the accumulated rectangle to the entire frame and detection silently
+    reports "no letterbox". Measured on JgvW7oCQxuI:6698: 259 of 265 sampled
+    frames agree on crop=1920:712:0:270, but 5 full-frame outliers were enough
+    to make the union return 1920:1080 and the short rendered with the
+    courtroom occupying 17% of the canvas.
+
+    The mode is also the honest statistic here: the letterbox is a fixed
+    property of the recording, so the common value is the true one and the
+    outliers are the noise — averaging them would land between two layouts and
+    match neither.
+
     Returns an ffmpeg `crop=` argument, or None when the frame is already full.
     """
     proc = subprocess.run(
         [
             "ffmpeg", "-hide_banner", "-nostats",
-            "-ss", f"{sample_start:.2f}", "-t", f"{sample_s:.2f}",
             "-i", str(source),
-            "-vf", "cropdetect=limit=24:round=2:reset=0",
+            "-vf", "fps=1,cropdetect=limit=24:round=2:reset=1",
             "-f", "null", "-",
         ],
-        capture_output=True, text=True, timeout=300,
+        capture_output=True, text=True, timeout=900,
     )
 
     crops = re.findall(r"crop=(\d+):(\d+):(\d+):(\d+)", proc.stderr)
     if not crops:
         return None
 
-    w, h, x, y = (int(v) for v in crops[-1])
-    if w <= 0 or h <= 0:
-        return None
-
     src_w, src_h = probe_dimensions(source)
     if not src_w or not src_h:
         return None
 
-    # A crop that keeps almost everything isn't worth applying, and one that
-    # throws most of the frame away is usually cropdetect misreading a dark
-    # shot rather than a genuine letterbox.
-    area_ratio = (w * h) / float(src_w * src_h)
-    if area_ratio > 0.92 or area_ratio < 0.15:
+    def _usable(c: tuple[str, str, str, str]) -> bool:
+        """A crop worth applying: not the whole frame, not a dark-shot misread.
+
+        One that keeps almost everything buys nothing, and one that throws most
+        of the frame away is usually cropdetect reading a dark shot rather than
+        a genuine letterbox.
+        """
+        cw, ch = int(c[0]), int(c[1])
+        if cw <= 0 or ch <= 0:
+            return False
+        ratio = (cw * ch) / float(src_w * src_h)
+        return 0.15 <= ratio <= 0.92
+
+    # Full-frame samples are dropped before the vote rather than after it.
+    # 4zkUTUavW4I:116 alternates between a full-bleed screen-share (51.3% of
+    # frames) and the letterboxed 2-up (48.7%), so counting them together
+    # elects "no crop" by three tenths of a percent and the backdrop is built
+    # from black bars again. The question this function answers is "where is
+    # the letterbox when there is one", and frames with no letterbox are not
+    # evidence about that.
+    candidates = [c for c in crops if _usable(c)]
+    if not candidates:
+        return None
+
+    (w, h, x, y), agree = Counter(candidates).most_common(1)[0]
+    w, h, x, y = int(w), int(h), int(x), int(y)
+
+    # A rectangle that only a minority of frames agree on is a layout that
+    # changes mid-clip, not a baked-in letterbox. Cropping to it would clip
+    # participants out of frame for the rest of the clip, which is the exact
+    # failure §4 of CONTENT_SPEC.md exists to prevent — so leave it uncropped.
+    # Measured against every sampled frame, not just the usable ones: a clip
+    # that is mostly full-bleed has no stable letterbox to strip.
+    if agree / float(len(crops)) < min_agreement:
+        log.info("framing: crop unstable (%d/%d frames agree) — leaving frame uncropped",
+                 agree, len(crops))
         return None
 
     return f"crop={w}:{h}:{x}:{y}"
+
+
+def _content_boxes(
+    source: Path,
+    win_w: int,
+    win_h: int,
+    x_off: int,
+    samples_per_s: float,
+    row_floor: float = 12.0,
+) -> list[tuple[int, int, int, int]]:
+    """Per-frame content rectangles of a region, by row/column occupancy.
+
+    Deliberately NOT ffmpeg's `bbox`, which is a max-based test: one bright
+    pixel anywhere in a row keeps that row inside the box. Judge Boyd's Zoom
+    tile carries a US flag down its right edge over an otherwise black lower
+    band, so bbox reported the tile as 628x488 when rows 354-486 average below
+    1.0 of luminance. Scaling that up put a 152px black band across the bottom
+    of the rendered short, and the measurement said the tile was fine.
+
+    A row counts as content when its MEAN luminance clears `row_floor`, which
+    is the question actually being asked: is there a picture here, or is this
+    padding with a highlight in it.
+    """
+    try:
+        import numpy as np
+    except ImportError:                      # pragma: no cover - numpy is present
+        log.warning("numpy unavailable; tile detection falling back to bbox")
+        return []
+
+    proc = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(source),
+         "-vf", f"fps={samples_per_s},crop={win_w}:{win_h}:{x_off}:0",
+         "-pix_fmt", "gray", "-f", "rawvideo", "-"],
+        capture_output=True, timeout=1800,
+    )
+    frame_bytes = win_w * win_h
+    n = len(proc.stdout) // frame_bytes
+    if n == 0:
+        return []
+
+    buf = np.frombuffer(proc.stdout[: n * frame_bytes], dtype=np.uint8)
+    frames = buf.reshape(n, win_h, win_w).astype(np.float32)
+
+    def longest_run(mask) -> tuple[int, int] | None:
+        """Bounds of the longest unbroken stretch of content.
+
+        First-to-last would be defeated by a single bright line inside the
+        padding: seven scattered rows in Judge Boyd's black lower band kept the
+        measured tile at 486 rows when the picture stops at 353.
+        """
+        best = cur = None
+        for i, on in enumerate(mask):
+            if on:
+                cur = (i, i) if cur is None else (cur[0], i)
+                if best is None or cur[1] - cur[0] > best[1] - best[0]:
+                    best = cur
+            else:
+                cur = None
+        return best
+
+    boxes: list[tuple[int, int, int, int]] = []
+    for f in frames:
+        rows = longest_run(f.mean(axis=1) >= row_floor)
+        cols = longest_run(f.mean(axis=0) >= row_floor)
+        if rows is None or cols is None:
+            continue
+        boxes.append((cols[0], cols[1], rows[0], rows[1]))
+    return boxes
+
+
+def detect_tile_crops(
+    source: Path,
+    inset: int = 6,
+    samples_per_s: float = 0.2,
+    min_agreement: float = 0.5,
+) -> tuple[str, str] | None:
+    """Content rectangle of each half of a side-by-side 2-up, measured separately.
+
+    `detect_content_crop` finds one rectangle for the whole frame, which is the
+    union of both tiles. On this docket the two tiles are not the same shape —
+    measured on JgvW7oCQxuI at four separate beats, all agreeing: the left tile
+    holds 640x360 of picture and the right tile 640x500, both starting at y=180
+    inside a 1280x720 frame. A single crop of 1280x476 therefore leaves 116px of
+    black under the left tile and cuts 24px off the bottom of the right one, so
+    the stacked pair renders with a black stripe through the middle.
+
+    `inset` trims a few pixels off every edge to lose Zoom's active-speaker
+    highlight, which is a bright green rectangle drawn just inside the tile
+    border and reads as a rendering glitch once the tile is blown up to 1080
+    wide.
+
+    Returns (left_crop, right_crop) as ffmpeg `crop=` arguments in the SOURCE
+    frame's coordinates, or None when the halves are not stably letterboxed.
+    """
+    src_w, src_h = probe_dimensions(source)
+    if not src_w or not src_h:
+        return None
+    half = src_w // 2
+
+    out: list[str] = []
+    for side, x_off in (("left", 0), ("right", half)):
+        boxes = _content_boxes(source, half, src_h, x_off, samples_per_s)
+        if not boxes:
+            return None
+        (x1, x2, y1, y2), agree = Counter(boxes).most_common(1)[0]
+        if agree / float(len(boxes)) < min_agreement:
+            log.info("framing: %s tile unstable (%d/%d frames agree)",
+                     side, agree, len(boxes))
+            return None
+        w = x2 - x1 + 1 - 2 * inset
+        h = y2 - y1 + 1 - 2 * inset
+        if w < 32 or h < 32:
+            return None
+        # ffmpeg's crop rejects odd sizes on some pixel formats, and libx264
+        # needs even dimensions after scaling anyway.
+        w -= w % 2
+        h -= h % 2
+        out.append(f"crop={w}:{h}:{x_off + x1 + inset}:{y1 + inset}")
+
+    return out[0], out[1]
+
+
+def plan_fill_window(
+    tile_crop: str,
+    target_aspect: float,
+    focus: tuple[float, float] = (0.5, 0.5),
+    zoom: float = 1.0,
+) -> str:
+    """Narrow a tile's crop to `target_aspect`, centred on a point of interest.
+
+    The tiles do not match the shape of the slot they have to fill, so
+    something has to give: either the picture is letterboxed into the slot
+    (black bands, which is what we are removing) or it is cropped to the slot's
+    aspect. This crops.
+
+    `focus` is where the subject sits inside the tile as a fraction of its own
+    width and height, so it survives the tile being re-measured. The window is
+    clamped to the tile, which means a subject near an edge ends up off-centre
+    rather than the window running outside the picture and reintroducing black.
+
+    `zoom` above 1.0 takes a smaller window and therefore magnifies further.
+    """
+    m = re.fullmatch(r"crop=(\d+):(\d+):(\d+):(\d+)", tile_crop.strip())
+    if not m:
+        raise ValueError(f"not a crop expression: {tile_crop!r}")
+    tw, th, tx, ty = (int(v) for v in m.groups())
+
+    if tw / th > target_aspect:          # too wide: take height, trim width
+        win_h = th
+        win_w = target_aspect * th
+    else:                                 # too tall: take width, trim height
+        win_w = tw
+        win_h = tw / target_aspect
+    win_w = int(win_w / max(1.0, zoom))
+    win_h = int(win_h / max(1.0, zoom))
+    win_w -= win_w % 2                     # libx264 wants even dimensions
+    win_h -= win_h % 2
+
+    x = int(round(focus[0] * tw - win_w / 2))
+    y = int(round(focus[1] * th - win_h / 2))
+    x = max(0, min(x, tw - win_w))
+    y = max(0, min(y, th - win_h))
+    return f"crop={win_w}:{win_h}:{tx + x}:{ty + y}"
 
 
 def probe_dimensions(path: Path) -> tuple[int, int]:
@@ -163,7 +381,171 @@ def probe_duration(path: Path) -> float:
     return float(json.loads(proc.stdout)["format"]["duration"])
 
 
+# ------------------------------------------------------------------ dead air
+
+
+def detect_silences(
+    source: Path,
+    noise_db: float = -30.0,
+    min_silence_s: float = 0.30,
+) -> list[tuple[float, float]]:
+    """Silent spans in the file, in FILE time (t=0 is the file's first frame).
+
+    One decode pass over the audio only — measured at 7.3s for the 2192s
+    Thompson section, so there is no reason to sample or to run this per beat.
+
+    The threshold is absolute, not relative: a courtroom mic carries constant
+    room tone, and -30dBFS sits below that tone but above the level of anyone
+    actually speaking. Verified against the shipped 34.55s Thompson short,
+    where it found 10 spans totalling 4.75s — 13.7% of a short that had been
+    called finished.
+    """
+    proc = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(source),
+         "-af", f"silencedetect=n={noise_db}dB:d={min_silence_s}",
+         "-f", "null", "-"],
+        capture_output=True, text=True, timeout=1800,
+    )
+    spans: list[tuple[float, float]] = []
+    start: float | None = None
+    for m in re.finditer(r"silence_(start|end): (-?[\d.]+)", proc.stderr):
+        kind, value = m.group(1), float(m.group(2))
+        if kind == "start":
+            start = value
+        elif start is not None:
+            spans.append((start, value))
+            start = None
+    return spans
+
+
+def plan_silence_trim(
+    segments: list[Segment],
+    silences: list[tuple[float, float]],
+    offset_s: float,
+    min_silence_s: float = 0.40,
+    keep_s: float = 0.12,
+    min_piece_s: float = 0.35,
+    edge_keep_s: float = 0.05,
+) -> list[Segment]:
+    """Split each beat around its own dead air, returning the pieces to keep.
+
+    Beats are chosen by where the *meaning* starts and stops, so they carry the
+    pauses that sat between those points — page turns, the judge reading, a
+    defendant deciding what to say. On a 9:16 short those pauses are the whole
+    difference between a clip that holds and one that gets swiped.
+
+    What this deliberately does NOT do is close every gap. `keep_s` leaves
+    120ms of the silence at each edge, because speech has attack and decay that
+    silencedetect does not count as sound: cutting flush to the detected
+    boundary clips the consonant off the front of the next word and the edit
+    reads as broken rather than tight. A pause shorter than `min_silence_s`
+    survives untouched — under half a second it is breath, not dead air, and
+    removing it makes courtroom speech sound machine-gunned.
+
+    `min_piece_s` refuses a cut that would leave a fragment too short to read as
+    a shot. Two cuts 200ms apart is a stutter, not pacing.
+
+    Silences are in file time; segments and the return value are in source time.
+    Keeping the units apart is why offset_s is required rather than optional —
+    getting it wrong desyncs every burned-in caption from the audio, and the
+    render still succeeds.
+    """
+    kept: list[Segment] = []
+
+    for seg in segments:
+        a = seg.start_s - offset_s
+        b = seg.end_s - offset_s
+        pieces: list[tuple[float, float]] = []
+        cursor = a
+
+        for s0, s1 in sorted(silences):
+            if s1 <= a or s0 >= b:
+                continue
+            s0, s1 = max(s0, a), min(s1, b)
+            if s1 - s0 < min_silence_s:
+                continue
+
+            # At a beat's own edges there is no speech on the outside to
+            # protect, so the pad shrinks. Leading dead air is the worst case
+            # of all — a hook that opens on half a second of nothing has
+            # already lost the swipe.
+            head_pad = edge_keep_s if s0 <= a + 0.05 else keep_s
+            tail_pad = edge_keep_s if s1 >= b - 0.05 else keep_s
+            cut0, cut1 = s0 + head_pad, s1 - tail_pad
+            if cut1 - cut0 < 0.10:
+                continue
+            if cut0 - cursor < min_piece_s and cut0 > a:
+                continue
+            pieces.append((cursor, cut0))
+            cursor = cut1
+
+        pieces.append((cursor, b))
+        for p0, p1 in pieces:
+            if p1 - p0 >= 0.08:
+                kept.append(Segment(p0 + offset_s, p1 + offset_s))
+
+    return kept
+
+
+def map_words_to_timeline(
+    words: list[Word], segments: list[Segment], absorb_gap_s: float = 1.5
+) -> list[Word]:
+    """Re-time transcript words from source time into output-clip time.
+
+    A word landing inside a *trimmed silence* is snapped back to the end of the
+    piece before it rather than dropped. Auto-caption timings drift by a
+    fraction of a second against the audio, so a word can be timestamped inside
+    a gap that genuinely held no speech, and dropping it would silently delete
+    a caption the viewer can hear being spoken.
+
+    `absorb_gap_s` is what keeps that from swallowing the clip. Only gaps short
+    enough to be a removed pause get absorbed; the gap between two beats is
+    minutes of unrelated docket. Without this bound the Thompson cut mapped
+    15,568 words onto a 32.9s timeline — every word spoken between the second
+    beat and the third, which are 22 minutes apart.
+    """
+    out: list[Word] = []
+    elapsed = 0.0
+    for i, seg in enumerate(segments):
+        hi = seg.end_s
+        if i + 1 < len(segments):
+            gap = segments[i + 1].start_s - seg.end_s
+            if 0.0 < gap <= absorb_gap_s:
+                hi = segments[i + 1].start_s
+        for w in words:
+            if seg.start_s <= w.t < hi:
+                t = elapsed + max(0.0, min(w.t, seg.end_s) - seg.start_s)
+                out.append(type(w)(t=t, w=w.w))
+        elapsed += seg.duration
+    out.sort(key=lambda w: w.t)
+    return out
+
+
 # --------------------------------------------------------------- acquisition
+
+
+# WHY THE CLIENT HAS TO BE PINNED. With no PO-token provider configured,
+# yt-dlp falls back to the ANDROID_VR player client, and googlevideo now serves
+# those URLs only as a short prefix: measured 2026-08-18 on a freshly extracted
+# URL, `Range: bytes=0-2097151` returned 206 but `bytes=0-4194303` and *every*
+# mid-file offset returned 403. Sequential 1 MB chunks died at the fourth.
+#
+# That is what broke `--download-sections`. The flag hands the URL to ffmpeg,
+# ffmpeg opens an HTTP input with a single open-ended `Range: bytes=0-`, and
+# the server refuses it — so the section fails instantly with 403 while
+# yt-dlp's own small-range probes still succeed. It is not DRM, not this video,
+# and not rate limiting: RzjGikNbHMA, which had downloaded fine before,
+# reproduces the identical pattern today.
+#
+# WEB_EMBEDDED_PLAYER still returns the full adaptive ladder (136 avc1 720p +
+# 140 m4a) on URLs that accept both open-ended and mid-file ranges, which is
+# exactly what ffmpeg needs to seek into hour two of a livestream and pull only
+# the requested window. The rest are fallbacks: mweb/tv_simply/android offer
+# only itag 18 (muxed 360p) but still render, and "default" is kept last so a
+# video with embedding disabled is still attempted the old way.
+SECTION_PLAYER_CLIENTS = (
+    "web_embedded", "mweb", "tv_simply", "android", "default",
+)
 
 
 def download_section(
@@ -190,76 +572,144 @@ def download_section(
     if out_path.exists():
         return out_path, section_start
 
-    _run(
-        [
-            "yt-dlp", "--no-warnings", "--ignore-config",
-            # A single transient 403 from googlevideo otherwise kills the whole
-            # unattended run. Observed 2026-08-10: the section download failed
-            # with "403 Forbidden" while the same command succeeded moments
-            # later, so the URL was expiring or being throttled mid-transfer
-            # rather than the video being unavailable.
-            "--retries", "10",
-            "--fragment-retries", "10",
-            "--extractor-retries", "5",
-            "--retry-sleep", "exp=2:60",
-            "--download-sections", f"*{section_start:.2f}-{section_end:.2f}",
-            # Without this, the file starts at the preceding keyframe and every
-            # timestamp downstream drifts by up to several seconds.
-            "--force-keyframes-at-cuts",
-            "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "--merge-output-format", "mp4",
-            "-o", str(out_path),
-            f"https://www.youtube.com/watch?v={video_id}",
-        ],
-        timeout=3600,
-    )
+    last_error: RuntimeError | None = None
+    for client in SECTION_PLAYER_CLIENTS:
+        try:
+            _run(
+                [
+                    "yt-dlp", "--no-warnings", "--ignore-config",
+                    # A single transient 403 from googlevideo otherwise kills
+                    # the whole unattended run. Observed 2026-08-10: the
+                    # section download failed with "403 Forbidden" while the
+                    # same command succeeded moments later, so the URL was
+                    # expiring or being throttled mid-transfer rather than the
+                    # video being unavailable.
+                    "--retries", "10",
+                    "--fragment-retries", "10",
+                    "--extractor-retries", "5",
+                    "--retry-sleep", "exp=2:60",
+                    # Node is what makes the non-default clients usable at all:
+                    # without a JS runtime the n-signature challenge goes
+                    # unsolved and web_embedded reports "Requested format is
+                    # not available", which is how the alternate clients were
+                    # wrongly ruled out earlier. Node 22 is on PATH; if it ever
+                    # isn't, yt-dlp warns and degrades rather than failing.
+                    "--js-runtimes", "node",
+                    *(() if client == "default" else
+                      ("--extractor-args", f"youtube:player_client={client}")),
+                    "--download-sections",
+                    f"*{section_start:.2f}-{section_end:.2f}",
+                    # Without this, the file starts at the preceding keyframe
+                    # and every timestamp downstream drifts by up to several
+                    # seconds.
+                    "--force-keyframes-at-cuts",
+                    # Explicitly avc1+mp4a rather than "best mp4". The generic
+                    # selector picked itag 398 (AV1), which costs a re-encode
+                    # on the way into the render chain. The trailing branches
+                    # cover the fallback clients, which only expose itag 18.
+                    "-f",
+                    "bv*[vcodec^=avc1][height<=1080]+ba[acodec^=mp4a]/"
+                    "bv*[height<=1080]+ba/best[ext=mp4]/best",
+                    "--merge-output-format", "mp4",
+                    "-o", str(out_path),
+                    f"https://www.youtube.com/watch?v={video_id}",
+                ],
+                timeout=3600,
+            )
+        except RuntimeError as exc:
+            # A half-written section is worse than none: the next client would
+            # otherwise resume onto a file whose t=0 came from a different
+            # stream. Clear the partials before falling through.
+            last_error = exc
+            for stale in out_path.parent.glob(f"{out_path.stem}*.part"):
+                stale.unlink(missing_ok=True)
+            out_path.unlink(missing_ok=True)
+            continue
 
-    if not out_path.exists():
-        raise RuntimeError(f"section download produced no file for {video_id}")
-    return out_path, section_start
+        if out_path.exists():
+            return out_path, section_start
+
+    raise RuntimeError(
+        f"section download produced no file for {video_id} "
+        f"(tried {', '.join(SECTION_PLAYER_CLIENTS)})"
+    ) from last_error
 
 
 # ------------------------------------------------------------------ captions
 
 
+# YouTube's auto-captions carry two things that are not speech: ">>" as a
+# speaker-change marker, and bracketed sound cues like "[clears throat]" or
+# "[inaudible]". Both were rendering on screen — the shipped Thompson short
+# burned in "[CLEARS THROAT]" mid-sentence, and ">> YOU'RE SAYING" appeared in
+# the re-cut. CONTENT_SPEC §5 requires captions be verbatim, which is a rule
+# about not paraphrasing what was *said*; a speaker-change glyph was never said
+# by anyone, so removing it is not an edit to the testimony.
+_CAPTION_ARTIFACT = re.compile(r">>+|\[[^\]]*\]")
+
+
+def strip_caption_artifact(token: str) -> str:
+    """Drop non-speech auto-caption markers, returning "" if nothing remains."""
+    return _CAPTION_ARTIFACT.sub("", token).strip()
+
+
 def group_words(
-    words: list[Word], max_chars: int, max_lines: int
+    words: list[Word], max_chars: int, max_lines: int,
+    max_words: int | None = None,
 ) -> list[list[Word]]:
-    """Chunk the word stream into caption cards of at most max_lines lines."""
-    budget = max_chars * max_lines
+    """Chunk the word stream into caption cards of at most max_lines lines.
+
+    Grouped by the wrap the card will actually get, not by a character budget.
+    A budget of max_chars * max_lines is not the same constraint: greedy
+    wrapping fills line 1 to max_chars and drops the remainder on line 2, so a
+    44-character budget at 22x2 routinely produced a 22/26 split. That is how
+    "KILLED? YES, INCLUDING MY" — 25 characters against a documented 22-char
+    limit — reached a published short. CONTENT_SPEC §5 sets the limit per line
+    because the constraint is legibility at thumb distance, and only the line
+    length is visible to a viewer.
+    """
     groups: list[list[Word]] = []
     current: list[Word] = []
-    length = 0
 
     for w in words:
-        token = w.w.strip()
-        if not token:
+        if not w.w.strip():
             continue
-        added = len(token) + (1 if current else 0)
-        if current and length + added > budget:
+        trial = current + [w]
+        # A word cap, when set, binds before the character cap. Measured across
+        # nine current high-view shorts, cards hold 1-4 words (mode 3) and the
+        # character budget never becomes the constraint.
+        if max_words and current and len(trial) > max_words:
             groups.append(current)
-            current, length = [], 0
-            added = len(token)
-        current.append(w)
-        length += added
+            current = [w]
+        elif current and len(_wrap([x.w.strip() for x in trial], max_chars)) > max_lines:
+            groups.append(current)
+            current = [w]
+        else:
+            current = trial
 
     if current:
         groups.append(current)
     return groups
 
 
-def _wrap(tokens: list[str], max_chars: int, max_lines: int) -> list[list[int]]:
-    """Distribute token indices across lines, returning index lists per line."""
+def _wrap(tokens: list[str], max_chars: int) -> list[list[int]]:
+    """Distribute token indices across lines, returning index lists per line.
+
+    Wraps unconditionally. It used to stop opening new lines once it reached
+    max_lines and let the final line run past max_chars instead — silently,
+    since the card still rendered. group_words is what bounds the line count
+    now, by only grouping words that fit.
+    """
     lines: list[list[int]] = [[]]
     width = 0
     for i, tok in enumerate(tokens):
         add = len(tok) + (1 if lines[-1] else 0)
-        if lines[-1] and width + add > max_chars and len(lines) < max_lines:
+        if lines[-1] and width + add > max_chars:
             lines.append([])
-            width = 0
-            add = len(tok)
+            width = len(tok)
+        else:
+            width += add
         lines[-1].append(i)
-        width += add
     return lines
 
 
@@ -278,15 +728,53 @@ def build_ass(
     style: dict[str, Any],
     end_card: dict[str, Any] | None,
     out_path: Path,
+    turns: list[tuple[float, str]] | None = None,
 ) -> Path:
-    """Word-highlight subtitles.
+    """Burned-in caption cards, in one of four treatments.
 
-    One Dialogue event per word, each rendering the full caption card with only
-    the active word recoloured. Simpler and far more predictable across libass
-    versions than karaoke (\\k) timing tags.
+    `style["animation"]` picks the treatment. The mechanism for the animated
+    ones is not invented here — it is what every current generator ships:
+    a static card with the active word carrying `\\fscx/\\fscy` inside a `\\t()`,
+    anchored by the style rather than by `\\move`. Checked against
+    nicolaigaina/ai-video-captions (`backend/subtitles.py`, pushed 2026-03-27),
+    sebetancurch/auto-caption (`autocaption/ass_builder.py`, 2026-07-17) and
+    kperreau/wordsubgen (`generator.go`). None of the three uses `\\move`.
+
+      plain      one event per card, no per-word treatment, short fade in/out.
+                 What editors doing serious/broadcast work default to — the
+                 r/editors thread on a CNN captioning workflow treats
+                 "professional captioning" and "capcut adhd style captions" as
+                 two different jobs.
+      pop        card re-rendered per word, active word scales 112 -> 100 over
+                 70ms and stays white. Motion without colour.
+      pop_color  as pop, plus the active word recoloured. The mainstream 2026
+                 look.
+      highlight  colour change only, no motion. The original behaviour, kept so
+                 old renders stay reproducible.
+
+    Which of these is right is a taste call and it is not settled: the same
+    search that found the pop mechanism also found the field mocking it —
+    "flashing words at someone rapidly is optimized for being annoying and
+    attention grabbing, not for readability" (r/mildlyinfuriating, 2026-05-08),
+    and "big yellow subtitles... when mom and dad are doing it, it's not cool
+    anymore" (r/smallbusiness, 2026-07-27). So all four are buildable and the
+    choice is made by looking at rendered output, not by argument.
+
+    One event per word for the animated modes rather than karaoke (\\k) tags:
+    far more predictable across libass versions, and it is what the three
+    reference implementations do.
 
     timeline_offset_s converts absolute source timestamps into output-clip time.
     """
+    # Cleaned before grouping, not at render time: the artifacts change token
+    # lengths, so stripping them afterwards would wrap the lines against text
+    # that is not what ends up on screen.
+    words = [
+        type(w)(t=w.t, w=strip_caption_artifact(w.w))
+        for w in words
+        if strip_caption_artifact(w.w)
+    ]
+
     max_chars = style.get("max_chars_per_line", 22)
     max_lines = style.get("max_lines", 2)
     upper = style.get("uppercase", True)
@@ -309,10 +797,103 @@ Style: Card,{style.get('font', 'Arial Black')},64,{highlight},{highlight},&H0000
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
-    events: list[str] = []
-    for group in group_words(words, max_chars, max_lines):
-        tokens = [(w.w.strip().upper() if upper else w.w.strip()) for w in group]
-        line_map = _wrap(tokens, max_chars, max_lines)
+    # Speaker-anchored caption slots. `turns` is [(output_time, speaker)]
+    # sorted ascending; `slot_margins` maps a speaker to the MarginV that puts
+    # the text beside them. ASS carries MarginV per Dialogue line, so this
+    # needs no second Style and no \pos — the alignment stays \an2 and only the
+    # distance from the bottom changes.
+    slot_margins: dict[str, int] = style.get("slot_margins") or {}
+    default_margin = int(style.get("margin_v", 420))
+
+    def speaker_at(t: float) -> str | None:
+        if not turns:
+            return None
+        who = None
+        for turn_t, name in turns:
+            if turn_t <= t + 1e-9:
+                who = name
+            else:
+                break
+        return who
+
+    def margin_at(t: float) -> int:
+        return slot_margins.get(speaker_at(t) or "", default_margin)
+
+    anim = style.get("animation", "highlight")
+    pop_scale = int(style.get("pop_scale", 112))
+    pop_ms = int(style.get("pop_ms", 70))
+    card_fade_ms = int(style.get("card_fade_ms", 80))
+
+    def active(token: str) -> str:
+        """The active word's markup for the chosen treatment.
+
+        `pop` and `pop_color` scale ONE word inside a line that libass then
+        re-lays-out, so the whole block shifts. Measured on short_v3_slots.mp4
+        by rendering its own .ass over black and taking the ink box per frame:
+        on a word change the line moved 33px left and grew 65px, then snapped
+        back over two frames — every word, all the way through. That is the
+        jitter, and it is why `card_punch` exists: the scale moves to the card
+        as a whole, where it cannot reflow anything relative to anything else.
+        """
+        if anim == "pop":
+            return (f"{{\\fscx{pop_scale}\\fscy{pop_scale}"
+                    f"\\t(0,{pop_ms},\\fscx100\\fscy100)}}{token}{{\\r}}")
+        if anim == "pop_color":
+            return (f"{{\\c{highlight}\\fscx{pop_scale}\\fscy{pop_scale}"
+                    f"\\t(0,{pop_ms},\\fscx100\\fscy100)}}{token}{{\\r}}")
+        return f"{{\\c{highlight}}}{token}{{\\c{primary}}}"
+
+    def card_prefix(is_first_event: bool) -> str:
+        """Scale applied to the entire card, once, as it appears."""
+        if anim != "card_punch" or not is_first_event:
+            return ""
+        return (f"{{\\fscx{pop_scale}\\fscy{pop_scale}"
+                f"\\t(0,{pop_ms},\\fscx100\\fscy100)}}")
+
+    # Cards are grouped within a speaker's run, never across a change. A card
+    # holding the end of one person's sentence and the start of the other's
+    # would have to sit in one slot or the other and would be wrong beside
+    # whichever it chose.
+    runs: list[list[Word]] = []
+    for word in words:
+        who = speaker_at(word.t - timeline_offset_s)
+        if runs and speaker_at(runs[-1][0].t - timeline_offset_s) == who:
+            runs[-1].append(word)
+        else:
+            runs.append([word])
+
+    max_words = style.get("max_words_per_card")
+    cards: list[tuple[list[Word], int]] = []
+    for run in runs:
+        slot = margin_at(run[0].t - timeline_offset_s)
+        for g in group_words(run, max_chars, max_lines, max_words):
+            cards.append((g, slot))
+
+    timed: list[tuple[float, float, str, int]] = []
+    for group, marginv in cards:
+        # CONTENT_SPEC §9: the audio ships as recorded, every text surface is
+        # censored. Captions are a text surface — they get indexed and read
+        # without the footage around them.
+        tokens = [censor(w.w.strip()) for w in group]
+        if upper:
+            tokens = [t.upper() for t in tokens]
+        line_map = _wrap(tokens, max_chars)
+        plain_text = "\\N".join(
+            " ".join(tokens[j] for j in line) for line in line_map
+        )
+
+        if anim == "plain":
+            # One event for the whole card. Nothing moves inside it, so
+            # re-emitting it per word would only give libass more chances to
+            # collide with itself.
+            start = group[0].t - timeline_offset_s
+            end = group[-1].t - timeline_offset_s + 0.45
+            if end > 0 and start < total_duration_s:
+                start = max(0.0, start)
+                end = min(total_duration_s, max(end, start + 0.05))
+                fade = f"{{\\fad({card_fade_ms},{card_fade_ms})}}" if card_fade_ms else ""
+                timed.append((start, end, fade + plain_text, marginv))
+            continue
 
         for i, word in enumerate(group):
             start = word.t - timeline_offset_s
@@ -329,14 +910,30 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             rendered_lines = []
             for line in line_map:
                 parts = [
-                    f"{{\\c{highlight}}}{tokens[j]}{{\\c{primary}}}" if j == i else tokens[j]
-                    for j in line
+                    active(tokens[j]) if j == i else tokens[j] for j in line
                 ]
                 rendered_lines.append(" ".join(parts))
-            text = "\\N".join(rendered_lines)
-            events.append(
-                f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Main,,0,0,0,,{text}"
-            )
+            timed.append((start, end,
+                          card_prefix(i == 0) + "\\N".join(rendered_lines),
+                          marginv))
+
+    # A card's last word had no successor to end against, so it ran for a flat
+    # 0.45s — straight over the start of the next card. libass does not discard
+    # a collision, it stacks it: two 2-line cards became FOUR lines on screen,
+    # which is what the shipped Thompson short opens on (events 0:01.27-1.72 and
+    # 0:01.39-1.75). Clamping every event against its successor is the general
+    # fix; the last-word case was only where it showed.
+    timed.sort(key=lambda e: e[0])
+    events: list[str] = []
+    for i, (start, end, text, marginv) in enumerate(timed):
+        if i + 1 < len(timed):
+            end = min(end, timed[i + 1][0])
+        if end - start < 0.02:
+            continue
+        events.append(
+            f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Main,,0,0,"
+            f"{marginv},,{text}"
+        )
 
     if end_card and end_card.get("enabled"):
         card_len = float(end_card.get("duration_s", 2.0))
@@ -353,19 +950,141 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 # ------------------------------------------------------------------ renderers
 
 
-def _concat_filter(segments: list[Segment], offset_s: float) -> tuple[str, str, str]:
-    """Build trim/concat filter chains for N segments of one input."""
+def _concat_filter(
+    segments: list[Segment], offset_s: float, join_fade_s: float = 0.015
+) -> tuple[str, str, str]:
+    """Build trim/concat filter chains for N segments of one input.
+
+    Every join gets a 15ms fade on the audio only. A hard splice lands wherever
+    the waveform happened to be, and joining two non-zero samples puts a step
+    discontinuity into the signal — a click. It is inaudible as a fade at 15ms
+    and it is the standard fix; the video stays a hard cut, because the jump
+    IS the edit.
+
+    This matters more now than it did with four hand-placed beats: trimming
+    dead air turns a 4-piece cut into an 11-piece one, so the same short went
+    from 3 joins to 10.
+    """
     parts: list[str] = []
     for i, seg in enumerate(segments):
         a = max(0.0, seg.start_s - offset_s)
         b = max(a + 0.05, seg.end_s - offset_s)
+        fade = ""
+        if join_fade_s > 0:
+            d = min(join_fade_s, (b - a) / 4.0)
+            fade = (f",afade=t=in:st=0:d={d:.3f}"
+                    f",afade=t=out:st={b - a - d:.3f}:d={d:.3f}")
         parts.append(
             f"[0:v]trim=start={a:.3f}:end={b:.3f},setpts=PTS-STARTPTS[v{i}];"
-            f"[0:a]atrim=start={a:.3f}:end={b:.3f},asetpts=PTS-STARTPTS[a{i}]"
+            f"[0:a]atrim=start={a:.3f}:end={b:.3f},asetpts=PTS-STARTPTS{fade}[a{i}]"
         )
     pairs = "".join(f"[v{i}][a{i}]" for i in range(len(segments)))
     concat = f"{pairs}concat=n={len(segments)}:v=1:a=1[vc][ac]"
     return ";".join(parts), concat, "[vc]"
+
+
+# The brand folder was moved into a per-project Desktop folder at some point
+# and the old absolute path stopped resolving. _watermark_chain degrades to "no
+# watermark" rather than failing the render, so every short since then went out
+# unbranded with only a log line to say so. Candidates rather than one path,
+# newest location first, so a move costs a warning instead of the mark.
+_INTRO_CANDIDATES = [
+    Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\sting_v2.mp4"),
+    Path(r"C:\Users\natha\OneDrive\Desktop\boyd-brand\sting_v2.mp4"),
+    Path(__file__).resolve().parents[2] / "assets" / "brand" / "sting_v2.mp4",
+]
+
+
+def resolve_intro(configured: str | None = None) -> Path | None:
+    """The branded sting that opens the long-form, or None.
+
+    Candidates rather than one path, for the same reason the watermark uses
+    them: the brand folder has already moved once, and the failure mode was a
+    silent one - every render went out unbranded with a single log line to say
+    so.
+
+    sting_v2.mp4 is 2.6s at 1920x1080 WITH an audio stream. The _SLOW variants
+    are 5.1-7.7s and silent; a silent branch forces render_longform to
+    synthesise an anullsrc to keep concat happy, and 7.7s of branding in front
+    of a cold open is retention paid for nothing.
+    """
+    if configured:
+        p = Path(configured)
+        return p if p.is_file() else None
+    return next((p for p in _INTRO_CANDIDATES if p.is_file()), None)
+
+
+_WATERMARK_CANDIDATES = [
+    Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\watermarks_v2\wm_brand_halo_40.png"),
+    Path(r"C:\Users\natha\OneDrive\Desktop\boyd-brand\watermarks_v2\wm_brand_halo_40.png"),
+    Path(__file__).resolve().parents[2] / "assets" / "brand" / "wm_brand_halo_40.png",
+]
+DEFAULT_WATERMARK = next(
+    (p for p in _WATERMARK_CANDIDATES if p.is_file()), _WATERMARK_CANDIDATES[0]
+)
+
+
+def _watermark_chain(
+    cfg: dict[str, Any],
+    w: int,
+    h: int,
+    in_label: str,
+    out_label: str,
+    width_frac: float,
+    wm_index: int = 1,
+    y: int | list[int] | None = None,
+) -> tuple[list[str], str]:
+    """Overlay the channel mark top-right. Returns (extra ffmpeg inputs, filter).
+
+    Top-right because YouTube's own player controls and branding watermark both
+    live bottom-right, and the progress bar eats the bottom edge on hover. The
+    mark file already carries its opacity and halo baked in, so this only scales
+    and places it — no alpha maths here, which keeps the one chosen file the
+    single source of truth.
+
+    When disabled or missing, returns a `null` pass-through on the same labels so
+    a missing asset degrades to "no watermark" rather than failing a render that
+    is otherwise fine.
+    """
+    raw = cfg.get("watermark", DEFAULT_WATERMARK)
+    if raw in (None, False, ""):
+        return [], f"[{in_label}]null[{out_label}]"
+    path = Path(raw)
+    if not path.is_file():
+        log.warning("watermark not found, rendering without it: %s", path)
+        return [], f"[{in_label}]null[{out_label}]"
+
+    frac = float(cfg.get("watermark_width_frac", width_frac))
+    margin = int(round(w * float(cfg.get("watermark_margin_frac", 0.035))))
+    wm_w = int(round(w * frac))
+    # `y` places the mark inside the PICTURE rather than inside the canvas. The
+    # court's frame carries its own black band across the top, so the default
+    # margin put the mark on black where it read as a channel bug rather than a
+    # watermark over the footage.
+    #
+    # A list of positions puts one mark on each tile. When the 2-up is stacked
+    # a single top-right mark lands on the upper participant only, leaving the
+    # judge's half unbranded — castillo_FINAL.mp4 carries the mark over Judge
+    # Boyd's tile, which is the house precedent.
+    tops = [margin] if y is None else ([y] if isinstance(y, int) else list(y))
+    tops = [int(v) for v in tops]
+
+    if len(tops) == 1:
+        return (
+            ["-i", str(path.resolve())],
+            f"[{wm_index}:v]scale={wm_w}:-1[wm];"
+            f"[{in_label}][wm]overlay=W-w-{margin}:{tops[0]}[{out_label}]",
+        )
+
+    n = len(tops)
+    parts = [f"[{wm_index}:v]scale={wm_w}:-1,split={n}"
+             + "".join(f"[wm{i}]" for i in range(n))]
+    src = in_label
+    for i, top in enumerate(tops):
+        dst = out_label if i == n - 1 else f"{out_label}_{i}"
+        parts.append(f"[{src}][wm{i}]overlay=W-w-{margin}:{top}[{dst}]")
+        src = dst
+    return ["-i", str(path.resolve())], ";".join(parts)
 
 
 def render_longform(
@@ -375,29 +1094,93 @@ def render_longform(
     cfg: dict[str, Any],
     out_path: Path,
     crop: str | None = None,
+    intro: Path | None = None,
+    watermark_y: int | None = None,
 ) -> float:
+    """The case, trimmed, optionally behind a branded intro.
+
+    `intro` is concatenated in front of the body inside the same filter graph
+    rather than by a second encode, so the court footage is compressed once.
+    The watermark is applied to the BODY only — the intro is already branding
+    and stacking the mark on top of it reads as a mistake.
+
+    `watermark_y` anchors the mark inside the picture instead of inside the
+    canvas. Measured on this docket: the court's own frame carries a black band
+    across its top 279 rows at 1080p, and the default margin dropped the mark
+    into it, where it sat on black instead of over the footage.
+    """
     w, h = cfg.get("resolution", [1920, 1080])
     trims, concat, vlabel = _concat_filter(segments, offset_s)
     pre = f"{crop}," if crop else ""
 
+    inputs: list[str] = ["-i", str(source)]
+    intro_idx = None
+    if intro is not None:
+        if not Path(intro).is_file():
+            raise FileNotFoundError(f"intro not found: {intro}")
+        intro_idx = 1
+        inputs += ["-i", str(Path(intro).resolve())]
+
+    wm_index = 1 if intro_idx is None else 2
+    wm_in, wm_filter = _watermark_chain(cfg, w, h, "vbase", "vwm", 0.06,
+                                        wm_index=wm_index, y=watermark_y)
+    if not wm_in:                      # no watermark file -> nothing to index
+        wm_index = None
+    inputs += wm_in
+
+    fps = cfg.get("fps", 30)
     chain = (
         f"{vlabel}{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
         f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,"
-        f"fps={cfg.get('fps', 30)},format=yuv420p[vout]"
+        f"fps={fps}[vbase]"
     )
-    filter_complex = f"{trims};{concat};{chain}"
+    parts = [trims, concat, chain, wm_filter]
+
+    if intro_idx is None:
+        parts.append("[vwm]format=yuv420p[vout]")
+        amap = "[ac]"
+    else:
+        # Both branches must agree on pixel format, SAR, frame rate, sample
+        # rate and channel layout or concat refuses to join them.
+        parts.append("[vwm]format=yuv420p,setsar=1[vbody]")
+        parts.append(
+            f"[{intro_idx}:v]scale={w}:{h}:force_original_aspect_ratio=decrease,"
+            f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,"
+            f"fps={fps},format=yuv420p,setsar=1[iv]"
+        )
+        norm = "aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo"
+        if _has_audio(Path(intro)):
+            parts.append(f"[{intro_idx}:a]{norm}[ia]")
+        else:
+            # A silent intro still needs an audio stream, or concat drops it.
+            parts.append(
+                f"anullsrc=channel_layout=stereo:sample_rate=48000:"
+                f"d={probe_duration(Path(intro)):.3f},{norm}[ia]"
+            )
+        parts.append(f"[ac]{norm}[ab]")
+        parts.append("[iv][ia][vbody][ab]concat=n=2:v=1:a=1[vout][aout]")
+        amap = "[aout]"
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _run([
-        "ffmpeg", "-y", "-i", str(source),
-        "-filter_complex", filter_complex,
-        "-map", "[vout]", "-map", "[ac]",
+        "ffmpeg", "-y", *inputs,
+        "-filter_complex", ";".join(parts),
+        "-map", "[vout]", "-map", amap,
         "-c:v", "libx264", "-preset", "medium", "-crf", str(cfg.get("crf", 20)),
         "-c:a", "aac", "-b:a", cfg.get("audio_bitrate", "192k"),
         "-movflags", "+faststart",
         str(out_path),
     ])
     return probe_duration(out_path)
+
+
+def _has_audio(path: Path) -> bool:
+    proc = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries",
+         "stream=codec_type", "-of", "csv=p=0", str(path)],
+        capture_output=True, text=True, timeout=60,
+    )
+    return "audio" in proc.stdout
 
 
 def render_short(
@@ -408,6 +1191,8 @@ def render_short(
     ass_path: Path | None,
     out_path: Path,
     crop: str | None = None,
+    bg_crop: str | None = None,
+    tile_crops: tuple[str, str] | None = None,
 ) -> float:
     w, h = cfg.get("resolution", [1080, 1920])
     fps = cfg.get("fps", 30)
@@ -416,11 +1201,39 @@ def render_short(
     # occupying a fraction of the vertical canvas.
     pre = f"{crop}," if crop else ""
 
+    # The blurred backdrop is built by scaling the frame to fill 9:16 and centre
+    # cropping, which takes a narrow vertical column out of a 16:9 frame. When
+    # that frame carries its own black bars the column is mostly bar, so the
+    # "blurred fill" of CONTENT_SPEC §4 renders as flat black with a smear
+    # through it — which is what shipped for JgvW7oCQxuI:6698 and 4zkUTUavW4I:116.
+    #
+    # A backdrop may use a crop the foreground cannot. Clipping a participant
+    # out of the foreground loses the content; clipping one out of a blurred,
+    # darkened backdrop loses nothing, so bg_crop is accepted on much weaker
+    # agreement than `crop` and simply falls back to it when the frame is full.
+    bg_pre = pre or (f"{bg_crop}," if bg_crop else "")
+
     mode = cfg.get("vertical_mode", "auto")
     if mode == "auto":
         mode, _ = choose_vertical_layout(source, crop, cfg)
 
-    if mode == "center_crop":
+    if mode == "duo_fill":
+        # Both participants, each filling half the canvas exactly, so the
+        # rendered frame has no black anywhere — not at the top, not between
+        # the tiles, not at the bottom. The two windows must already be cropped
+        # to the slot's aspect (w : h/2); plan_fill_window does that, and it is
+        # the caller's job because choosing what the window centres on is an
+        # editorial decision, not a property of the file.
+        if not tile_crops:
+            raise ValueError("duo_fill needs tile_crops (use plan_fill_window)")
+        half = h // 2
+        vertical = (
+            f"{vlabel}split=2[l0][r0];"
+            f"[l0]{tile_crops[0]},scale={w}:{half},setsar=1[lt];"
+            f"[r0]{tile_crops[1]},scale={w}:{half},setsar=1[rt];"
+            f"[lt][rt]vstack=inputs=2[vv]"
+        )
+    elif mode == "center_crop":
         vertical = (
             f"{vlabel}{pre}scale={w}:{h}:force_original_aspect_ratio=increase,"
             f"crop={w}:{h}[vv]"
@@ -431,17 +1244,33 @@ def render_short(
         # roughly four times as much of the canvas with the same pixels.
         sigma = max(2.0, float(cfg.get("blur_sigma", 28)) / 4.0)
         sw, sh = w // 4, h // 4
+
+        # Each half gets its own crop when they were measured separately. The
+        # halves are not the same shape on this docket, so one shared crop
+        # leaves a black stripe between the stacked tiles — visible in
+        # short_v2_*.mp4 before this existed.
+        if tile_crops:
+            left_pre, right_pre = (f"{c}," for c in tile_crops)
+            bg_source = f"{tile_crops[1]},"   # the taller tile has more picture
+        else:
+            left_pre = f"{pre}crop=iw/2:ih:0:0,"
+            right_pre = f"{pre}crop=iw/2:ih:iw/2:0,"
+            bg_source = bg_pre
+
+        # Anchored to the BOTTOM, not the top. The caption band is fixed by the
+        # platform safe zone rather than by the layout, so the only free choice
+        # left is which part of the picture sits under the text — and pushing
+        # the stack down puts the lower participant's face below the captions
+        # instead of behind them.
         vertical = (
-            f"{vlabel}{pre}split=3[bg][l][r];"
-            f"[bg]scale={sw}:{sh}:force_original_aspect_ratio=increase,"
+            f"{vlabel}split=3[bg0][l0][r0];"
+            f"[bg0]{bg_source}scale={sw}:{sh}:force_original_aspect_ratio=increase,"
             f"crop={sw}:{sh},gblur=sigma={sigma:.1f},"
-            f"eq=brightness=-0.25:saturation=0.6,scale={w}:{h}[bgb];"
-            f"[l]crop=iw/2:ih:0:0,scale={w}:-2[lt];"
-            f"[r]crop=iw/2:ih:iw/2:0,scale={w}:-2[rt];"
+            f"eq=brightness=-0.12:saturation=0.6,scale={w}:{h}[bgb];"
+            f"[l0]{left_pre}scale={w}:-2[lt];"
+            f"[r0]{right_pre}scale={w}:-2[rt];"
             f"[lt][rt]vstack=inputs=2[stk];"
-            # Anchored near the top rather than centred, so the lower band is
-            # free for captions instead of them sitting over a participant.
-            f"[bgb][stk]overlay=(W-w)/2:{STACK_TOP_Y}[vv]"
+            f"[bgb][stk]overlay=(W-w)/2:H-h-{STACK_BOTTOM_MARGIN}[vv]"
         )
     else:
         # Zoom court puts several people on screen; cropping to 9:16 removes
@@ -454,16 +1283,46 @@ def render_short(
         darken = float(cfg.get("blur_darken", 0.55))
         sw, sh = w // 4, h // 4
         vertical = (
-            f"{vlabel}{pre}split=2[bg][fg];"
-            f"[bg]scale={sw}:{sh}:force_original_aspect_ratio=increase,"
+            f"{vlabel}split=2[bg0][fg0];"
+            f"[bg0]{bg_pre}scale={sw}:{sh}:force_original_aspect_ratio=increase,"
             f"crop={sw}:{sh},gblur=sigma={sigma:.1f},"
             f"eq=brightness=-{(1 - darken) * 0.5:.3f}:saturation=0.7,"
             f"scale={w}:{h}[bgb];"
-            f"[fg]scale={w}:-2[fgs];"
+            f"[fg0]{pre}scale={w}:-2[fgs];"
             f"[bgb][fgs]overlay=(W-w)/2:(H-h)/2[vv]"
         )
 
     tail = f"[vv]fps={fps}"
+
+    # Colour grade the PICTURE, before the captions are burned in.
+    #
+    # Order is the whole point. Grading after `ass=` would lift the caption
+    # white too, and white is already at ceiling — it would clip the text
+    # edges and eat the black outline that makes them readable. Everything
+    # below therefore touches court footage only.
+    #
+    # The court's Zoom feed is flat and slightly grey. The naive fix is
+    # `eq=brightness=...`, which raises every pixel including the ones already
+    # near white — the jail scrubs, the paper on the bench and the overhead
+    # lights blow out and the frame reads washed rather than bright.
+    #
+    # A curve fixes that: lift the shadows and midtones hard, then pull the
+    # top end DOWN to 0.97 so the highlights roll off instead of clipping.
+    # Brighter picture, whites intact.
+    if cfg.get("color", {}).get("enabled", True):
+        c = cfg.get("color", {})
+        curve = c.get(
+            "curve",
+            # x/y control points. 0.25 -> 0.31 and 0.5 -> 0.57 is the lift;
+            # 1.0 -> 0.97 is the highlight rolloff that protects the whites.
+            "0/0.02 0.25/0.31 0.5/0.57 0.75/0.80 1/0.97",
+        )
+        tail += (
+            f",curves=all='{curve}'"
+            f",eq=saturation={float(c.get('saturation', 1.10)):.3f}"
+            f":contrast={float(c.get('contrast', 1.05)):.3f}"
+        )
+
     if ass_path is not None:
         # ffmpeg's filter parser mangles Windows drive letters and backslashes,
         # so run with cwd set to the file's directory and reference it by name.
@@ -475,14 +1334,28 @@ def render_short(
         if fonts_dir.is_dir() and any(fonts_dir.iterdir()):
             rel = os.path.relpath(fonts_dir, ass_path.parent).replace("\\", "/")
             tail += f":fontsdir='{rel}'"
-    tail += ",format=yuv420p[vout]"
+    tail += "[vbase]"
 
-    filter_complex = f"{trims};{concat};{vertical};{tail}"
+    # Shorts are 1080 wide against a 1920-tall canvas, so the same 6% used on the
+    # longform renders a 65px mark that vanishes on a phone. 11% matches its
+    # apparent size on the 16:9 cut.
+    # One mark per participant when the tiles are stacked. A single top-right
+    # mark brands the upper tile only and leaves Judge Boyd's half bare;
+    # castillo_FINAL.mp4 carries it over her tile, so both is the house look.
+    wm_margin = int(round(w * float(cfg.get("watermark_margin_frac", 0.035))))
+    wm_y: int | list[int] | None = None
+    if mode == "duo_fill" and cfg.get("watermark_per_tile", True):
+        wm_y = [wm_margin, h // 2 + wm_margin]
+    wm_in, wm_filter = _watermark_chain(cfg, w, h, "vbase", "vwm", 0.11,
+                                        y=wm_y)
+    post = "[vwm]format=yuv420p[vout]"
+
+    filter_complex = f"{trims};{concat};{vertical};{tail};{wm_filter};{post}"
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     cwd = ass_path.parent if ass_path is not None else None
     _run([
-        "ffmpeg", "-y", "-i", str(source.resolve()),
+        "ffmpeg", "-y", "-i", str(source.resolve()), *wm_in,
         "-filter_complex", filter_complex,
         "-map", "[vout]", "-map", "[ac]",
         "-c:v", "libx264", "-preset", "medium", "-crf", str(cfg.get("crf", 20)),
