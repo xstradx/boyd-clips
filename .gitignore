@@ -21,3 +21,36 @@ __pycache__/
 # Archived county data — regenerable for 7 days, then not. Kept out of git
 # because it grows daily and contains raw county records.
 data/jail-activity/
+
+# --- 2026-08-19: committing two days of untracked work ---
+
+# Transient run logs and a Windows reserved-name artefact
+*.log
+*.err
+NUL
+
+# Tool caches
+.firecrawl/
+
+# ECAPA speaker-embedding model — 85 MB of checkpoints, re-downloadable
+assets/ecapa/
+
+# Research media: 2.2 GB of Blender renders, competitor audio and frame grabs.
+# The analysis text sitting next to it IS tracked; the binaries are not.
+research/**/*.png
+research/**/*.jpg
+research/**/*.jpeg
+research/**/*.wav
+research/**/*.mov
+research/**/*.mkv
+research/**/*.avi
+research/**/*.webm
+research/**/*.exr
+research/**/*.raw
+research/**/*.blend
+research/**/*.ttf
+research/**/*.pdf
+
+# Raw competitor captions (~70 MB, re-fetchable with yt-dlp). The derived
+# analysis — ct_meta.jsonl, ct_compact.tsv, research/fit — IS tracked.
+research/**/subs/
