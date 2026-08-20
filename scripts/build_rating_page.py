@@ -86,8 +86,10 @@ JS = """
 // let that exception escape, so every click silently failed and a reload wiped
 // everything. Nothing here can throw out of a click handler.
 var KEY='boyd_labels_v1';
-var STATE={};
-try{ var raw=localStorage.getItem(KEY); if(raw){ STATE=JSON.parse(raw)||{}; } }catch(e){}
+var STATE=SEED;
+try{ var raw=localStorage.getItem(KEY);
+     if(raw){ var prev=JSON.parse(raw)||{};
+              for(var kk in prev){ if(!(kk in STATE)) STATE[kk]=prev[kk]; } } }catch(e){}
 
 function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }catch(e){} }
 
@@ -130,11 +132,12 @@ function rate(k,v){
 }
 
 function summary(){
-  var L=lines();
-  return 'POST: '+(L.yes.join(', ')||'none')+
-       '\nSKIP: '+(L.no.join(', ')||'none')+
-       '\nUNSURE: '+(L.maybe.join(', ')||'none')+
-       '\n\n'+JSON.stringify(STATE);
+  var L=lines(), NL=String.fromCharCode(10);
+  return ['POST: '+(L.yes.join(', ')||'none'),
+          'SKIP: '+(L.no.join(', ')||'none'),
+          'UNSURE: '+(L.maybe.join(', ')||'none'),
+          '',
+          JSON.stringify(STATE)].join(NL);
 }
 
 function copy(){
@@ -153,14 +156,33 @@ else{ document.addEventListener('DOMContentLoaded', paint); }
 
 def main() -> None:
     rows = json.loads(CANDS.read_text(encoding="utf-8"))[:SHOW]
+
+    # Carry forward anything already rated. He rated 24 of these on the served
+    # version before it was killed; those went to state/labels.json and must not
+    # be asked for again. Unrated cards sort to the top so finishing is quick,
+    # while the number on each card stays its original rank.
+    prior = {}
+    lab = ROOT / "state" / "labels.json"
+    if lab.exists():
+        try:
+            prior = json.loads(lab.read_text(encoding="utf-8"))
+        except Exception:
+            prior = {}
+    for i, c in enumerate(rows, 1):
+        c["_rank"] = i
+        c["_done"] = prior.get("%s:%d" % (c["video_id"], int(c["t"])), "")
+    rows.sort(key=lambda c: (1 if c["_done"] else 0, c["_rank"]))
+    left = sum(1 for c in rows if not c["_done"])
     out = ["<!doctype html><html><head><meta charset=utf-8>",
            "<title>Rate Boyd moments</title><style>", CSS, "</style></head><body>",
            "<header><h1>Does this belong on the channel?</h1><div class=sub>",
-           "Top %d candidates &middot; <b id=count>0</b> rated &middot; " % len(rows),
-           "saves in this browser, survives closing and rebooting &middot; ",
-           "skips matter as much as posts</div></header><div class=wrap>"]
+           "<b id=count>0</b> of %d rated &middot; <b>%d left</b> &middot; "
+           % (len(rows), left),
+           "unrated shown first &middot; skips matter as much as posts"
+           "</div></header><div class=wrap>"]
 
-    for i, c in enumerate(rows, 1):
+    for c in rows:
+        i = c["_rank"]
         k = "%s:%d" % (c["video_id"], int(c["t"]))
         t = int(c["t"])
         url = "https://youtu.be/%s?t=%d" % (c["video_id"], max(0, t - 12))
@@ -187,6 +209,7 @@ def main() -> None:
     out.append('<div id=live class=sub style="width:100%;font-family:'
                'ui-monospace,Consolas,monospace"></div>')
     out.append('<textarea id=out readonly></textarea></div>')
+    out.append("<script>var SEED=" + json.dumps(prior) + ";</script>")
     out.append("<script>" + JS + "</script></body></html>")
 
     dest = desktop() / "RATE-BOYD-MOMENTS.html"
