@@ -39,6 +39,20 @@ PROC   = re.compile(r"\bcause number\b|\bmotion to\b|\bstate'?s exhibit\b|\brese
                     r"\bcall the docket\b|\bplea of\b|\barraign\b|\bapproach the bench\b|"
                     r"\braise your right hand\b|\bsolemnly swear\b|\bcourt reporter\b", re.I)
 
+# Trials are not the product. Nathan, 2026-08-20: when the third camera is on
+# the witness chair with someone in it, that is an actual trial, and that is
+# not what we are here clipping. Trials read as lawyer-and-witness Q&A, so most
+# already fail the tests below - this catches the rest. Measured at 5% of 500
+# candidates, and 1 of the top 30.
+#
+# The stronger check is visual and lives in render.detect_tile_grid(): an empty
+# witness chair scores about 1.7 on temporal variance, an occupied one is high.
+TRIAL  = re.compile(r"\braise your right hand\b|\bsolemnly swear\b|\bstate calls\b|"
+                    r"\bladies and gentlemen of the jury\b|\bmembers of the jury\b|"
+                    r"\bjury panel\b|\bvoir dire\b|\bstrike for cause\b|"
+                    r"\bcross-examination\b|\bapproach the witness\b|"
+                    r"\bsustained\b|\boverruled\b", re.I)
+
 
 
 # --- speaker attribution -------------------------------------------------
@@ -75,6 +89,11 @@ def is_boyd(txt, nxt):
         return False
     return bool(CTRL.search(txt)) or bool(nxt and DEFER.search(nxt))
 
+
+def setup_probe(ts, i):
+    """The few turns before this one, used to test the run-up for trial talk."""
+    return " ".join(x[1] for x in ts[max(0, i - 3):i])
+
 def turns(words):
     cur_t, buf, out = None, [], []
     for it in words:
@@ -106,6 +125,8 @@ def main():
             wc = len(txt.split())
             if not (55 <= wc <= 320):
                 continue
+            if TRIAL.search(txt) or TRIAL.search(setup_probe(ts, i)):
+                continue                       # a trial, not a docket
             proc = len(PROC.findall(txt))
             if proc >= 2:
                 continue
