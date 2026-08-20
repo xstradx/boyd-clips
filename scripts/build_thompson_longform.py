@@ -24,7 +24,7 @@ measured wrong on this exact source: it kept 132 rows of black inside Judge
 Boyd's tile because a flag runs down the edge. A document imposes nothing.
 
 NOT DONE HERE, and deliberately: no chapters, no narration, no legal
-exposition. `spec/LONGFORM-ANTIPATTERNS.md` §5 items 12-13 want those and treat
+exposition. `docs/reference/LONGFORM-ANTIPATTERNS.md` §5 items 12-13 want those and treat
 a lightly-trimmed feed as a failure; CONTENT_SPEC §2 defines this product as the
 proceeding itself. CONTENT_SPEC says of itself "This file is the format
 contract", and the antipatterns file's own scope note calls it one specialist's
