@@ -135,6 +135,23 @@ the good moments by accident and could not find more of them.
   Their alignment remains useful for which CASES are worth using, which is a
   different question.
 
+- **"We can go off the record" as a locator.** Reading the two biggest rival
+  clips, both payloads began right after she said it, and the ramen-noodle line
+  does too - she finishes the legal formalities, goes off the record, then talks
+  bluntly. It looked like a structural boundary rather than a keyword, which
+  would have beaten any phrase list.
+
+  It does not survive measurement. The marker is common and real - 2,546
+  occurrences across 692 of 880 dockets - but candidates cluster after it barely
+  above chance: 1.27x at a 45-second window, 1.06x at 240. The top-60 figures
+  range 1.30x to 2.06x across windows on samples of 8 to 18, which is noise.
+
+  **The test is also circular and should be redone**, because it validated the
+  marker against this scorer's own output rather than against known-good
+  moments. It shows the marker disagrees with the scorer; it cannot show whether
+  it predicts a good clip. That question needs labels, and the only labels are
+  Nathan's.
+
 Implementation: `scripts/find_wentthere.py`. Turn-level speaker attribution is
 in `is_boyd()` - validated at 5/7 on known-good moments and 3/3 on known junk.
 Precision at the top of the ranking is roughly 60%; the residual misses are
