@@ -115,6 +115,26 @@ the good moments by accident and could not find more of them.
   against fifteen procedural minutes, so long dull hearings outrank the moment
   worth cutting. The unit is the exchange.
 
+- **Mining the rival's clips for her tells.** Their published spans were aligned
+  onto our own dockets (`scripts/align_clips.py`, 139 of 148 matched) and scored
+  by lift against the speech nobody clipped - a real contrast set, so boilerplate
+  should have cancelled. It returned case-specific nouns from a single hearing
+  and probation-condition boilerplate. The cause is structural and checked:
+  **their catalogue contains zero videos under three minutes** - 280 run 30-60
+  minutes and 157 run over an hour. A compilation includes whole cases, so
+  "published" means "this case was chosen", never "this line landed", and their
+  editors never had to cut to a punchline.
+
+  It also graded the hand-written phrases as weak - "here's the thing" 1.62,
+  "you know what" 1.65, "guess what" 2.51, "let me tell you" absent from clipped
+  spans entirely - which is evidence about the contrast set, not about the
+  phrases.
+
+  Consequence: **moment-level labels cannot be obtained from that channel at
+  all.** They exist only in Nathan's ratings (`scripts/review_moments.py`).
+  Their alignment remains useful for which CASES are worth using, which is a
+  different question.
+
 Implementation: `scripts/find_wentthere.py`. Turn-level speaker attribution is
 in `is_boyd()` - validated at 5/7 on known-good moments and 3/3 on known junk.
 Precision at the top of the ranking is roughly 60%; the residual misses are
