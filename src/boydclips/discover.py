@@ -55,6 +55,38 @@ def parse_docket_date(title: str) -> str:
         return ""
 
 
+def fetch_upload_date(video_id: str) -> str:
+    """The video's own upload date, as a fallback when the title has no usable one.
+
+    847 of the channel's 1,750 streams - nearly half - have a title this module
+    cannot parse, and they are not junk. 344 are titled only "Judge Boyd's Zoom
+    Meeting" yet run two to six hours, spanning 2022 to 2026. The other 503 are
+    ordinary dockets whose titles carry a typo: "FEB 225, 2026", "TUE, FEB 17.
+    2026", or "THURS. AUG. 13" with no year at all.
+
+    Those 503 are current, so a strict title parser silently drops real dockets
+    from the daily run whenever the clerk mistypes. Chasing each typo variant
+    with more regex would be a losing game; asking YouTube what day the thing
+    was published is one code path and is always right.
+
+    Costs one metadata request per undated video, so callers resolve lazily
+    rather than for every docket. Returns "" if it cannot be determined.
+    """
+    try:
+        out = _run_ytdlp(
+            ["--skip-download", "--print", "%(upload_date)s",
+             f"https://www.youtube.com/watch?v={video_id}"],
+            timeout=90,
+        ).strip()
+    except Exception:
+        return ""
+    if len(out) != 8 or not out.isdigit():
+        return ""
+    try:
+        return date(int(out[:4]), int(out[4:6]), int(out[6:])).isoformat()
+    except ValueError:
+        return ""
+
 def parse_session(title: str) -> str:
     m = _SESSION_RE.search(title)
     if not m:

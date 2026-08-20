@@ -56,6 +56,9 @@ def main() -> None:
     ap.add_argument("--depth", type=int, default=2500)
     ap.add_argument("--limit", type=int, default=0, help="stop after N (0 = all)")
     ap.add_argument("--pace", type=float, default=1.5, help="seconds between videos")
+    ap.add_argument("--resolve-dates", action="store_true",
+                    help="ask YouTube for the upload date of streams whose title "
+                         "has none (847 of 1,750 - see discover.fetch_upload_date)")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -66,6 +69,26 @@ def main() -> None:
     listing = discover.list_recent(channel, args.depth)
     have = on_disk()
     todo = [d for d in listing if d.video_id not in have and d.docket_date]
+
+    # Nearly half the channel has a title this parser cannot read - 344 titled
+    # only "Judge Boyd's Zoom Meeting" but running two to six hours, and 503
+    # ordinary dockets with a typo in the date. Skipping them loses real
+    # material, so resolve the date from the video itself when asked.
+    if args.resolve_dates:
+        undated = [d for d in listing if d.video_id not in have and not d.docket_date]
+        print(f"resolving upload dates for {len(undated)} undated streams...",
+              flush=True)
+        for n, d in enumerate(undated, 1):
+            iso = discover.fetch_upload_date(d.video_id)
+            if iso:
+                d.docket_date = iso
+                todo.append(d)
+            if n % 25 == 0:
+                print(f"  resolved {n}/{len(undated)}", flush=True)
+            time.sleep(0.4)
+        got = sum(1 for d in undated if d.docket_date)
+        print(f"  recovered {got} of {len(undated)}", flush=True)
+
     if args.limit:
         todo = todo[: args.limit]
 
