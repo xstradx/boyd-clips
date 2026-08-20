@@ -79,6 +79,26 @@ RECEIPT = re.compile(r"\bi'?ve read\b|\bi read\b|\bit says\b|"
                      r"\bi know (that )?from reading\b|\brecords? (show|indicate)\b|"
                      r"\bthe file\b|\bindicates?\b", re.I)
 
+# Her questions, split by what they DO. Nathan: 'can you not see where judge
+# Boyd asks questions but not just any questions the ones actually worth
+# clipping'. He is right, and it is the first signal here that is a speech act
+# rather than a word count - which is why the vocabulary features all reversed
+# on held-out data and this one did not.
+#
+# Held out (12 post / 15 skip), per 100 words:
+#   challenge question   0.43 post vs 0.07 skip   present 5/12 vs 2/15
+#   procedural question  0.04 post vs 0.17 skip   1/12 vs 4/15
+#   tag question         0.14 post vs 0.29 skip   2/12 vs 6/15
+#
+# Small counts, and the patterns were written after reading that batch's
+# questions, so this is provisional until it survives a fresh batch.
+PROC_Q  = re.compile(r"\b(do|did) you understand\b|\bis that correct\b|"
+                     r"\bany objection\w*\b|\bhow do you plead\b", re.I)
+TAG_Q   = re.compile(r",?\s*(right|okay|correct)\s*\?", re.I)
+CHALL_Q = re.compile(r"[^.?!]*\b(why|what|how|who)\b[^.?!]*\byou\b[^.?!]*\?|"
+                     r"[^.?!]*\bdo you (know|think|want|realize|expect)\b[^.?!]*\?|"
+                     r"[^.?!]*\bare you (serious|kidding|telling me)\b[^.?!]*\?", re.I)
+
 
 
 # --- speaker attribution -------------------------------------------------
@@ -188,6 +208,11 @@ def main():
             # 1 excuse among 14 posts and 7 among 14 skips. Not inverted into a
             # penalty either - 8 hits cannot tell a bad detector from a bad idea.
             
+            # The question layer - the strongest held-out signal so far.
+            sc += min(30, len(CHALL_Q.findall(txt)) * 12.0)
+            sc -= min(14, len(PROC_Q.findall(txt)) * 7.0)
+            sc -= min(12, len(TAG_Q.findall(txt)) * 4.0)
+
             sc -= proc * 8
             sc -= min(18, len(BOND.findall(txt)) * 6.0)
             if wc > 260:
