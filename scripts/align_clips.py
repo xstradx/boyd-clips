@@ -49,7 +49,12 @@ def shingles(ws: list[str], step: int = 1):
         yield i, hash(" ".join(ws[i:i + W]))
 
 def main():
-    subs = sorted(glob.glob("research/reference/courtroomtime/subs/*.vtt"))
+    # All channels that clip her, not just the first one found. Court Trials TV
+    # publishes at a 1,024s median against Courtroom Time's 60-minute
+    # compilations, so its spans are four times sharper a statement of "this is
+    # the part worth watching". Skip .en-orig, which duplicates .en.
+    subs = sorted(g for g in glob.glob("research/reference/*/subs/*.vtt")
+                  if ".en-orig." not in g)
     trans = sorted(glob.glob("work/*/*.transcript.json"))
     print(f"clips: {len(subs)}   transcripts: {len(trans)}", flush=True)
 
@@ -99,6 +104,22 @@ def main():
                 cat[r["id"]] = r
     except Exception:
         pass
+    # The other channels were catalogued by the scan, not by a json file.
+    for f in glob.glob("state/scan/*.txt"):
+        if f.endswith(("_boyd_ids.txt", "channels.txt", "targets.txt", "boydsearch.txt")):
+            continue
+        try:
+            for line in open(f, encoding="utf-8", errors="replace"):
+                parts = line.rstrip().split(chr(124))
+                if len(parts) < 4:
+                    continue
+                try:
+                    dur = float(parts[0])
+                except ValueError:
+                    continue
+                cat.setdefault(parts[2], {"id": parts[2], "dur": dur})
+        except Exception:
+            pass
 
     GAP = 90.0            # seconds of silence that ends a cluster
 

@@ -152,6 +152,32 @@ the good moments by accident and could not find more of them.
   it predicts a good clip. That question needs labels, and the only labels are
   Nathan's.
 
+### The archive splits in two, July 2025
+
+The court changed how it captions around July 2025. Before that the captions are
+raw machine transcription with no speaker changes marked; after, nearly all
+carry `>>` turn markers.
+
+    2022-03 .. 2025-06     0 transcripts with markers,  589 without
+    2025-07 .. 2026-08   291 with markers,                9 without
+
+`find_wentthere.py` splits speech into turns on those markers, so **it works on
+291 dockets and is blind to 589** - the preceding 3.3 years. The ramen-noodle
+line sits in that blind spot, which is why a raw text search found it and the
+finder never could.
+
+**Pause-based segmentation was tried and does not work.** Tested against the 291
+marker-bearing transcripts as ground truth, the best threshold scores F1 0.445 -
+55.8% recall at 37.0% precision at 1.0s, and every other threshold is worse.
+She pauses mid-sentence constantly and speakers hand off without pausing, so
+silence is not a speaker change. Do not retry it; use the labelled transcripts
+to test any replacement.
+
+What remains open for the older 589: score sliding windows of raw text rather
+than turns, which is how the first moments miner worked and how the spearmint
+riff was originally found. Less precise, but it does not need speaker
+structure. They are also still searchable by plain text today.
+
 Implementation: `scripts/find_wentthere.py`. Turn-level speaker attribution is
 in `is_boyd()` - validated at 5/7 on known-good moments and 3/3 on known junk.
 Precision at the top of the ranking is roughly 60%; the residual misses are

@@ -53,6 +53,19 @@ TRIAL  = re.compile(r"\braise your right hand\b|\bsolemnly swear\b|\bstate calls
                     r"\bcross-examination\b|\bapproach the witness\b|"
                     r"\bsustained\b|\boverruled\b", re.I)
 
+# Bond hearings are what other editors avoid hardest. Measured across 553 of
+# their clips aligned onto our own dockets: bond language appears in 0.8% of
+# clipped turns against 7.0% outside - 0.12x, an eight-fold avoidance. Trials
+# score 0.40x, which confirms Nathan's instruction from a separate source, and
+# revocations 1.50x. Plea and sentencing is flat at 1.01x, so it is noise.
+#
+# This is the one signal today measured against other people's editorial
+# choices rather than against this scorer's own output, so it is not circular.
+# Applied as a penalty, not an exclusion: 'bond' appears incidentally in
+# hearings that are not about bond.
+BOND   = re.compile(r"\bbond\b|\bsurety\b|\bpersonal recognizance\b|"
+                    r"\bmagistrat\w+\b", re.I)
+
 
 
 # --- speaker attribution -------------------------------------------------
@@ -146,6 +159,7 @@ def main():
             sc += min(14, len(VERDICT.findall(txt)) * 4.5)
             sc += min(14, len(EXCUSE.findall(setup)) * 7.0)   # the setup
             sc -= proc * 8
+            sc -= min(18, len(BOND.findall(txt)) * 6.0)   # 0.12x in real clips
             if wc < 70:
                 sc -= 6
             rows.append({"video_id": vid, "t": round(t, 1), "score": round(sc, 1),
