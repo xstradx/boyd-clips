@@ -81,44 +81,73 @@ min-height:64px;display:none}
 """
 
 JS = """
+// State lives in memory first. localStorage is a bonus, not a dependency -
+// browsers commonly refuse it on a file:// page, and the first version of this
+// let that exception escape, so every click silently failed and a reload wiped
+// everything. Nothing here can throw out of a click handler.
 var KEY='boyd_labels_v1';
-function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};} }
-function save(o){ localStorage.setItem(KEY, JSON.stringify(o)); }
+var STATE={};
+try{ var raw=localStorage.getItem(KEY); if(raw){ STATE=JSON.parse(raw)||{}; } }catch(e){}
+
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }catch(e){} }
+
+function lines(){
+  var yes=[],no=[],maybe=[];
+  var cards=document.querySelectorAll('.card');
+  for(var i=0;i<cards.length;i++){
+    var c=cards[i], k=c.getAttribute('data-k'), r=c.getAttribute('data-rank');
+    if(STATE[k]==='yes') yes.push(r);
+    else if(STATE[k]==='no') no.push(r);
+    else if(STATE[k]==='maybe') maybe.push(r);
+  }
+  return {yes:yes,no:no,maybe:maybe};
+}
+
 function paint(){
-  var L=load(), n=0;
-  document.querySelectorAll('.card').forEach(function(c){
-    var k=c.getAttribute('data-k'), v=L[k]||'';
-    c.setAttribute('data-r', v); if(v) n++;
-    c.querySelectorAll('.btns button').forEach(function(b){
-      b.className = (b.getAttribute('data-v')===v && v) ? 'on-'+v : '';
-    });
-  });
+  var n=0, cards=document.querySelectorAll('.card');
+  for(var i=0;i<cards.length;i++){
+    var c=cards[i], k=c.getAttribute('data-k'), v=STATE[k]||'';
+    c.setAttribute('data-r', v);
+    if(v) n++;
+    var bs=c.querySelectorAll('.btns button');
+    for(var j=0;j<bs.length;j++){
+      var b=bs[j];
+      b.className=(b.getAttribute('data-v')===v && v) ? 'on-'+v : '';
+    }
+  }
   document.getElementById('count').textContent=n;
+  var L=lines();
+  document.getElementById('live').textContent =
+    'POST: '+(L.yes.join(', ')||'-')+'   SKIP: '+(L.no.join(', ')||'-')+
+    '   UNSURE: '+(L.maybe.join(', ')||'-');
 }
+
 function rate(k,v){
-  var L=load(); if(L[k]===v){ delete L[k]; } else { L[k]=v; } save(L); paint();
+  try{
+    if(STATE[k]===v){ delete STATE[k]; } else { STATE[k]=v; }
+    persist(); paint();
+  }catch(e){ alert('click error: '+e.message); }
 }
+
 function summary(){
-  var L=load(), yes=[], no=[], maybe=[];
-  document.querySelectorAll('.card').forEach(function(c){
-    var k=c.getAttribute('data-k'), r=c.getAttribute('data-rank');
-    if(L[k]==='yes') yes.push(r); else if(L[k]==='no') no.push(r);
-    else if(L[k]==='maybe') maybe.push(r);
-  });
-  return 'POST: '+(yes.join(', ')||'none')+'\\nSKIP: '+(no.join(', ')||'none')+
-         '\\nUNSURE: '+(maybe.join(', ')||'none')+'\\n\\n'+JSON.stringify(L);
+  var L=lines();
+  return 'POST: '+(L.yes.join(', ')||'none')+
+       '\nSKIP: '+(L.no.join(', ')||'none')+
+       '\nUNSURE: '+(L.maybe.join(', ')||'none')+
+       '\n\n'+JSON.stringify(STATE);
 }
-function show(){
-  var o=document.getElementById('out');
-  o.style.display='block'; o.value=summary(); o.select();
-}
+
 function copy(){
-  show();
-  try{ document.execCommand('copy');
-       document.getElementById('msg').textContent='copied - paste it to Claude';
-  }catch(e){ document.getElementById('msg').textContent='select the text above and copy'; }
+  var o=document.getElementById('out');
+  o.style.display='block'; o.value=summary(); o.focus(); o.select();
+  var done=false;
+  try{ done=document.execCommand('copy'); }catch(e){}
+  document.getElementById('msg').textContent =
+    done ? 'copied - paste it to Claude' : 'select the text above and copy it';
 }
-window.addEventListener('DOMContentLoaded', paint);
+
+if(document.readyState!=='loading'){ paint(); }
+else{ document.addEventListener('DOMContentLoaded', paint); }
 """
 
 
@@ -155,6 +184,8 @@ def main() -> None:
     out.append("</div><div id=bar>")
     out.append('<button class=big onclick="copy()">Copy my answers</button>')
     out.append('<span id=msg class=sub></span>')
+    out.append('<div id=live class=sub style="width:100%;font-family:'
+               'ui-monospace,Consolas,monospace"></div>')
     out.append('<textarea id=out readonly></textarea></div>')
     out.append("<script>" + JS + "</script></body></html>")
 
