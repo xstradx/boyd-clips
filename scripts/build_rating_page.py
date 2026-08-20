@@ -155,7 +155,19 @@ else{ document.addEventListener('DOMContentLoaded', paint); }
 
 
 def main() -> None:
-    rows = json.loads(CANDS.read_text(encoding="utf-8"))[:SHOW]
+    allrows = json.loads(CANDS.read_text(encoding="utf-8"))
+
+    # Only candidates he has never seen. Re-showing rated ones would let the
+    # refit be judged on the labels it was fitted to, which proves nothing.
+    seen = {}
+    lab0 = ROOT / "state" / "labels.json"
+    if lab0.exists():
+        try:
+            seen = json.loads(lab0.read_text(encoding="utf-8"))
+        except Exception:
+            seen = {}
+    rows = [c for c in allrows
+            if "%s:%d" % (c["video_id"], int(c["t"])) not in seen][:SHOW]
 
     # Carry forward anything already rated. He rated 24 of these on the served
     # version before it was killed; those went to state/labels.json and must not

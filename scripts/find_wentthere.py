@@ -66,6 +66,19 @@ TRIAL  = re.compile(r"\braise your right hand\b|\bsolemnly swear\b|\bstate calls
 BOND   = re.compile(r"\bbond\b|\bsurety\b|\bpersonal recognizance\b|"
                     r"\bmagistrat\w+\b", re.I)
 
+# She has read the file and says so. This is the strongest signal in Nathan's
+# 28 labels - 0.79 hits per post against 0.14 per skip, and present in 36% of
+# posts against 14% of skips - and it independently matches the competitor
+# study in section 2, which measured 'Boyd produces a receipt' at 6 winners and
+# 0 losers. Two unrelated sources, same conclusion, and this scorer previously
+# gave it nothing.
+RECEIPT = re.compile(r"\bi'?ve read\b|\bi read\b|\bit says\b|"
+                     r"\bsays right here\b|\bmy notes\b|\bthe report\b|"
+                     r"\baccording to\b|\bi'?m looking at\b|\bthe summary\b|"
+                     r"\byour (own )?(text|message|letter)s?\b|\bin front of me\b|"
+                     r"\bi know (that )?from reading\b|\brecords? (show|indicate)\b|"
+                     r"\bthe file\b|\bindicates?\b", re.I)
+
 
 
 # --- speaker attribution -------------------------------------------------
@@ -152,16 +165,34 @@ def main():
                 continue                       # not her comparing herself to them
             per100 = 100.0 / wc
             setup = " ".join(x[1] for x in ts[max(0, i - 3):i])
+            # Refitted 2026-08-20 against 28 labelled moments. The previous version
+            # scored 61.6 on posts and 62.4 on skips - it did not rank at all. What
+            # survives measurement, and nothing else, is used here.
             sc = 0.0
-            sc += min(24, f * per100 * 2.6)          # she is in it
-            sc += min(24, s * per100 * 2.2)          # aimed at them
-            sc += min(20, len(RHET.findall(txt)) * 9.0)
-            sc += min(14, len(VERDICT.findall(txt)) * 4.5)
-            sc += min(14, len(EXCUSE.findall(setup)) * 7.0)   # the setup
+            recpt = len(RECEIPT.findall(txt + ' ' + setup))
+            sc += min(30, recpt * 15.0)              # 5.6x separation, dual-confirmed
+            
+            # Aimed at them, not about herself. you:I was 1.79 on posts, 1.26 on
+            # skips, and raw first-person density ran HIGHER on skips - the earlier
+            # 'she puts herself in it' weight had the wrong sign.
+            ratio = s / max(1.0, float(f))
+            sc += min(26, max(0.0, ratio - 0.9) * 20.0)
+            sc += min(16, s * per100 * 1.4)
+            
+            # Kept, but small: these never separated the two piles on their own.
+            sc += min(8, len(RHET.findall(txt)) * 4.0)
+            sc += min(8, len(VERDICT.findall(txt)) * 2.5)
+            
+            # The excuse bonus is GONE. Nathan offered ridiculous excuses as an
+            # illustration and it was anchored on as a specification; his labels put
+            # 1 excuse among 14 posts and 7 among 14 skips. Not inverted into a
+            # penalty either - 8 hits cannot tell a bad detector from a bad idea.
+            
             sc -= proc * 8
-            sc -= min(18, len(BOND.findall(txt)) * 6.0)   # 0.12x in real clips
-            if wc < 70:
-                sc -= 6
+            sc -= min(18, len(BOND.findall(txt)) * 6.0)
+            if wc > 260:
+                sc -= 6                              # posts averaged 159 words, skips 180
+
             rows.append({"video_id": vid, "t": round(t, 1), "score": round(sc, 1),
                          "words": wc, "first": f, "second": s,
                          "rhet": len(RHET.findall(txt)),
