@@ -115,7 +115,7 @@ def detect_content_crop(
     source: Path,
     sample_start: float = 5.0,
     sample_s: float = 25.0,
-    min_agreement: float = 0.6,
+    min_agreement: float = 0.66,
 ) -> str | None:
     """Find the real content rectangle inside a letterboxed source.
 
@@ -267,6 +267,171 @@ def _content_boxes(
     return boxes
 
 
+# A pixel at or below this luminance is padding, not picture. Zoom's gutters
+# are true black; anti-aliasing on a tile edge lifts a pixel or two above it.
+TILE_BLACK_LEVEL = 16.0
+
+# A column is a gutter when it is dark for this fraction of a band's rows.
+# Measured on zHchVGBX9iA: the real gutter at x640-719 is dark for 0.933 of the
+# band because the "Judge Boyd" name label is drawn ON the gutter, while no
+# content column exceeds 0.5. An earlier 0.95 sat above the gutter and merged
+# the two tiles into one 1200px rectangle, which is what put a black stripe
+# through the rendered short.
+TILE_GUTTER_Q = 0.85
+
+# Smallest tile worth cutting to, in either axis.
+TILE_MIN_SIDE = 64
+
+# A second tile this much less active than the first is furniture, not a
+# person. 4zkUTUavW4I is a clean 2-up whose right tile is an EMPTY witness
+# stand; forcing duo_fill on it renders half a frame of static wall.
+DEAD_TILE_ACTIVITY_RATIO = 0.25
+
+
+def _gray_stack(source: Path, samples_per_s: float):
+    """Sampled luminance frames of the whole frame, as (stack, w, h)."""
+    try:
+        import numpy as np
+    except ImportError:                      # pragma: no cover - numpy is present
+        return None, 0, 0
+    src_w, src_h = probe_dimensions(source)
+    if not src_w or not src_h:
+        return None, 0, 0
+    proc = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(source),
+         "-vf", f"fps={samples_per_s}", "-pix_fmt", "gray", "-f", "rawvideo", "-"],
+        capture_output=True, timeout=1800,
+    )
+    fb = src_w * src_h
+    n = len(proc.stdout) // fb
+    if n == 0:
+        return None, src_w, src_h
+    buf = np.frombuffer(proc.stdout[: n * fb], dtype=np.uint8)
+    return buf.reshape(n, src_h, src_w).astype(np.float32), src_w, src_h
+
+
+def _spans(mask, min_len: int = 1) -> list[tuple[int, int]]:
+    out: list[tuple[int, int]] = []
+    cur: tuple[int, int] | None = None
+    for i, on in enumerate(mask):
+        if on:
+            cur = (i, i) if cur is None else (cur[0], i)
+        elif cur is not None:
+            out.append(cur)
+            cur = None
+    if cur is not None:
+        out.append(cur)
+    return [s for s in out if s[1] - s[0] + 1 >= min_len]
+
+
+def detect_tile_grid(
+    source: Path,
+    samples_per_s: float = 0.2,
+    black_level: float = TILE_BLACK_LEVEL,
+    gutter_q: float = TILE_GUTTER_Q,
+    min_side: int = TILE_MIN_SIDE,
+    min_agreement: float = 0.66,
+) -> list[dict[str, Any]]:
+    """Every tile in the source's Zoom layout, with how much each one moves.
+
+    Makes no assumption about how many tiles there are or where they sit.
+    zHchVGBX9iA is a 2-over-1 grid: "187TH DC" at x0-639 and "Judge Boyd" at
+    x720-1199 across the top, an empty witness stand at x320-959 underneath.
+
+    Two properties of the real frames rule out the obvious approaches, and both
+    were measured rather than assumed:
+
+    * There is no black ROW between the upper and lower bands - the tiles touch
+      at y359/360 - so connected-component labelling merges them into one
+      region. Bands are therefore found where the dark-column SIGNATURE
+      changes, not where a dark row appears.
+    * Participant name labels are drawn on top of the gutters, so a gutter is
+      not dark for every row of its band. Hence `gutter_q` rather than "all".
+
+    `activity` is the per-pixel standard deviation across sampled frames: a
+    talking participant moves, an empty witness stand does not. Measured on
+    zHchVGBX9iA the two live tiles score 20.8 and 8.6 against the empty stand's
+    1.7, a five-fold gap.
+
+    Returns tiles as dicts of x/y/w/h/activity in SOURCE coordinates.
+    """
+    try:
+        import numpy as np
+    except ImportError:                      # pragma: no cover - numpy is present
+        return []
+
+    stack, src_w, src_h = _gray_stack(source, samples_per_s)
+    if stack is None or len(stack) < 2:
+        return []
+
+    def layout(frame) -> tuple[tuple[int, int, int, int], ...]:
+        dark = frame < black_level
+        # Band boundaries: rows whose dark-column signature differs sharply
+        # from the row above. A tile edge changes many columns at once.
+        churn = np.abs(np.diff(dark.astype(np.int8), axis=0)).sum(axis=1)
+        cuts = ([0] + [int(i) + 1 for i in np.where(churn > src_w * 0.10)[0]]
+                + [src_h])
+        found: list[tuple[int, int, int, int]] = []
+        for top, bot in zip(cuts, cuts[1:]):
+            if bot - top < min_side:
+                continue
+            gutter = dark[top:bot, :].mean(axis=0) >= gutter_q
+            for x1, x2 in _spans(~gutter, min_side):
+                # Tiles in one band are not always the same height, so trim
+                # padding off each tile's own top and bottom.
+                col = dark[top:bot, x1:x2 + 1]
+                keep = _spans(~(col.mean(axis=1) >= gutter_q), min_side)
+                if not keep:
+                    continue
+                y1, y2 = keep[0][0] + top, keep[-1][1] + top
+                found.append((x1, y1, x2 - x1 + 1, y2 - y1 + 1))
+        return tuple(sorted(found))
+
+    # Segment every sampled frame separately and keep the layout only if most
+    # of them agree. Averaging first looks tidier and is wrong: over a 34-minute
+    # section participants join and leave, and the mean of two different Zoom
+    # layouts is a grid that appears in no actual frame. Measured on
+    # JgvW7oCQxuI:3211 the averaged mask invented a 1205x178 tile, and on
+    # 4zkUTUavW4I:116 a 640x143 sliver, in both cases displacing a correct
+    # fallback with confident nonsense.
+    # Vote on how MANY tiles there are, not on their exact pixels. Measured
+    # across the sampled frames: the count is stable where the layout is stable
+    # (zHchVGBX9iA, a 2-over-1 grid, shows 3 tiles in 20 of 21 frames) while the
+    # exact boxes agree only 8 times in 21, because an edge moves a pixel or two
+    # between frames. Voting on exact tuples therefore rejected a layout that
+    # never actually changed.
+    #
+    # Where the layout really does change mid-section the count says so and this
+    # returns nothing, which is correct: 4zkUTUavW4I splits 217/198 between two
+    # tiles and one, and JgvW7oCQxuI 37/26, as participants join and leave over
+    # half an hour. Those fall back to halving the frame, which is what produced
+    # the approved renders.
+    per_frame = [layout(f) for f in stack]
+    counts = Counter(len(b) for b in per_frame if b)
+    if not counts:
+        return []
+    modal, agree = counts.most_common(1)[0]
+    if not modal or agree / float(len(stack)) < min_agreement:
+        log.info("framing: layout unstable (%d/%d frames show %d tiles)",
+                 agree, len(stack), modal)
+        return []
+
+    # Median box per tile position, over the frames that saw the modal count.
+    agreeing = [b for b in per_frame if len(b) == modal]
+    tiles: list[dict[str, Any]] = []
+    for idx in range(modal):
+        xs = sorted(b[idx][0] for b in agreeing)
+        ys = sorted(b[idx][1] for b in agreeing)
+        ws = sorted(b[idx][2] for b in agreeing)
+        hs = sorted(b[idx][3] for b in agreeing)
+        mid = len(agreeing) // 2
+        x, y, w, h = xs[mid], ys[mid], ws[mid], hs[mid]
+        act = float(stack[:, y:y + h, x:x + w].std(axis=0).mean())
+        tiles.append({"x": int(x), "y": int(y), "w": int(w), "h": int(h),
+                      "activity": round(act, 2)})
+    return tiles
+
+
 def detect_tile_crops(
     source: Path,
     inset: int = 6,
@@ -294,6 +459,34 @@ def detect_tile_crops(
     src_w, src_h = probe_dimensions(source)
     if not src_w or not src_h:
         return None
+
+    # Prefer a measured grid. Only fall back to halving the frame when the
+    # layout has no gutters to measure, which is the 2-up this function was
+    # originally written for.
+    grid = detect_tile_grid(source, samples_per_s=samples_per_s)
+    if len(grid) >= 2:
+        ranked = sorted(grid, key=lambda t: -t["activity"])
+        best, second = ranked[0], ranked[1]
+        if second["activity"] < best["activity"] * DEAD_TILE_ACTIVITY_RATIO:
+            log.info("framing: one live tile of %d (activity %.1f vs %.1f) - "
+                     "not forcing a duo onto furniture",
+                     len(grid), best["activity"], second["activity"])
+            return None
+        pair = sorted((best, second), key=lambda t: t["x"])
+        cuts: list[str] = []
+        for t in pair:
+            w = t["w"] - 2 * inset
+            h = t["h"] - 2 * inset
+            if w < 32 or h < 32:
+                break
+            w -= w % 2
+            h -= h % 2
+            cuts.append(f"crop={w}:{h}:{t['x'] + inset}:{t['y'] + inset}")
+        if len(cuts) == 2:
+            log.info("framing: %d tiles measured, using %s | %s",
+                     len(grid), cuts[0], cuts[1])
+            return cuts[0], cuts[1]
+
     half = src_w // 2
 
     out: list[str] = []
