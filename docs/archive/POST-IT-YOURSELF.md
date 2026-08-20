@@ -220,7 +220,7 @@ local model well. But split the job honestly:
 - **Segmenting a 3-hour docket and running the safety gate** — 40k tokens of
   context, strict JSON out, and legal judgment about what is safe to publish.
   Malformed JSON was already a tracked failure *with Claude* (see
-  `SCOREBOARD.md`). A local 9–14B model would be worse at exactly the step
+  `docs/archive/SCOREBOARD.md`). A local 9–14B model would be worse at exactly the step
   where a mistake is a legal problem, not a quality problem.
 
 And you do not need that step again for months — the bank is already scored.

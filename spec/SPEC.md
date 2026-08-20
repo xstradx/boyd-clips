@@ -175,23 +175,51 @@ Judge Boyd traced out and composited over the courtroom plate.
 2. `spec/SAFETY_RULES.md` — safety only, and it outranks this file on safety.
 3. `config/pipeline.yaml` — the numbers the code actually reads.
 4. `prompts/*.md` — what the model is asked.
+5. `spec/CONTENT_SPEC.md`, `spec/PACKAGING.md`, `spec/RECORDS-API.md` —
+   subordinate specs. Where one disagrees with §1–§5, this file wins; on
+   anything this file does not cover, they stand.
 
-Everything else is a note, a measurement or a log, and **binds nothing**.
+Anything under `docs/` is a note, a measurement or a log, and **binds nothing**.
 
-### Retired 2026-08-18
+### Corrected 2026-08-20 — this list used to be wrong
 
-- **`spec/LONGFORM-ANTIPATTERNS.md`** — §5 items 12–13 demanded a written
-  script, chapters and legal exposition, and called a lightly-trimmed feed a
-  failure. That is the opposite of §4 here. It was one specialist's
-  negative-space output, it was never reconciled, and the build ignored it.
-- **`spec/CONTENT_SPEC.md`** — superseded by §4 and §5. Its cold-open rule was
-  already amended once when the sting was added.
-- **`spec/PACKAGING.md`** — its thumbnail rules came from 12 thumbnails of a
-  different channel and are superseded by §5, measured from 25 thumbnails of the
-  channel clipping this same judge.
-- **`POST-IT-YOURSELF.md`** — stale, with three retracted claims.
+The 2026-08-18 edition declared `CONTENT_SPEC.md` and `PACKAGING.md` retired.
+**They were not.** Both are still read by things that run, which was verified
+rather than assumed:
+
+- `tests/test_pipeline.py:950` opens `spec/CONTENT_SPEC.md` and asserts §2 still
+  states a dead-air threshold. Delete the file and the suite fails.
+- `config/pipeline.yaml` cites CONTENT_SPEC §2 in three places for the cold open
+  and the 4-second rule.
+- `prompts/package_post.md` cites `spec/PACKAGING.md` three times, at runtime,
+  and `scripts/make_thumbnail.py` builds to its rules.
+
+A file that is declared dead while the build still obeys it is the exact
+failure this spec was written to end. They are demoted to subordinate, at
+rank 5 above — not retired.
+
+### Genuinely retired
+
+- **`docs/archive/POST-IT-YOURSELF.md`** — stale, three retracted claims. It
+  carries its own superseded banner. Was briefly renamed `Notes`, which hid the
+  warning its filename was doing; the name is restored.
 - **`src/boydclips/notoriety.py`, `banger.py`, `scripts/dialogue_metrics.py`** —
-  replaced by §3.
+  replaced by §3. Moved to `research/retired/`.
+- **`docs/archive/SCOREBOARD.md`** — scoring history from the pre-2026-08-19
+  rubric. Kept for the record; the numbers in it are not comparable to current
+  scores.
+
+### Moved to reference, one question still open
+
+- **`docs/reference/LONGFORM-ANTIPATTERNS.md`** and
+  **`docs/reference/SOURCING.md`** — 90 KB of specialist research. Informative,
+  binding on nothing.
+
+  **Open, and Nathan's call, not mine** (`STATE.md`): LONGFORM-ANTIPATTERNS §5
+  items 12–13 demand a written script, chapters and legal exposition, and call a
+  lightly-trimmed feed a failure. §4 of this file says the opposite. The build
+  has followed §4 throughout. Filing the document under reference does not
+  settle that — it just stops it being read as a contract while it is unsettled.
 
 ### Standing rules
 

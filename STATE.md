@@ -108,7 +108,7 @@ only one is a 10k flop.
 Updated 2026-08-16. Every claim here was produced by a command run on this
 machine, and the command is named. Where something was not measured, it says so.
 
-**Read this first, not `POST-IT-YOURSELF.md`.** That file is from 2026-08-14 and
+**Read this first, not `docs/archive/POST-IT-YOURSELF.md`.** That file is from 2026-08-14 and
 three of its central claims turned out to be wrong. See "Retracted" at the
 bottom — they are kept there deliberately, because a stale hand-off doc that
 reads as authoritative is what caused the wrong work to be planned.
@@ -177,7 +177,7 @@ Anton ships in `assets/fonts/`.
 moved to `OneDrive\Desktop\Boyd Clips\boyd-brand\`. `_watermark_chain` degrades
 to "no watermark" with only a log line. Now resolved from a candidate list.
 
-**Unresolved conflict, needs Nathan.** `spec/LONGFORM-ANTIPATTERNS.md` §5 items
+**Unresolved conflict, needs Nathan.** `docs/reference/LONGFORM-ANTIPATTERNS.md` §5 items
 12–13 require a written script, chapters and legal exposition and treat a
 lightly-trimmed feed as a failure. CONTENT_SPEC §2 defines the long-form as the
 proceeding itself, uncut but for dead air. CONTENT_SPEC calls itself the format
@@ -350,7 +350,7 @@ so backwards means the short points at nothing.
 
 ---
 
-## Retracted from POST-IT-YOURSELF.md
+## Retracted from docs/archive/POST-IT-YOURSELF.md
 
 1. *"All three long-forms and their shorts were rendered … Nothing left to
    render — tomorrow is upload only."* Wrong. The shorts were unwatchable and

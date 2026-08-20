@@ -83,14 +83,18 @@ don't exist yet.
 
 ---
 
-## The four files you'll actually edit
+## The files you'll actually edit
 
 | File | Controls |
 |---|---|
+| `spec/SPEC.md` | **The contract.** The product, what makes a clip gold, selection, format, packaging. Wins over everything else |
+| `spec/SAFETY_RULES.md` | What must never be published, and why. Outranks SPEC on safety |
 | `config/pipeline.yaml` | Every threshold, duration, format, and platform switch |
-| `spec/CONTENT_SPEC.md` | The format contract — clip structure, framing, title rules |
-| `spec/SAFETY_RULES.md` | What must never be published, and why |
-| `prompts/*.md` | The three Claude prompts, versioned |
+| `prompts/*.md` | What the model is asked, versioned |
+| `spec/CONTENT_SPEC.md`, `spec/PACKAGING.md` | Subordinate specs. Still read by the tests and the packaging prompt |
+
+`docs/reference/` is research and binds nothing. `docs/archive/` is superseded —
+do not plan from it. See `spec/SPEC.md` §6 for the full order of authority.
 
 Code doesn't hardcode policy. If output drifts, the fix belongs in one of
 these — and because prompt versions are stamped into every clip's manifest, you
