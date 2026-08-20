@@ -51,8 +51,18 @@ def hhmmss(t: int) -> str:
 
 
 def candidates() -> list:
+    """Unrated candidates only, top first.
+
+    Anything already rated is excluded: the scorer was refitted on those labels,
+    so re-showing them would test the fit against the data that produced it.
+    Every click here writes straight to state/labels.json, which is why the
+    first 24 survived this server being killed mid-session.
+    """
     rows = json.loads(CANDS.read_text(encoding="utf-8"))
-    return rows[:SHOW]
+    done = load_labels()
+    fresh = [c for c in rows
+             if "%s:%d" % (c["video_id"], int(c["t"])) not in done]
+    return fresh[:SHOW]
 
 
 CSS = """
