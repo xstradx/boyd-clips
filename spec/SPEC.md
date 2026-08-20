@@ -67,6 +67,61 @@ clip, not low stakes.**
 all eight winners it happens once. Her register is flat, unhurried and
 declarative, then a rhetorical hammer. A loudness detector would find nothing.
 
+### The mechanism, from Nathan 2026-08-20
+
+The table above says an antagonist is the whole thing but never says what the
+antagonism looks like. It looks like an excuse. His words, kept verbatim:
+
+> "it's also when people have ridiculous excuses"
+
+> "she goes off on people and really calls people out and people give up their
+> right to stay silent and they have to talk"
+
+> "it's dead serious but funny to us or like oh damn, or when she scolds a
+> person for doing something bad so also it's when it's harsh too"
+
+> "sometimes judge Boyd warns them then throws them in the slammer"
+
+**It is a setup and a punchline.** Someone offers an excuse that sounds
+reasonable to them and ridiculous to everyone else. She demolishes it, flat and
+personal, in her own words. Two flavours, one shape - funny, or harsh. Both are
+"she went there".
+
+Four things follow, and each one changed how the search works:
+
+1. **Funny to the viewer, never to the room.** Nobody in there is laughing;
+   someone is facing prison. The contrast IS the entertainment.
+2. **She puts herself in it.** Her nose, her mind, her walk to work in heels,
+   her hair getting wet, riding the VIA bus as a new attorney. First person and
+   second person together, at length. Procedural speech has neither, so this is
+   the cleanest single discriminator we have.
+3. **The excuse can come from anyone** - "lawyer mother anything". What matters
+   is that she answers it at length instead of moving on. When she lets it go,
+   there is no clip.
+4. **Warning then consequence is its own arc.** She flags it herself - "you
+   were previously here before", "it appears that you have learned nothing" -
+   so it is findable without auditing every appearance a defendant ever made.
+
+Search the SETUP, not the punchline. Scoring her language for unusualness found
+the good moments by accident and could not find more of them.
+
+### Two dead ends - do not retry
+
+- **`[laughter]` markers.** 550 of them across 146 of 352 dockets, and they
+  find staff banter between cases - Batman, Grease 2, the Cowboys. The rival
+  channel used 4 of 462 such bits. Nathan: *"people in the court aren't
+  laughing"*. Wrong signal entirely.
+- **Ranking whole cases.** A case-level score averages one devastating exchange
+  against fifteen procedural minutes, so long dull hearings outrank the moment
+  worth cutting. The unit is the exchange.
+
+Implementation: `scripts/find_wentthere.py`. Turn-level speaker attribution is
+in `is_boyd()` - validated at 5/7 on known-good moments and 3/3 on known junk.
+Precision at the top of the ranking is roughly 60%; the residual misses are
+staff conversation, not garbage.
+
+---
+
 ---
 
 ## 3. SELECTION
