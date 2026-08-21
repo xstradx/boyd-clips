@@ -124,8 +124,18 @@ output:
     # and a cold open onto 4.8s of nothing. These constants are the ones the
     # Thompson rebuild was verified against — zero remaining runs over 4s,
     # opening silence 4.8s -> 0.81s.
+    # SUPERSEDED 2026-08-21 by Nathan, asked directly: pauses STAY. His words:
+    # "only cut if the screen goes black or she says shes gonna call them back
+    # in a couple min". The four-second rule came from CONTENT_SPEC, not from
+    # him, and it was cutting the tension out of every hearing - a courtroom
+    # pause before an answer is the moment, not dead air.
+    #
+    # His actual rule needs black-frame detection, which does not exist yet.
+    # Until it does, the threshold is raised so only genuinely dead stretches go
+    # - a recess or a camera cut - and ordinary pauses survive. This is an
+    # approximation of his rule and is recorded as one, not as his rule.
     trim_dead_air: true
-    dead_air_s: 4.0          # the spec's threshold, not a tuned number
+    dead_air_s: 25.0         # was 4.0; see above. Not his rule, a stand-in.
     silence_noise_db: -30.0
     silence_keep_s: 0.35     # left at each end of a removed run; 0 reads as a glitch
     silence_min_piece_s: 0.5 # stutter guard, looser than a short's deliberately

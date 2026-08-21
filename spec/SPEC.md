@@ -105,6 +105,54 @@ Four things follow, and each one changed how the search works:
 Search the SETUP, not the punchline. Scoring her language for unusualness found
 the good moments by accident and could not find more of them.
 
+### His taste, answered directly 2026-08-21
+
+Twenty questions, his picks and his notes. Where a note exists it is quoted,
+because a paraphrase of a rule drifts into meaning something else.
+
+**Strongest single answers** - one option chosen, no hedging:
+
+- A defendant who argues back and will not accept it: **the best kind of video**
+- A defendant caught in a clear lie: **top tier, always post**
+- Lawyer does all the talking and the defendant barely speaks: **skip**
+- A great hearing that is only 6 minutes: **post it short anyway**
+- Defendant's name in the title: **never**
+
+**Where he chose several**, meaning it is not a discriminator: harsh versus
+funny (he took every option), and repeat offenders (better, slightly better and
+doesn't matter all at once). Do not weight either.
+
+**Also wanted, and previously assumed away:**
+
+- Crying or begging: *"great - emotion sells"*. This CONTRADICTS the title study,
+  where "defendant BEGS/PLEADS/CRIES" measured 0.72x on the tail. His channel,
+  his call - but the tension is real and should be revisited against his own
+  analytics rather than settled by argument.
+- A sympathetic defendant - addiction, poverty, mental health: good, adds depth.
+- Family in the room who speak: adds drama, better still if she goes after them.
+- Case type does not matter: *"whatever has the best exchange"*.
+- Keep the lawyer's legal arguments. They are context, not filler. A filter to
+  strip them was nearly built; do not build it.
+
+**Two rules that change the edit:**
+
+> "only cut if the screen goes black or she says shes gonna call them back in a
+> couple min"
+
+Pauses STAY. This supersedes the four-second dead-air rule, which was cutting
+the tension out of every hearing. Only a black screen or an explicit recall is
+removed.
+
+> "if the others are boring then there might be no need but it really makes
+> sense when judge boyd gives them a chance and then theyre back"
+
+So multi-appearance videos are chronological and are justified by ONE specific
+arc: she gives them a chance, and they come back. Not by stacking appearances
+for length.
+
+**Workflow:** 50+ candidates per review batch. Once the picks are trusted,
+auto-cut the best one daily for him to review before it goes out.
+
 ### Two dead ends - do not retry
 
 - **`[laughter]` markers.** 550 of them across 146 of 352 dockets, and they

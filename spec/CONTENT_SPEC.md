@@ -59,8 +59,16 @@ Rules:
   a hearing is retention spent on nothing.
 
 - **Never** cut mid-sentence. Boundaries snap to caption-segment edges.
-- Dead air longer than 4 seconds is removed. Shorter gaps stay — courtroom
+- Dead air longer than 25 seconds is removed. Shorter gaps stay — courtroom
   pauses carry weight and cutting them makes proceedings feel falsified.
+
+  Raised from 4 seconds on 2026-08-21, asked directly. Nathan: *"only cut if the
+  screen goes black or she says shes gonna call them back in a couple min"*. The
+  four-second rule was written here, not by him, and it was removing the pause
+  before an answer — which is the moment, not dead air. His actual rule needs
+  black-frame detection, which does not exist yet; 25 seconds is a stand-in that
+  clears recesses and camera cuts while leaving ordinary pauses alone, and it is
+  recorded as a stand-in rather than as his rule.
 - No music. No sound effects. No added narration. The audio is the record.
   The sting carries its own audio; nothing is added over the proceeding.
 - No zooms, speed ramps, or reaction overlays. This is a document.
