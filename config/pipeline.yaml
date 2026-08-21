@@ -92,7 +92,12 @@ output:
     # 1.84x). Part of what reads as "longer is better" on the biggest channel
     # is "multi-hearing episodes are better". Treat duration as a floor and the
     # repeat format as the lever.
-    max_duration_s: 3480
+    # 2026-08-21, Nathan: "8min to 20 ... but 50 min is way too long", with
+    # 6-7 minutes as the floor below which a hearing is too thin. The old 3480
+    # came from a channel whose house style is hour-long compilations; Court
+    # Trials TV, which outperforms it two to one, runs a 16-minute median.
+    min_duration_s: 360
+    max_duration_s: 1200
     pad_before_s: 4.0        # start slightly before the first word
     pad_after_s: 3.0
 

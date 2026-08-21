@@ -224,11 +224,45 @@ case stays in the bank. Only safety rejects outright.
 [end]   HARD CUT    no outro
 ```
 
-- **Target 25–58 minutes.** Measured on @courtroomtime, pre-Oct-2025 where age
-  is uniform: 0–20m 0.39×, 20–35m 0.86×, 35–50m 1.06×, **50–58m 1.35×**, 58+
-  0.83×. It falls off after 58, so this is a band and not "longer is better".
-  One appearance rarely fills it; that is fine, and it is another reason the
-  format stacks appearances rather than padding one.
+- **Target 8–20 minutes.** Nathan, 2026-08-21, and this supersedes the
+  25–58 minute band that stood here: *"no they're usually like 8min to 20
+  sometimes it really depends but 50 min is way too long"*. A hearing under
+  about **6–7 minutes is too thin to carry a video**.
+
+  The old band came from @courtroomtime, whose house style is hour-long
+  compilations, and it was read as a general law. It is not. **Court Trials TV
+  Network - 1,000,000 views on its best Boyd video, against Courtroom Time's
+  564,000 - runs a 970s median. That is 16 minutes**, inside Nathan's range.
+  The strongest channel in the niche and the channel owner agree; the earlier
+  figure was one house style mistaken for a rule.
+
+### What one finished video is
+
+Nathan, 2026-08-21, verbatim:
+
+> "complete video would be the defendant comes in usually most times when
+> there's a MTR defendant judge Boyd always kinda talks to them and if it's
+> actually at least 6-7 min long that's a good video just something with drama
+> and judge Boyd calling out people for their bs or asking them what actually
+> happened and then the defendant talks to the judge"
+
+Read that as a shape, not a wish list:
+
+1. **A motion to revoke** is the typical setting. Independently supported -
+   revocation language runs 1.50× inside rival clips against the docket at
+   large, the only case-type that scores positive.
+2. **She engages the defendant directly**, rather than processing them.
+3. **The defendant answers back at length.** Both halves are required. A
+   monologue is not the product and neither is a compliant defendant.
+4. **6-7 minutes minimum**, 8-20 the target.
+
+The unit is therefore **the hearing**, not a 60-second moment. Moments are the
+hook for the short that advertises it - the long-form is the hearing itself.
+
+Cadence is **every other day**. Additions - narration, graphics, context - come
+later; today the video is the hearing, cut. Where someone else has already
+posted a case, Nathan: *"if we're gonna clip and bring back what someone already
+posted we will do it better and add more to the video"*.
 - Chapters run in **chronological order**. Never reordered (SAFETY_RULES R5).
 - Dead air over **4 seconds** removed inside each chapter. Shorter gaps stay —
   courtroom pauses carry weight.
