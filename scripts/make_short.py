@@ -207,6 +207,8 @@ def main() -> None:
                          "plays in the order given")
     ap.add_argument("--out", required=True)
     ap.add_argument("--no-tighten", action="store_true")
+    ap.add_argument("--no-captions", action="store_true",
+                    help="skip burned captions - the auto-captions are not accurate")
     args = ap.parse_args()
 
     srcs = sorted(glob.glob(str(ROOT / "work" / args.video / (args.video + "_h_*.mp4"))))
@@ -243,9 +245,10 @@ def main() -> None:
     if kept > LIMIT_S:
         print("  WARNING: %.1fs exceeds the %.0fs Shorts limit" % (kept, LIMIT_S))
 
-    tj = glob.glob(str(ROOT / "work" / args.video / "*.transcript.json"))
-    ws = json.load(open(tj[0], encoding="utf-8"))["words"]
-    build_ass(ws, sec, keep, ROOT / "work" / "_short.ass")
+    if not args.no_captions:
+        tj = glob.glob(str(ROOT / "work" / args.video / "*.transcript.json"))
+        ws = json.load(open(tj[0], encoding="utf-8"))["words"]
+        build_ass(ws, sec, keep, ROOT / "work" / "_short.ass")
 
     parts, labels = [], ""
     for i, (s, e) in enumerate(keep):
@@ -257,12 +260,14 @@ def main() -> None:
           + "[cv]split=2[p][q];"
           + "[p]" + top + ",scale=%d:%d,setsar=1[t];" % (W, HALF)
           + "[q]" + bot + ",scale=%d:%d,setsar=1[u];" % (W, HALF)
-          + "[t][u]vstack=inputs=2[v];[v]subtitles=_short.ass[vv]")
+          + "[t][u]vstack=inputs=2[vv]"
+          + ("" if args.no_captions else ";[vv]subtitles=_short.ass[vc]"))
+    last = "[vv]" if args.no_captions else "[vc]"
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     cmd = ["ffmpeg", "-v", "error", "-y", "-i", str(src.resolve()),
-           "-filter_complex", vf, "-map", "[vv]", "-map", "[aa]",
+           "-filter_complex", vf, "-map", last, "-map", "[aa]",
            "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-r", "30",
            "-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2",
            str(out.resolve())]
@@ -271,7 +276,23 @@ def main() -> None:
     if p.returncode != 0:
         print("ffmpeg failed: " + p.stderr.strip()[:400])
         return
+    # Sidecar map so the short can be edited on its OWN timeline later. The
+    # short is shorter than the span it came from - silence was removed - so a
+    # mark at 0:20 in the short is not 0:20 in the hearing. Each piece records
+    # where it starts in the short and where it came from in the source.
+    pieces, acc = [], 0.0
+    for ks, ke in keep:
+        pieces.append({"short_start": round(acc, 3),
+                       "short_end": round(acc + (ke - ks), 3),
+                       "src_start": round(ks + sec, 2),
+                       "src_end": round(ke + sec, 2)})
+        acc += ke - ks
+    side = out.with_suffix(".map.json")
+    side.write_text(json.dumps({"video": args.video, "section_start_s": sec,
+                                "duration_s": round(acc, 2), "pieces": pieces},
+                               indent=1), encoding="utf-8")
     print(NL + "-> " + str(out) + "  %.1f MB" % (out.stat().st_size / 1e6))
+    print("   map -> " + side.name + "  (%d pieces)" % len(pieces))
 
 
 if __name__ == "__main__":
