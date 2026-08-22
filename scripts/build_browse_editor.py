@@ -58,6 +58,9 @@ td.n{font-variant-numeric:tabular-nums}
 #cmd{width:100%;background:#0b0d10;color:var(--fg);border:1px solid var(--line);border-radius:8px;
 padding:9px;font:12px ui-monospace,Consolas,monospace;min-height:86px;margin-top:7px}
 .tot{font-weight:600}.over{color:var(--warn)}
+.tl{position:relative;height:16px;background:#0b0d10;border:1px solid var(--line);border-radius:5px;margin:8px 0 4px;overflow:hidden}
+.tl .seg{position:absolute;top:0;bottom:0;background:var(--go);opacity:.85;cursor:pointer}
+.tl .seg:hover{opacity:1}
 kbd{background:#1f2530;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px}
 select{background:#1f2530;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-family:inherit}
 </style></head><body>
@@ -80,7 +83,8 @@ select{background:#1f2530;color:var(--fg);border:1px solid var(--line);border-ra
         <option value="4" selected>punch 4 and 5</option>
         <option value="5">punch 5 only</option>
       </select></div>
-    <table><thead><tr><th>#</th><th>label</th><th>len</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+    <div id="tl" class="tl"></div>
+    <table><thead><tr><th>#</th><th>label</th><th>start</th><th>end</th><th>len</th><th>trim start</th><th>trim end</th><th></th></tr></thead><tbody id="rows"></tbody></table>
     <div class="row"><span class="tot" id="total">nothing picked</span></div>
     <div class="row"><button class="acc" onclick="copyCmd()">Copy build command</button>
       <button onclick="clearAll()">Clear</button><span class="dim" id="msg"></span></div>
@@ -125,13 +129,49 @@ function nudge(d){ v.currentTime = Math.max(0,(v.currentTime||0)+d); }
 function del(k){ picks.splice(k,1); render(); }
 function up(k){ if(k>0){var t=picks[k-1];picks[k-1]=picks[k];picks[k]=t;render();} }
 function down(k){ if(k<picks.length-1){var t=picks[k+1];picks[k+1]=picks[k];picks[k]=t;render();} }
-function playp(k){ seek(picks[k].a); }
+var stopAt = null;
+function playp(k){
+  var p = picks[k];
+  stopAt = p.b - BASE;
+  v.currentTime = Math.max(0, p.a - BASE); v.play();
+}
+v.addEventListener("timeupdate", function(){
+  if (stopAt !== null && v.currentTime >= stopAt){ v.pause(); stopAt = null; }
+});
+// Indexed spans are the model's guess and often start early or end late, so
+// each end moves independently. Start cannot cross end and vice versa.
+function trim(k, which, d){
+  var p = picks[k];
+  if (which === 0) p.a = Math.min(p.b - 0.5, Math.max(0, p.a + d));
+  else             p.b = Math.max(p.a + 0.5, p.b + d);
+  seekPreview(which === 0 ? p.a : p.b - 1.2);
+  render();
+}
+function seekPreview(t){ stopAt = null; v.currentTime = Math.max(0, t - BASE); v.play(); }
+function drawTimeline(){
+  var dur = v.duration || 1, h = "";
+  for (var k=0;k<picks.length;k++){
+    var p = picks[k];
+    var l = 100 * (p.a - BASE) / dur, w = 100 * (p.b - p.a) / dur;
+    h += "<span class=seg style='left:" + l.toFixed(2) + "%;width:" + Math.max(0.4,w).toFixed(2)
+      +  "%' title='" + esc(p.label) + "' onclick='playp(" + k + ")'></span>";
+  }
+  document.getElementById("tl").innerHTML = h;
+}
 function clearAll(){ picks=[]; pendingIn=null; render(); }
 function render(){
   var h="", tot=0;
   for(var k=0;k<picks.length;k++){
     var p=picks[k], len=p.b-p.a; tot+=len;
-    h += "<tr><td class=n>"+(k+1)+"</td><td>"+esc(p.label)+"</td><td class=n>"+len.toFixed(0)+"s</td><td>"
+    h += "<tr><td class=n>"+(k+1)+"</td><td>"+esc(p.label)+"</td>"
+      + "<td class=n>"+fmt(p.a-BASE)+"</td><td class=n>"+fmt(p.b-BASE)+"</td>"
+      + "<td class=n>"+len.toFixed(1)+"s</td>"
+      + "<td><button class=mini onclick='trim("+k+",0,-1)'>&laquo;1s</button>"
+      + "<button class=mini onclick='trim("+k+",0,-0.3)'>&lsaquo;</button>"
+      + "<button class=mini onclick='trim("+k+",0,0.3)'>&rsaquo;</button></td>"
+      + "<td><button class=mini onclick='trim("+k+",1,-0.3)'>&lsaquo;</button>"
+      + "<button class=mini onclick='trim("+k+",1,0.3)'>&rsaquo;</button>"
+      + "<button class=mini onclick='trim("+k+",1,1)'>1s&raquo;</button></td><td>"
       + "<button class=mini onclick='playp("+k+")'>play</button> "
       + "<button class=mini onclick='up("+k+")'>&uarr;</button> "
       + "<button class=mini onclick='down("+k+")'>&darr;</button> "
@@ -142,6 +182,7 @@ function render(){
   el.textContent = picks.length ? (picks.length+" picked, "+tot.toFixed(0)+"s"+(tot>60?"  - OVER 60s":"")) : "nothing picked";
   el.className = "tot"+(tot>60?" over":"");
   document.getElementById("cmd").value = build();
+  drawTimeline();
   try{ localStorage.setItem("browse_"+VIDEO, JSON.stringify(picks)); }catch(e){}
   renderMoments();
 }
