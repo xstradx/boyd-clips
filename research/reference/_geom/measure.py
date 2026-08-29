@@ -73,34 +73,82 @@ def fillmask(bgr):
     return white, yellow, red
 
 
+def _glyphs(mask, X0, Y0, X1, Y1, lineH):
+    """components inside crop that look like glyphs; drop border-touching / oversize blobs"""
+    sub = mask[Y0:Y1, X0:X1].astype(np.uint8)
+    if sub.sum() < 30:
+        return [], None
+    n, lab, st, cen = cv2.connectedComponentsWithStats(sub, 8)
+    ch, cw = sub.shape
+    comps = []
+    for i in range(1, n):
+        a = st[i, cv2.CC_STAT_AREA]
+        L_, T_ = st[i, cv2.CC_STAT_LEFT], st[i, cv2.CC_STAT_TOP]
+        ww, hh = st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]
+        if a < 30:
+            continue
+        if hh < 0.22 * lineH or hh > 1.35 * lineH:
+            continue
+        if ww > 0.55 * cw and ww > 6 * hh:
+            continue
+        if (L_ <= 0 and T_ <= 0) or (L_ + ww >= cw and T_ + hh >= ch):
+            continue
+        if T_ <= 0 and hh >= ch - 1:
+            continue
+        comps.append((L_, T_, ww, hh, a, i))
+    return comps, lab
+
+
 def refine_text(img, lines):
     H, W = img.shape[:2]
     white, yellow, red = fillmask(img)
-    any_fill = white | yellow | red
+    bright = white | yellow | red
+    V = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 2].astype(int)
+    dark = V < 95
     out = []
     for L in lines:
         p = np.array(L['poly'])
         x0, x1 = p[:, 0].min(), p[:, 0].max()
         y0, y1 = p[:, 1].min(), p[:, 1].max()
-        pad = 0.18 * (y1 - y0)
+        lineH = y1 - y0
+        pad = 0.20 * lineH
         X0, X1 = int(max(0, x0 - pad)), int(min(W, x1 + pad))
         Y0, Y1 = int(max(0, y0 - pad)), int(min(H, y1 + pad))
-        sub = any_fill[Y0:Y1, X0:X1].astype(np.uint8)
-        if sub.sum() < 30:
+        r = max(5, int(0.30 * lineH)) * 2 + 1
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r, r))
+        # polarity A: bright glyph enclosed by dark stroke
+        dclose = cv2.morphologyEx(dark.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
+        A = bright & dclose
+        # polarity B: dark glyph on a flat bright plate (yellow/white banner)
+        bclose = cv2.morphologyEx(bright.astype(np.uint8), cv2.MORPH_CLOSE, k) > 0
+        B = dark & bclose
+        # POLARITY is a construction question, not a scoring one:
+        # CourtroomTime sets BLACK type on a solid colour BANNER PLATE;
+        # Audit sets BRIGHT stroked type straight onto the photo.
+        # So: is there a large flat bright plate filling this line box?
+        boxa = float(max(1, (X1 - X0) * (Y1 - Y0)))
+        bsub = bright[Y0:Y1, X0:X1].astype(np.uint8)
+        plate = 0.0
+        if bsub.sum():
+            nn, ll, ss, _ = cv2.connectedComponentsWithStats(bsub, 8)
+            if nn > 1:
+                j = 1 + int(np.argmax(ss[1:, cv2.CC_STAT_AREA]))
+                pa = ss[j, cv2.CC_STAT_AREA]
+                pbb = float(max(1, ss[j, cv2.CC_STAT_WIDTH] * ss[j, cv2.CC_STAT_HEIGHT]))
+                if pa / pbb > 0.55:            # solid, not a glyph cluster
+                    plate = pa / boxa
+        order = (('dark', B), ('bright', A)) if plate > 0.40 else (('bright', A), ('dark', B))
+        best = None
+        for tag, m in order:
+            comps, lab = _glyphs(m, X0, Y0, X1, Y1, lineH)
+            if len(comps) >= 2:
+                best = (0, tag, comps, lab, m)
+                break
+            if comps and best is None:
+                best = (0, tag, comps, lab, m)
+        if best is None:
             continue
-        n, lab, st, cen = cv2.connectedComponentsWithStats(sub, 8)
-        comps = []
-        for i in range(1, n):
-            a = st[i, cv2.CC_STAT_AREA]
-            hh = st[i, cv2.CC_STAT_HEIGHT]
-            ww = st[i, cv2.CC_STAT_WIDTH]
-            if a < 40:
-                continue
-            if hh < 0.25 * (y1 - y0):
-                continue
-            comps.append((st[i, cv2.CC_STAT_LEFT], st[i, cv2.CC_STAT_TOP], ww, hh, a, i))
-        if not comps:
-            continue
+        _, pol, comps, lab, m = best
         gx0 = min(c[0] for c in comps) + X0
         gx1 = max(c[0] + c[2] for c in comps) + X0
         gy0 = min(c[1] for c in comps) + Y0
@@ -109,18 +157,20 @@ def refine_text(img, lines):
         cap = float(np.median([h for h in hs if h >= 0.80 * hs[-1]]))
         runs = []
         for c in sorted(comps, key=lambda c: c[0]):
-            m = (lab[c[1]:c[1] + c[3], c[0]:c[0] + c[2]] == c[5])
-            wy = white[Y0 + c[1]:Y0 + c[1] + c[3], X0 + c[0]:X0 + c[0] + c[2]][m].sum()
-            yy = yellow[Y0 + c[1]:Y0 + c[1] + c[3], X0 + c[0]:X0 + c[0] + c[2]][m].sum()
-            rr = red[Y0 + c[1]:Y0 + c[1] + c[3], X0 + c[0]:X0 + c[0] + c[2]][m].sum()
-            col = ['white', 'yellow', 'red'][int(np.argmax([wy, yy, rr]))]
+            sl = (slice(Y0 + c[1], Y0 + c[1] + c[3]), slice(X0 + c[0], X0 + c[0] + c[2]))
+            mm = (lab[c[1]:c[1] + c[3], c[0]:c[0] + c[2]] == c[5])
+            if pol == 'bright':
+                cnts = [white[sl][mm].sum(), yellow[sl][mm].sum(), red[sl][mm].sum()]
+                col = ['white', 'yellow', 'red'][int(np.argmax(cnts))]
+            else:
+                col = 'black'
             if runs and runs[-1][0] == col:
                 runs[-1][2] = c[0] + c[2] + X0
             else:
                 runs.append([col, c[0] + X0, c[0] + c[2] + X0])
         out.append(dict(txt=L['txt'], conf=L['conf'], x0=float(gx0), x1=float(gx1),
-                        y0=float(gy0), y1=float(gy1), cap=cap,
-                        runs=[[r[0], float(r[1]), float(r[2])] for r in runs], ncomp=len(comps)))
+                        y0=float(gy0), y1=float(gy1), cap=cap, polarity=pol,
+                        runs=[[r_[0], float(r_[1]), float(r_[2])] for r_ in runs], ncomp=len(comps)))
     out.sort(key=lambda d: d['y0'])
     return out
 
@@ -138,27 +188,45 @@ def graphic_masks(bgr):
 
 
 def head_tail(comp):
-    """arrow head/tail from the distance transform along the principal axis"""
+    """Arrow head = end nearest the PERPENDICULAR-WIDTH PEAK (the head triangle is
+    the widest part; the shaft is thin). Tip = extreme point on that side."""
     ys, xs = np.nonzero(comp)
     pts = np.stack([xs, ys], 1).astype(np.float64)
     mu = pts.mean(0)
     u, s, vt = np.linalg.svd(pts - mu, full_matrices=False)
     ax = vt[0]
+    perp = np.array([-ax[1], ax[0]])
     t = (pts - mu) @ ax
-    dt = cv2.distanceTransform(comp.astype(np.uint8), cv2.DIST_L2, 5)[ys, xs]
+    q = (pts - mu) @ perp
     lo, hi = t.min(), t.max()
-    band = 0.25 * (hi - lo)
-    dneg = dt[t < lo + band].mean() if (t < lo + band).any() else 0
-    dpos = dt[t > hi - band].mean() if (t > hi - band).any() else 0
-    sign = 1.0 if dpos > dneg else -1.0
-    sel = (t * sign) > (max(abs(lo), abs(hi)) * 0 + (hi if sign > 0 else -lo) - band)
-    cand = pts[(t * sign) >= (t * sign).max() - 2]
-    tip = cand.mean(0) if len(cand) else pts[int((t * sign).argmax())]
-    return ax * sign, tip, float(hi - lo), float(dt.max())
+    L = hi - lo
+    NB = 14
+    idx = np.clip(((t - lo) / (L + 1e-9) * NB).astype(int), 0, NB - 1)
+    wid = np.zeros(NB)
+    for b in range(NB):
+        sel = idx == b
+        wid[b] = (q[sel].max() - q[sel].min()) if sel.sum() > 3 else 0
+    pk = int(np.argmax(wid))
+    # HEAD = the end whose INNER band (15-35% in) is wider: the arrowhead triangle's
+    # base sits just behind the tip, while the shaft/tail stays thin. Works for both
+    # stubby arrows and curved swooshes, where BOTH extremities taper to a point.
+    inA = wid[2:5][wid[2:5] > 0]
+    inB = wid[-5:-2][wid[-5:-2] > 0]
+    a_ = inA.mean() if inA.size else 0.0
+    b_ = inB.mean() if inB.size else 0.0
+    sign = -1.0 if a_ > b_ else 1.0
+    tt = t * sign
+    cand = pts[tt >= tt.max() - 2]
+    tip = cand.mean(0) if len(cand) else pts[int(tt.argmax())]
+    med = float(np.median(wid[wid > 0])) if (wid > 0).any() else 1.0
+    return (ax * sign, tip, float(L), float(wid.max()),
+            float(wid.max() / (med + 1e-9)), float(min(pk, NB - 1 - pk) / (NB / 2.0)))
 
 
 def accents(img, textmask):
+    global VGLOB
     H, W = img.shape[:2]
+    VGLOB = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 2]
     res = []
     for name, m in graphic_masks(img).items():
         mm = cv2.morphologyEx((m.astype(np.uint8)) * 255, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
@@ -170,32 +238,39 @@ def accents(img, textmask):
             x, y = int(st[i, cv2.CC_STAT_LEFT]), int(st[i, cv2.CC_STAT_TOP])
             w, h = int(st[i, cv2.CC_STAT_WIDTH]), int(st[i, cv2.CC_STAT_HEIGHT])
             comp = (lab == i)
-            # graphic-uniformity: flat fill, not textured scene content
             px = img[comp].astype(float)
             if px[:, 0].std() + px[:, 1].std() + px[:, 2].std() > 90:
                 continue
+            # black keyline: graphics carry a heavy dark stroke, scene colour does not
+            ring = (cv2.dilate(comp.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0) & (~comp)
+            keyline = float((VGLOB[ring] < 70).mean()) if ring.sum() else 0.0
             fill = a / float(w * h)
             ov = float((comp & textmask).sum()) / a
             cnt, _ = cv2.findContours(comp.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             c = max(cnt, key=cv2.contourArea)
             sol = float(cv2.contourArea(c) / (cv2.contourArea(cv2.convexHull(c)) + 1e-9))
-            if fill > 0.85 and w > 3 * h and a > 12000:
+            if w > 0.9 * W and h > 0.9 * H and fill < 0.20:
+                kind = 'frame'
+            elif fill > 0.85 and w > 3 * h and a > 12000:
                 kind = 'bar'
             elif ov > 0.30:
                 continue
             else:
                 kind = 'shape'
-            d, tip, length, thick = head_tail(comp)
+            d, tip, length, thick, wpeak, pkpos = head_tail(comp)
             M = cv2.moments(c)
             cx = M['m10'] / (M['m00'] + 1e-9)
             cy = M['m01'] / (M['m00'] + 1e-9)
-            # arrow-likeness: elongated, non-convex, one thick end one thin end
-            arrowish = (kind == 'shape' and sol < 0.90 and length > 2.2 * thick and a > 1500)
+            # arrow-likeness: elongated, non-convex, one wide (head) end and one thin (shaft) end
+            border = (x <= 1 or y <= 1 or x + w >= W - 1 or y + h >= H - 1)
+            arrowish = (kind == 'shape' and keyline > 0.35 and sol < 0.88 and not border
+                        and 0.15 < fill < 0.70 and wpeak > 1.55 and a > 1500)
             res.append(dict(colour=name, kind=('arrow' if arrowish else kind), x=x, y=y, w=w, h=h,
                             area=a, solidity=sol, fill=float(fill), cx=float(cx), cy=float(cy),
                             tip=[float(tip[0]), float(tip[1])],
                             ang=float(math.degrees(math.atan2(d[1], d[0]))),
-                            length=length, thick=thick, textov=ov))
+                            length=length, thick=thick, wpeak=wpeak, pkpos=pkpos,
+                            keyline=keyline, textov=ov))
     res.sort(key=lambda r: -r['area'])
     return res
 

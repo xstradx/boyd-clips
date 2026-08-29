@@ -70,6 +70,35 @@ thumbnail path was violating its own rule: type burned in, saved, THEN graded.
 `thumbnail.grade_image(img, cfg)` now works in memory so the builder can grade
 before drawing type.
 
+## The one command for shorts — `scripts/make_short_auto.py`
+
+```
+python scripts/make_short_auto.py --short READY-TO-POST/X_SHORT.mp4     --transcript work/ID/ID.transcript.json --src-start 3931.8     --out READY-TO-POST/X_SHORT_FINAL.mp4
+```
+
+Runs the whole chain with no hand-tuning and **refuses rather than emitting
+something broken** — it checks pix_fmt, dimensions, A/V sync, remaining word-gaps
+and a clean decode, and exits non-zero if any fails.
+
+All three cases pass:
+
+| | before | after | cuts | gaps >0.7s | turns |
+|---|---|---|---|---|---|
+| CARTHIEF | 56.2s | 34.8s | 22 | 0 | 34 |
+| SANCHEZ  | 53.0s | 49.1s |  8 | 0 | 35 |
+| OFFERUP  | 55.5s | 41.8s | 18 | 0 | 36 |
+
+OFFERUP lost 25% and SANCHEZ only 7% — Sanchez is a faster back-and-forth. A
+uniform cut would have wrecked one and barely touched the other, which is the
+argument for deriving the cuts per clip rather than fixing a ratio.
+
+**Verifying caption side: key on the OUTLINE, not brightness.** A check that
+thresholded on white reported 0/5 wrong on a render that was correct — it was
+measuring the ceiling and Judge Boyd's white collar. Caption glyphs are a white
+core inside a 12px black stroke, so the reliable test is a very bright pixel with
+a very dark pixel within ~17px. Nothing else in a courtroom frame does that.
+Measured on the rendered files, the caption changes half 10 / 11 / 11 times.
+
 ## 2026-08-29 — open right now
 
 **Two workflows running** on thumbnails, deliberately disjoint:
