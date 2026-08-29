@@ -1,0 +1,3140 @@
+{
+ "1200000_yzv_uxBSgu0.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\1200000_yzv_uxBSgu0.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 119474,
+  "ext": ".jpg",
+  "sat_mean": 0.316,
+  "val_mean": 0.63,
+  "rms_contrast": 0.307,
+  "clip_hi": 0.0489,
+  "clip_lo": 0.045,
+  "colorfulness": 57.2,
+  "global_detail": 322.8,
+  "seams": [
+   0.123,
+   0.134,
+   0.274,
+   0.487,
+   0.499,
+   0.546
+  ],
+  "seam_zmax": 8.3,
+  "faces": [
+   [
+    856,
+    72,
+    313,
+    313
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.435,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     38,
+     43,
+     567,
+     91
+    ],
+    "txt": "This cop was",
+    "conf": 0.9
+   },
+   {
+    "box": [
+     615,
+     48,
+     246,
+     81
+    ],
+    "txt": "lying!",
+    "conf": 0.73
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.0776,
+  "text_max_h_frac": 0.126,
+  "text_med_h_frac": 0.119,
+  "text_on_face_frac": 0.004,
+  "text_cx": 0.351,
+  "text_cy": 0.123,
+  "wcag_min": 11.3,
+  "wcag_med": 13.7,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0175,
+  "red_frac": 0.0036,
+  "grp": "AUDIT"
+ },
+ "301000_qyETv1lTSuA.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\301000_qyETv1lTSuA.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 136701,
+  "ext": ".jpg",
+  "sat_mean": 0.431,
+  "val_mean": 0.522,
+  "rms_contrast": 0.254,
+  "clip_hi": 0.0152,
+  "clip_lo": 0.0499,
+  "colorfulness": 59.7,
+  "global_detail": 406.7,
+  "seams": [
+   0.312,
+   0.509,
+   0.545,
+   0.555,
+   0.645
+  ],
+  "seam_zmax": 7.2,
+  "faces": [
+   [
+    947,
+    129,
+    148,
+    148
+   ],
+   [
+    1214,
+    257,
+    51,
+    51
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.206,
+  "face_2nd_h_frac": 0.071,
+  "text": [
+   {
+    "box": [
+     37,
+     95,
+     879,
+     66
+    ],
+    "txt": "Get out of my courtroom!",
+    "conf": 0.92
+   },
+   {
+    "box": [
+     605,
+     685,
+     219,
+     24
+    ],
+    "txt": "JudgeNathanJ.Milliron",
+    "conf": 0.88
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.0687,
+  "text_max_h_frac": 0.092,
+  "text_med_h_frac": 0.062,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.372,
+  "text_cy": 0.558,
+  "wcag_min": 3.0,
+  "wcag_med": 10.3,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 0.5,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0066,
+  "red_frac": 0.0,
+  "grp": "AUDIT"
+ },
+ "364000_AAVDROvkXsU.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\364000_AAVDROvkXsU.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 153954,
+  "ext": ".jpg",
+  "sat_mean": 0.218,
+  "val_mean": 0.579,
+  "rms_contrast": 0.29,
+  "clip_hi": 0.0769,
+  "clip_lo": 0.0207,
+  "colorfulness": 44.8,
+  "global_detail": 522.3,
+  "seams": [],
+  "seam_zmax": 5.8,
+  "faces": [
+   [
+    842,
+    181,
+    326,
+    326
+   ],
+   [
+    193,
+    263,
+    152,
+    152
+   ],
+   [
+    310,
+    534,
+    52,
+    52
+   ],
+   [
+    652,
+    514,
+    46,
+    46
+   ],
+   [
+    457,
+    496,
+    46,
+    46
+   ]
+  ],
+  "n_faces": 5,
+  "face_max_h_frac": 0.453,
+  "face_2nd_h_frac": 0.211,
+  "text": [
+   {
+    "box": [
+     32,
+     35,
+     1078,
+     48
+    ],
+    "txt": "I'm sure that was uncomfortable!",
+    "conf": 0.89
+   },
+   {
+    "box": [
+     327,
+     565,
+     26,
+     15
+    ],
+    "txt": "1507",
+    "conf": 0.72
+   },
+   {
+    "box": [
+     161,
+     580,
+     68,
+     26
+    ],
+    "txt": "Z.MePADON",
+    "conf": 0.76
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.0585,
+  "text_max_h_frac": 0.067,
+  "text_med_h_frac": 0.036,
+  "text_on_face_frac": 0.007,
+  "text_cx": 0.446,
+  "text_cy": 0.445,
+  "wcag_min": 2.2,
+  "wcag_med": 5.8,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 0.33,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0114,
+  "red_frac": 0.0036,
+  "grp": "AUDIT"
+ },
+ "412000_IPpy830CJkQ.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\412000_IPpy830CJkQ.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 156821,
+  "ext": ".jpg",
+  "sat_mean": 0.383,
+  "val_mean": 0.454,
+  "rms_contrast": 0.275,
+  "clip_hi": 0.0426,
+  "clip_lo": 0.018,
+  "colorfulness": 60.8,
+  "global_detail": 454.4,
+  "seams": [
+   0.361
+  ],
+  "seam_zmax": 25.4,
+  "faces": [
+   [
+    953,
+    317,
+    99,
+    99
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.138,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     438,
+     53,
+     766,
+     73
+    ],
+    "txt": "I'm sick of bad cops!",
+    "conf": 0.89
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0607,
+  "text_max_h_frac": 0.101,
+  "text_med_h_frac": 0.101,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.641,
+  "text_cy": 0.124,
+  "wcag_min": 18.1,
+  "wcag_med": 18.1,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0109,
+  "red_frac": 0.0033,
+  "grp": "AUDIT"
+ },
+ "414000_Ek3Ah3NZYVo.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\414000_Ek3Ah3NZYVo.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 142679,
+  "ext": ".jpg",
+  "sat_mean": 0.247,
+  "val_mean": 0.606,
+  "rms_contrast": 0.283,
+  "clip_hi": 0.0766,
+  "clip_lo": 0.037,
+  "colorfulness": 62.1,
+  "global_detail": 861.2,
+  "seams": [
+   0.171,
+   0.282,
+   0.298,
+   0.326,
+   0.388
+  ],
+  "seam_zmax": 9.8,
+  "faces": [
+   [
+    844,
+    62,
+    220,
+    220
+   ],
+   [
+    946,
+    565,
+    86,
+    86
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.306,
+  "face_2nd_h_frac": 0.119,
+  "text": [
+   {
+    "box": [
+     54,
+     130,
+     701,
+     101
+    ],
+    "txt": "This is what a",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     55,
+     247,
+     551,
+     112
+    ],
+    "txt": "bully with",
+    "conf": 0.81
+   },
+   {
+    "box": [
+     49,
+     362,
+     454,
+     116
+    ],
+    "txt": "a badge",
+    "conf": 0.8
+   },
+   {
+    "box": [
+     54,
+     484,
+     487,
+     93
+    ],
+    "txt": "looks like",
+    "conf": 0.89
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.2501,
+  "text_max_h_frac": 0.161,
+  "text_med_h_frac": 0.148,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.314,
+  "text_cy": 0.491,
+  "wcag_min": 13.8,
+  "wcag_med": 14.9,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0443,
+  "red_frac": 0.0,
+  "grp": "AUDIT"
+ },
+ "42000_muF8LBaKZrI.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\42000_muF8LBaKZrI.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 128634,
+  "ext": ".jpg",
+  "sat_mean": 0.511,
+  "val_mean": 0.477,
+  "rms_contrast": 0.31,
+  "clip_hi": 0.0043,
+  "clip_lo": 0.1078,
+  "colorfulness": 74.7,
+  "global_detail": 320.1,
+  "seams": [
+   0.194,
+   0.454
+  ],
+  "seam_zmax": 7.5,
+  "faces": [
+   [
+    200,
+    194,
+    320,
+    320
+   ],
+   [
+    851,
+    300,
+    283,
+    283
+   ],
+   [
+    951,
+    347,
+    119,
+    119
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.444,
+  "face_2nd_h_frac": 0.393,
+  "text": [
+   {
+    "box": [
+     11,
+     19,
+     611,
+     54
+    ],
+    "txt": "Are you completely",
+    "conf": 0.86
+   },
+   {
+    "box": [
+     624,
+     19,
+     242,
+     49
+    ],
+    "txt": "insane?",
+    "conf": 0.78
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.0487,
+  "text_max_h_frac": 0.075,
+  "text_med_h_frac": 0.072,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.343,
+  "text_cy": 0.064,
+  "wcag_min": 17.8,
+  "wcag_med": 18.1,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0148,
+  "red_frac": 0.0064,
+  "grp": "AUDIT"
+ },
+ "439000_lzOg8heXmV0.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\439000_lzOg8heXmV0.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 153345,
+  "ext": ".jpg",
+  "sat_mean": 0.393,
+  "val_mean": 0.417,
+  "rms_contrast": 0.301,
+  "clip_hi": 0.0439,
+  "clip_lo": 0.0876,
+  "colorfulness": 56.8,
+  "global_detail": 779.7,
+  "seams": [
+   0.151,
+   0.172,
+   0.28,
+   0.302,
+   0.323,
+   0.384
+  ],
+  "seam_zmax": 7.9,
+  "faces": [
+   [
+    833,
+    181,
+    271,
+    271
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.376,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     65,
+     149,
+     744,
+     81
+    ],
+    "txt": "This is what an",
+    "conf": 0.81
+   },
+   {
+    "box": [
+     54,
+     258,
+     706,
+     106
+    ],
+    "txt": "arrogant cop",
+    "conf": 0.89
+   },
+   {
+    "box": [
+     59,
+     369,
+     480,
+     93
+    ],
+    "txt": "looks like",
+    "conf": 0.82
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.195,
+  "text_max_h_frac": 0.147,
+  "text_med_h_frac": 0.129,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.337,
+  "text_cy": 0.424,
+  "wcag_min": 13.3,
+  "wcag_med": 17.1,
+  "n_text_lines_210": 3,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0289,
+  "red_frac": 0.0001,
+  "grp": "AUDIT"
+ },
+ "444000_5VLPFCTlyss.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\444000_5VLPFCTlyss.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 133029,
+  "ext": ".jpg",
+  "sat_mean": 0.462,
+  "val_mean": 0.406,
+  "rms_contrast": 0.217,
+  "clip_hi": 0.0087,
+  "clip_lo": 0.0129,
+  "colorfulness": 56.2,
+  "global_detail": 315.0,
+  "seams": [
+   0.456,
+   0.621,
+   0.758,
+   0.845
+  ],
+  "seam_zmax": 10.8,
+  "faces": [
+   [
+    204,
+    117,
+    203,
+    203
+   ],
+   [
+    1046,
+    321,
+    97,
+    97
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.282,
+  "face_2nd_h_frac": 0.135,
+  "text": [
+   {
+    "box": [
+     472,
+     37,
+     767,
+     83
+    ],
+    "txt": "Cops can't do that!",
+    "conf": 0.92
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0691,
+  "text_max_h_frac": 0.115,
+  "text_med_h_frac": 0.115,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.668,
+  "text_cy": 0.109,
+  "wcag_min": 17.3,
+  "wcag_med": 17.3,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0165,
+  "red_frac": 0.0041,
+  "grp": "AUDIT"
+ },
+ "552000_SpO2yU2mG78.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\552000_SpO2yU2mG78.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 92547,
+  "ext": ".jpg",
+  "sat_mean": 0.271,
+  "val_mean": 0.487,
+  "rms_contrast": 0.284,
+  "clip_hi": 0.0125,
+  "clip_lo": 0.0374,
+  "colorfulness": 56.2,
+  "global_detail": 329.8,
+  "seams": [
+   0.146,
+   0.335,
+   0.385
+  ],
+  "seam_zmax": 8.0,
+  "faces": [
+   [
+    837,
+    184,
+    427,
+    427
+   ],
+   [
+    398,
+    427,
+    104,
+    104
+   ],
+   [
+    412,
+    221,
+    92,
+    92
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.593,
+  "face_2nd_h_frac": 0.144,
+  "text": [
+   {
+    "box": [
+     23,
+     43,
+     820,
+     81
+    ],
+    "txt": "He lost this case!",
+    "conf": 0.85
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0721,
+  "text_max_h_frac": 0.113,
+  "text_med_h_frac": 0.113,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.338,
+  "text_cy": 0.116,
+  "wcag_min": 16.4,
+  "wcag_med": 16.4,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0241,
+  "red_frac": 0.0042,
+  "grp": "AUDIT"
+ },
+ "59000_bXbyg2vK6CI.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\59000_bXbyg2vK6CI.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 132668,
+  "ext": ".jpg",
+  "sat_mean": 0.28,
+  "val_mean": 0.529,
+  "rms_contrast": 0.222,
+  "clip_hi": 0.0119,
+  "clip_lo": 0.012,
+  "colorfulness": 57.2,
+  "global_detail": 349.9,
+  "seams": [
+   0.264,
+   0.277,
+   0.745
+  ],
+  "seam_zmax": 7.3,
+  "faces": [
+   [
+    35,
+    168,
+    306,
+    306
+   ],
+   [
+    916,
+    216,
+    302,
+    302
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.425,
+  "face_2nd_h_frac": 0.419,
+  "text": [
+   {
+    "box": [
+     326,
+     42,
+     915,
+     82
+    ],
+    "txt": "I don't need a lawyer!",
+    "conf": 0.91
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0814,
+  "text_max_h_frac": 0.114,
+  "text_med_h_frac": 0.114,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.612,
+  "text_cy": 0.115,
+  "wcag_min": 14.4,
+  "wcag_med": 14.4,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0169,
+  "red_frac": 0.0047,
+  "grp": "AUDIT"
+ },
+ "591000_amiWU58HFpM.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\591000_amiWU58HFpM.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 161752,
+  "ext": ".jpg",
+  "sat_mean": 0.301,
+  "val_mean": 0.395,
+  "rms_contrast": 0.261,
+  "clip_hi": 0.0116,
+  "clip_lo": 0.0128,
+  "colorfulness": 51.0,
+  "global_detail": 482.3,
+  "seams": [
+   0.409,
+   0.423
+  ],
+  "seam_zmax": 10.4,
+  "faces": [
+   [
+    917,
+    134,
+    237,
+    237
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.329,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     42,
+     58,
+     772,
+     69
+    ],
+    "txt": "That is not the law!",
+    "conf": 0.85
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0578,
+  "text_max_h_frac": 0.096,
+  "text_med_h_frac": 0.096,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.334,
+  "text_cy": 0.128,
+  "wcag_min": 17.4,
+  "wcag_med": 17.4,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0143,
+  "red_frac": 0.0032,
+  "grp": "AUDIT"
+ },
+ "971000_4kIjd7CLp7c.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\competitor\\thumbs\\971000_4kIjd7CLp7c.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 181614,
+  "ext": ".jpg",
+  "sat_mean": 0.398,
+  "val_mean": 0.37,
+  "rms_contrast": 0.248,
+  "clip_hi": 0.0105,
+  "clip_lo": 0.0339,
+  "colorfulness": 44.6,
+  "global_detail": 597.5,
+  "seams": [
+   0.643
+  ],
+  "seam_zmax": 24.1,
+  "faces": [
+   [
+    936,
+    86,
+    227,
+    227
+   ],
+   [
+    184,
+    194,
+    114,
+    114
+   ],
+   [
+    1047,
+    547,
+    52,
+    52
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.315,
+  "face_2nd_h_frac": 0.158,
+  "text": [
+   {
+    "box": [
+     14,
+     32,
+     916,
+     63
+    ],
+    "txt": "He destroyed the cop's attorney",
+    "conf": 0.89
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0626,
+  "text_max_h_frac": 0.087,
+  "text_med_h_frac": 0.087,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.369,
+  "text_cy": 0.088,
+  "wcag_min": 17.1,
+  "wcag_med": 17.1,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0072,
+  "red_frac": 0.0042,
+  "grp": "AUDIT"
+ },
+ "bot_00000388_q1Fo7x_0ItI_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00000388_q1Fo7x_0ItI_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 160275,
+  "ext": ".jpg",
+  "sat_mean": 0.464,
+  "val_mean": 0.436,
+  "rms_contrast": 0.356,
+  "clip_hi": 0.0048,
+  "clip_lo": 0.2126,
+  "colorfulness": 90.4,
+  "global_detail": 1301.6,
+  "seams": [
+   0.487
+  ],
+  "seam_zmax": 22.8,
+  "faces": [
+   [
+    170,
+    315,
+    107,
+    107
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.149,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     392,
+     211,
+     334,
+     148
+    ],
+    "txt": "JUDGE",
+    "conf": 0.8
+   },
+   {
+    "box": [
+     438,
+     317,
+     298,
+     151
+    ],
+    "txt": "FIRES",
+    "conf": 0.83
+   },
+   {
+    "box": [
+     337,
+     411,
+     549,
+     178
+    ],
+    "txt": "PROBATION",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     352,
+     518,
+     548,
+     186
+    ],
+    "txt": "OFFICER？",
+    "conf": 0.81
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.3191,
+  "text_max_h_frac": 0.258,
+  "text_med_h_frac": 0.228,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.483,
+  "text_cy": 0.635,
+  "wcag_min": 5.6,
+  "wcag_med": 18.1,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1096,
+  "red_frac": 0.0142,
+  "grp": "CT_BOT"
+ },
+ "bot_00000749_RfF0ouKeE0w_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00000749_RfF0ouKeE0w_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 173113,
+  "ext": ".jpg",
+  "sat_mean": 0.462,
+  "val_mean": 0.473,
+  "rms_contrast": 0.314,
+  "clip_hi": 0.0195,
+  "clip_lo": 0.1125,
+  "colorfulness": 104.6,
+  "global_detail": 1463.6,
+  "seams": [],
+  "seam_zmax": 25.4,
+  "faces": [
+   [
+    948,
+    137,
+    207,
+    207
+   ],
+   [
+    337,
+    89,
+    138,
+    138
+   ],
+   [
+    819,
+    651,
+    46,
+    46
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.287,
+  "face_2nd_h_frac": 0.192,
+  "text": [
+   {
+    "box": [
+     523,
+     60,
+     304,
+     121
+    ],
+    "txt": "CAUGHT",
+    "conf": 0.76
+   },
+   {
+    "box": [
+     620,
+     145,
+     141,
+     103
+    ],
+    "txt": "ON",
+    "conf": 0.65
+   },
+   {
+    "box": [
+     545,
+     206,
+     343,
+     120
+    ],
+    "txt": "CAMERA!!",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     20,
+     600,
+     1234,
+     97
+    ],
+    "txt": "CARYING PUNK CUFFED",
+    "conf": 0.82
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.2302,
+  "text_max_h_frac": 0.168,
+  "text_med_h_frac": 0.155,
+  "text_on_face_frac": 0.01,
+  "text_cx": 0.498,
+  "text_cy": 0.526,
+  "wcag_min": 10.2,
+  "wcag_med": 18.3,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1567,
+  "red_frac": 0.011,
+  "grp": "CT_BOT"
+ },
+ "bot_00000988_79nw7lP0jm0_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00000988_79nw7lP0jm0_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 170165,
+  "ext": ".jpg",
+  "sat_mean": 0.485,
+  "val_mean": 0.512,
+  "rms_contrast": 0.291,
+  "clip_hi": 0.0418,
+  "clip_lo": 0.0317,
+  "colorfulness": 85.5,
+  "global_detail": 1416.7,
+  "seams": [
+   0.233
+  ],
+  "seam_zmax": 6.5,
+  "faces": [
+   [
+    754,
+    71,
+    247,
+    247
+   ],
+   [
+    149,
+    165,
+    205,
+    205
+   ],
+   [
+    969,
+    137,
+    71,
+    71
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.343,
+  "face_2nd_h_frac": 0.285,
+  "text": [
+   {
+    "box": [
+     393,
+     25,
+     332,
+     72
+    ],
+    "txt": "SHOCIING",
+    "conf": 0.82
+   },
+   {
+    "box": [
+     13,
+     571,
+     686,
+     61
+    ],
+    "txt": "JUDGEBOYDSHOCKED!",
+    "conf": 0.88
+   },
+   {
+    "box": [
+     9,
+     662,
+     1020,
+     45
+    ],
+    "txt": "DEFENDANT CHOOSEPRISON OVER PROBATION!!",
+    "conf": 0.9
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.1211,
+  "text_max_h_frac": 0.1,
+  "text_med_h_frac": 0.085,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.405,
+  "text_cy": 0.508,
+  "wcag_min": 4.0,
+  "wcag_med": 14.3,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 0.33,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.0469,
+  "red_frac": 0.0341,
+  "grp": "CT_BOT"
+ },
+ "bot_00001000_95HqsmyM-zI_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001000_95HqsmyM-zI_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 175251,
+  "ext": ".jpg",
+  "sat_mean": 0.644,
+  "val_mean": 0.415,
+  "rms_contrast": 0.263,
+  "clip_hi": 0.0135,
+  "clip_lo": 0.0365,
+  "colorfulness": 89.3,
+  "global_detail": 1658.1,
+  "seams": [],
+  "seam_zmax": 5.3,
+  "faces": [],
+  "n_faces": 0,
+  "face_max_h_frac": 0.0,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     950,
+     6,
+     316,
+     126
+    ],
+    "txt": "STUPD",
+    "conf": 0.78
+   },
+   {
+    "box": [
+     20,
+     512,
+     262,
+     81
+    ],
+    "txt": "JUDGE",
+    "conf": 0.82
+   },
+   {
+    "box": [
+     14,
+     619,
+     737,
+     89
+    ],
+    "txt": "EXPOSES STUPID",
+    "conf": 0.87
+   },
+   {
+    "box": [
+     738,
+     623,
+     308,
+     80
+    ],
+    "txt": "KAREN",
+    "conf": 0.73
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.1641,
+  "text_max_h_frac": 0.175,
+  "text_med_h_frac": 0.118,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.5,
+  "text_cy": 0.496,
+  "wcag_min": 3.7,
+  "wcag_med": 14.4,
+  "n_text_lines_210": 3,
+  "ocr_survival_210": 0.75,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0602,
+  "red_frac": 0.0285,
+  "grp": "CT_BOT"
+ },
+ "bot_00001100_--Mpaln4jx8_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001100_--Mpaln4jx8_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 357188,
+  "ext": ".jpg",
+  "sat_mean": 0.63,
+  "val_mean": 0.463,
+  "rms_contrast": 0.28,
+  "clip_hi": 0.0032,
+  "clip_lo": 0.0785,
+  "colorfulness": 84.2,
+  "global_detail": 1939.1,
+  "seams": [],
+  "seam_zmax": 5.6,
+  "faces": [
+   [
+    536,
+    193,
+    138,
+    138
+   ],
+   [
+    296,
+    154,
+    117,
+    117
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.192,
+  "face_2nd_h_frac": 0.163,
+  "text": [
+   {
+    "box": [
+     12,
+     17,
+     596,
+     114
+    ],
+    "txt": "FAKE LAWYER",
+    "conf": 0.84
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0737,
+  "text_max_h_frac": 0.158,
+  "text_med_h_frac": 0.158,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.242,
+  "text_cy": 0.103,
+  "wcag_min": 17.5,
+  "wcag_med": 17.5,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0506,
+  "red_frac": 0.0017,
+  "grp": "CT_BOT"
+ },
+ "bot_00001100_U204YIfp-rc_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001100_U204YIfp-rc_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 183018,
+  "ext": ".jpg",
+  "sat_mean": 0.536,
+  "val_mean": 0.521,
+  "rms_contrast": 0.285,
+  "clip_hi": 0.0275,
+  "clip_lo": 0.031,
+  "colorfulness": 98.1,
+  "global_detail": 1704.7,
+  "seams": [],
+  "seam_zmax": 5.7,
+  "faces": [
+   [
+    780,
+    159,
+    357,
+    357
+   ],
+   [
+    157,
+    237,
+    193,
+    193
+   ],
+   [
+    302,
+    34,
+    99,
+    99
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.496,
+  "face_2nd_h_frac": 0.268,
+  "text": [
+   {
+    "box": [
+     14,
+     13,
+     796,
+     77
+    ],
+    "txt": "MY SON CAN'T BE GAY!",
+    "conf": 0.88
+   },
+   {
+    "box": [
+     12,
+     561,
+     551,
+     51
+    ],
+    "txt": "6 YEARS FOR THIS ??",
+    "conf": 0.78
+   },
+   {
+    "box": [
+     16,
+     642,
+     209,
+     60
+    ],
+    "txt": "JUDGE",
+    "conf": 0.79
+   },
+   {
+    "box": [
+     236,
+     644,
+     188,
+     57
+    ],
+    "txt": "BOYD",
+    "conf": 0.72
+   },
+   {
+    "box": [
+     432,
+     643,
+     283,
+     58
+    ],
+    "txt": "REACTS!",
+    "conf": 0.86
+   }
+  ],
+  "n_text_lines": 5,
+  "text_area_frac": 0.14,
+  "text_max_h_frac": 0.107,
+  "text_med_h_frac": 0.081,
+  "text_on_face_frac": 0.043,
+  "text_cx": 0.321,
+  "text_cy": 0.497,
+  "wcag_min": 14.1,
+  "wcag_med": 18.7,
+  "n_text_lines_210": 3,
+  "ocr_survival_210": 0.6,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0684,
+  "red_frac": 0.0558,
+  "grp": "CT_BOT"
+ },
+ "bot_00001200_qlDoZCJs620_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001200_qlDoZCJs620_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 209235,
+  "ext": ".jpg",
+  "sat_mean": 0.604,
+  "val_mean": 0.499,
+  "rms_contrast": 0.295,
+  "clip_hi": 0.0077,
+  "clip_lo": 0.1257,
+  "colorfulness": 108.3,
+  "global_detail": 1825.8,
+  "seams": [
+   0.417
+  ],
+  "seam_zmax": 12.5,
+  "faces": [
+   [
+    899,
+    63,
+    210,
+    210
+   ],
+   [
+    153,
+    165,
+    202,
+    202
+   ],
+   [
+    784,
+    401,
+    149,
+    149
+   ],
+   [
+    473,
+    14,
+    44,
+    44
+   ]
+  ],
+  "n_faces": 4,
+  "face_max_h_frac": 0.292,
+  "face_2nd_h_frac": 0.281,
+  "text": [
+   {
+    "box": [
+     440,
+     22,
+     384,
+     87
+    ],
+    "txt": "ENTED",
+    "conf": 0.53
+   },
+   {
+    "box": [
+     433,
+     118,
+     403,
+     175
+    ],
+    "txt": "BRAT",
+    "conf": 0.74
+   },
+   {
+    "box": [
+     438,
+     303,
+     403,
+     96
+    ],
+    "txt": "ENPOSEI",
+    "conf": 0.68
+   },
+   {
+    "box": [
+     931,
+     364,
+     149,
+     80
+    ],
+    "txt": "JAIL",
+    "conf": 0.73
+   },
+   {
+    "box": [
+     260,
+     482,
+     68,
+     19
+    ],
+    "txt": "Judoe",
+    "conf": 0.74
+   },
+   {
+    "box": [
+     27,
+     518,
+     511,
+     92
+    ],
+    "txt": "JUDGE BOYD",
+    "conf": 0.83
+   },
+   {
+    "box": [
+     17,
+     633,
+     1246,
+     70
+    ],
+    "txt": "OWNS AN ENTITLED MOM IN HER COURT",
+    "conf": 0.88
+   }
+  ],
+  "n_text_lines": 7,
+  "text_area_frac": 0.3147,
+  "text_max_h_frac": 0.243,
+  "text_med_h_frac": 0.121,
+  "text_on_face_frac": 0.006,
+  "text_cx": 0.5,
+  "text_cy": 0.503,
+  "wcag_min": 1.2,
+  "wcag_med": 6.6,
+  "n_text_lines_210": 6,
+  "ocr_survival_210": 0.86,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1073,
+  "red_frac": 0.0757,
+  "grp": "CT_BOT"
+ },
+ "bot_00001300_rUJ__Sb3Y8w_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001300_rUJ__Sb3Y8w_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 167843,
+  "ext": ".jpg",
+  "sat_mean": 0.563,
+  "val_mean": 0.494,
+  "rms_contrast": 0.267,
+  "clip_hi": 0.007,
+  "clip_lo": 0.0501,
+  "colorfulness": 86.5,
+  "global_detail": 1593.6,
+  "seams": [],
+  "seam_zmax": 5.9,
+  "faces": [
+   [
+    486,
+    516,
+    72,
+    72
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.1,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     886,
+     297,
+     275,
+     98
+    ],
+    "txt": "SOCHN",
+    "conf": 0.58
+   },
+   {
+    "box": [
+     32,
+     520,
+     819,
+     63
+    ],
+    "txt": "JAIL FOR BEER & CANDY?!",
+    "conf": 0.88
+   },
+   {
+    "box": [
+     23,
+     607,
+     1141,
+     82
+    ],
+    "txt": "JUDGE FLEISCHER'S TOUGH.VERDICT!",
+    "conf": 0.88
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.1868,
+  "text_max_h_frac": 0.136,
+  "text_med_h_frac": 0.114,
+  "text_on_face_frac": 0.026,
+  "text_cx": 0.464,
+  "text_cy": 0.685,
+  "wcag_min": 3.5,
+  "wcag_med": 14.3,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 0.67,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.0729,
+  "red_frac": 0.0146,
+  "grp": "CT_BOT"
+ },
+ "bot_00001500_gVVI_SdlsvA_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001500_gVVI_SdlsvA_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 181111,
+  "ext": ".jpg",
+  "sat_mean": 0.587,
+  "val_mean": 0.53,
+  "rms_contrast": 0.317,
+  "clip_hi": 0.0273,
+  "clip_lo": 0.0997,
+  "colorfulness": 118.3,
+  "global_detail": 1909.2,
+  "seams": [],
+  "seam_zmax": 19.7,
+  "faces": [
+   [
+    113,
+    106,
+    210,
+    210
+   ],
+   [
+    778,
+    55,
+    184,
+    184
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.292,
+  "face_2nd_h_frac": 0.256,
+  "text": [
+   {
+    "box": [
+     37,
+     481,
+     495,
+     81
+    ],
+    "txt": "JUDGEBOYD",
+    "conf": 0.86
+   },
+   {
+    "box": [
+     542,
+     489,
+     707,
+     72
+    ],
+    "txt": "DADMADEITWORSE",
+    "conf": 0.75
+   },
+   {
+    "box": [
+     33,
+     607,
+     1218,
+     63
+    ],
+    "txt": "LAWYER GETS SHOCKED BY THE HONESTY",
+    "conf": 0.88
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.182,
+  "text_max_h_frac": 0.113,
+  "text_med_h_frac": 0.1,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.502,
+  "text_cy": 0.799,
+  "wcag_min": 5.0,
+  "wcag_med": 7.8,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.33,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1392,
+  "red_frac": 0.0363,
+  "grp": "CT_BOT"
+ },
+ "bot_00001700_-YRHSSLanxk_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\bot_00001700_-YRHSSLanxk_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 182529,
+  "ext": ".jpg",
+  "sat_mean": 0.609,
+  "val_mean": 0.468,
+  "rms_contrast": 0.326,
+  "clip_hi": 0.0051,
+  "clip_lo": 0.129,
+  "colorfulness": 121.4,
+  "global_detail": 1759.0,
+  "seams": [],
+  "seam_zmax": 20.4,
+  "faces": [
+   [
+    877,
+    118,
+    203,
+    203
+   ],
+   [
+    252,
+    79,
+    159,
+    159
+   ],
+   [
+    495,
+    46,
+    150,
+    150
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.282,
+  "face_2nd_h_frac": 0.221,
+  "text": [
+   {
+    "box": [
+     86,
+     443,
+     1062,
+     156
+    ],
+    "txt": "SNAPCHAT FOOL",
+    "conf": 0.87
+   },
+   {
+    "box": [
+     36,
+     594,
+     1210,
+     123
+    ],
+    "txt": "FACES 20 YEARS",
+    "conf": 0.84
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.3413,
+  "text_max_h_frac": 0.217,
+  "text_med_h_frac": 0.194,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.501,
+  "text_cy": 0.806,
+  "wcag_min": 17.9,
+  "wcag_med": 18.4,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1756,
+  "red_frac": 0.0294,
+  "grp": "CT_BOT"
+ },
+ "top_00204000_J3LdwHAZR2E_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00204000_J3LdwHAZR2E_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 202545,
+  "ext": ".jpg",
+  "sat_mean": 0.439,
+  "val_mean": 0.541,
+  "rms_contrast": 0.304,
+  "clip_hi": 0.0026,
+  "clip_lo": 0.1087,
+  "colorfulness": 108.9,
+  "global_detail": 1968.6,
+  "seams": [
+   0.837
+  ],
+  "seam_zmax": 6.4,
+  "faces": [
+   [
+    916,
+    122,
+    149,
+    149
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.207,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     444,
+     256,
+     297,
+     150
+    ],
+    "txt": "UPDATE",
+    "conf": 0.79
+   },
+   {
+    "box": [
+     468,
+     346,
+     311,
+     187
+    ],
+    "txt": "2026",
+    "conf": 0.8
+   },
+   {
+    "box": [
+     2,
+     569,
+     962,
+     140
+    ],
+    "txt": "NASTYVISITOR",
+    "conf": 0.92
+   },
+   {
+    "box": [
+     888,
+     575,
+     380,
+     125
+    ],
+    "txt": "RMOM",
+    "conf": 0.69
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.3091,
+  "text_max_h_frac": 0.26,
+  "text_med_h_frac": 0.201,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.496,
+  "text_cy": 0.67,
+  "wcag_min": 8.8,
+  "wcag_med": 18.0,
+  "n_text_lines_210": 3,
+  "ocr_survival_210": 0.75,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0926,
+  "red_frac": 0.062,
+  "grp": "CT_TOP"
+ },
+ "top_00209000_z05aWSTzw0k_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00209000_z05aWSTzw0k_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 196916,
+  "ext": ".jpg",
+  "sat_mean": 0.571,
+  "val_mean": 0.477,
+  "rms_contrast": 0.276,
+  "clip_hi": 0.0112,
+  "clip_lo": 0.0919,
+  "colorfulness": 101.5,
+  "global_detail": 1891.9,
+  "seams": [],
+  "seam_zmax": 10.6,
+  "faces": [
+   [
+    151,
+    165,
+    204,
+    204
+   ],
+   [
+    833,
+    100,
+    145,
+    145
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.283,
+  "face_2nd_h_frac": 0.201,
+  "text": [
+   {
+    "box": [
+     569,
+     339,
+     690,
+     99
+    ],
+    "txt": "ENTTLEDPUNK",
+    "conf": 0.76
+   },
+   {
+    "box": [
+     16,
+     548,
+     385,
+     58
+    ],
+    "txt": "JUDGEBOYI",
+    "conf": 0.73
+   },
+   {
+    "box": [
+     19,
+     644,
+     1098,
+     50
+    ],
+    "txt": "OWNS THE CRAZIEST ENTITLED PUNK IN COURT!",
+    "conf": 0.9
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.1579,
+  "text_max_h_frac": 0.138,
+  "text_med_h_frac": 0.081,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.498,
+  "text_cy": 0.717,
+  "wcag_min": 4.9,
+  "wcag_med": 10.3,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.33,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1041,
+  "red_frac": 0.0443,
+  "grp": "CT_TOP"
+ },
+ "top_00214000__eMKRoRaE_w_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00214000__eMKRoRaE_w_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 149761,
+  "ext": ".jpg",
+  "sat_mean": 0.579,
+  "val_mean": 0.466,
+  "rms_contrast": 0.267,
+  "clip_hi": 0.031,
+  "clip_lo": 0.0328,
+  "colorfulness": 91.4,
+  "global_detail": 1189.4,
+  "seams": [
+   0.211
+  ],
+  "seam_zmax": 6.4,
+  "faces": [
+   [
+    152,
+    166,
+    201,
+    201
+   ],
+   [
+    711,
+    63,
+    174,
+    174
+   ],
+   [
+    1184,
+    87,
+    54,
+    54
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.279,
+  "face_2nd_h_frac": 0.242,
+  "text": [
+   {
+    "box": [
+     417,
+     16,
+     281,
+     126
+    ],
+    "txt": "EXPOSED!",
+    "conf": 0.79
+   },
+   {
+    "box": [
+     19,
+     500,
+     485,
+     95
+    ],
+    "txt": "20-YEARS ?!",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     25,
+     611,
+     1082,
+     80
+    ],
+    "txt": "JUDGE BOYD'S TOUGH VERDICT!",
+    "conf": 0.89
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.1823,
+  "text_max_h_frac": 0.175,
+  "text_med_h_frac": 0.132,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.44,
+  "text_cy": 0.491,
+  "wcag_min": 2.5,
+  "wcag_med": 14.3,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 0.67,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.051,
+  "red_frac": 0.024,
+  "grp": "CT_TOP"
+ },
+ "top_00233000_-iPnSFl434E_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00233000_-iPnSFl434E_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 288574,
+  "ext": ".jpg",
+  "sat_mean": 0.355,
+  "val_mean": 0.55,
+  "rms_contrast": 0.312,
+  "clip_hi": 0.0314,
+  "clip_lo": 0.0916,
+  "colorfulness": 89.2,
+  "global_detail": 1542.9,
+  "seams": [
+   0.345,
+   0.642
+  ],
+  "seam_zmax": 7.3,
+  "faces": [
+   [
+    758,
+    63,
+    371,
+    371
+   ],
+   [
+    51,
+    90,
+    125,
+    125
+   ],
+   [
+    801,
+    529,
+    118,
+    118
+   ],
+   [
+    435,
+    167,
+    114,
+    114
+   ],
+   [
+    555,
+    442,
+    54,
+    54
+   ]
+  ],
+  "n_faces": 5,
+  "face_max_h_frac": 0.515,
+  "face_2nd_h_frac": 0.174,
+  "text": [
+   {
+    "box": [
+     20,
+     422,
+     261,
+     144
+    ],
+    "txt": "IDO",
+    "conf": 0.64
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.0408,
+  "text_max_h_frac": 0.2,
+  "text_med_h_frac": 0.2,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.118,
+  "text_cy": 0.686,
+  "wcag_min": 5.0,
+  "wcag_med": 5.0,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 2.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.083,
+  "red_frac": 0.0304,
+  "grp": "CT_TOP"
+ },
+ "top_00241000_8lxIY35zb6Q_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00241000_8lxIY35zb6Q_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 290794,
+  "ext": ".jpg",
+  "sat_mean": 0.335,
+  "val_mean": 0.529,
+  "rms_contrast": 0.302,
+  "clip_hi": 0.0275,
+  "clip_lo": 0.0753,
+  "colorfulness": 82.9,
+  "global_detail": 1694.3,
+  "seams": [
+   0.344
+  ],
+  "seam_zmax": 7.5,
+  "faces": [
+   [
+    871,
+    383,
+    279,
+    279
+   ],
+   [
+    934,
+    59,
+    80,
+    80
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.388,
+  "face_2nd_h_frac": 0.111,
+  "text": [
+   {
+    "box": [
+     14,
+     16,
+     345,
+     87
+    ],
+    "txt": "BUSTED",
+    "conf": 0.77
+   },
+   {
+    "box": [
+     363,
+     14,
+     552,
+     98
+    ],
+    "txt": "HAVING SEX",
+    "conf": 0.78
+   },
+   {
+    "box": [
+     13,
+     120,
+     495,
+     103
+    ],
+    "txt": "IN COURT!!",
+    "conf": 0.76
+   },
+   {
+    "box": [
+     706,
+     317,
+     266,
+     32
+    ],
+    "txt": "lon.J.CedricSimpson",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     421,
+     424,
+     103,
+     128
+    ],
+    "txt": "USTEL",
+    "conf": 0.7
+   }
+  ],
+  "n_text_lines": 5,
+  "text_area_frac": 0.1701,
+  "text_max_h_frac": 0.178,
+  "text_med_h_frac": 0.136,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.385,
+  "text_cy": 0.393,
+  "wcag_min": 5.1,
+  "wcag_med": 11.5,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 0.4,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.0695,
+  "red_frac": 0.0258,
+  "grp": "CT_TOP"
+ },
+ "top_00277000_k69GmELAgVw_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00277000_k69GmELAgVw_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 165770,
+  "ext": ".jpg",
+  "sat_mean": 0.456,
+  "val_mean": 0.524,
+  "rms_contrast": 0.285,
+  "clip_hi": 0.0105,
+  "clip_lo": 0.0872,
+  "colorfulness": 84.7,
+  "global_detail": 1434.0,
+  "seams": [],
+  "seam_zmax": 18.2,
+  "faces": [
+   [
+    150,
+    163,
+    208,
+    208
+   ],
+   [
+    739,
+    112,
+    188,
+    188
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.289,
+  "face_2nd_h_frac": 0.261,
+  "text": [
+   {
+    "box": [
+     648,
+     354,
+     380,
+     100
+    ],
+    "txt": "HIGHIN",
+    "conf": 0.81
+   },
+   {
+    "box": [
+     647,
+     460,
+     372,
+     78
+    ],
+    "txt": "COURT",
+    "conf": 0.82
+   },
+   {
+    "box": [
+     267,
+     485,
+     56,
+     14
+    ],
+    "txt": "OOE",
+    "conf": 0.53
+   },
+   {
+    "box": [
+     17,
+     548,
+     389,
+     59
+    ],
+    "txt": "JUDGEBOYD",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     15,
+     634,
+     1086,
+     55
+    ],
+    "txt": "OWNS MOM SHOWED UP HIGH IN COURT!",
+    "conf": 0.86
+   }
+  ],
+  "n_text_lines": 5,
+  "text_area_frac": 0.1633,
+  "text_max_h_frac": 0.139,
+  "text_med_h_frac": 0.082,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.436,
+  "text_cy": 0.724,
+  "wcag_min": 1.2,
+  "wcag_med": 4.9,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 0.8,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0884,
+  "red_frac": 0.0191,
+  "grp": "CT_TOP"
+ },
+ "top_00305000_8n5raFtKul8_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00305000_8n5raFtKul8_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 146057,
+  "ext": ".jpg",
+  "sat_mean": 0.398,
+  "val_mean": 0.595,
+  "rms_contrast": 0.323,
+  "clip_hi": 0.0574,
+  "clip_lo": 0.0899,
+  "colorfulness": 108.9,
+  "global_detail": 962.5,
+  "seams": [
+   0.15,
+   0.233,
+   0.409,
+   0.441,
+   0.525,
+   0.696,
+   0.728,
+   0.741,
+   0.831
+  ],
+  "seam_zmax": 9.0,
+  "faces": [
+   [
+    861,
+    67,
+    300,
+    300
+   ],
+   [
+    364,
+    143,
+    77,
+    77
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.417,
+  "face_2nd_h_frac": 0.107,
+  "text": [
+   {
+    "box": [
+     0,
+     508,
+     1279,
+     211
+    ],
+    "txt": "FAKE DISABILITY",
+    "conf": 0.93
+   }
+  ],
+  "n_text_lines": 1,
+  "text_area_frac": 0.2928,
+  "text_max_h_frac": 0.293,
+  "text_med_h_frac": 0.293,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.5,
+  "text_cy": 0.852,
+  "wcag_min": 19.1,
+  "wcag_med": 19.1,
+  "n_text_lines_210": 1,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1623,
+  "red_frac": 0.0,
+  "grp": "CT_TOP"
+ },
+ "top_00308000_lfAlCDsEQZ4_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00308000_lfAlCDsEQZ4_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 215287,
+  "ext": ".jpg",
+  "sat_mean": 0.602,
+  "val_mean": 0.508,
+  "rms_contrast": 0.295,
+  "clip_hi": 0.0118,
+  "clip_lo": 0.123,
+  "colorfulness": 112.9,
+  "global_detail": 1904.3,
+  "seams": [],
+  "seam_zmax": 20.3,
+  "faces": [
+   [
+    858,
+    46,
+    229,
+    229
+   ],
+   [
+    151,
+    165,
+    203,
+    203
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.318,
+  "face_2nd_h_frac": 0.282,
+  "text": [
+   {
+    "box": [
+     416,
+     19,
+     390,
+     103
+    ],
+    "txt": "RAPPER",
+    "conf": 0.7
+   },
+   {
+    "box": [
+     404,
+     137,
+     416,
+     169
+    ],
+    "txt": "PUNK",
+    "conf": 0.71
+   },
+   {
+    "box": [
+     423,
+     314,
+     396,
+     96
+    ],
+    "txt": "EXPOSET",
+    "conf": 0.71
+   },
+   {
+    "box": [
+     342,
+     483,
+     82,
+     15
+    ],
+    "txt": "Steoat",
+    "conf": 0.51
+   },
+   {
+    "box": [
+     26,
+     517,
+     510,
+     95
+    ],
+    "txt": "JUDGE BOYD",
+    "conf": 0.84
+   },
+   {
+    "box": [
+     19,
+     635,
+     1180,
+     67
+    ],
+    "txt": "SENTENCES RAPPER PUNK TO 8O YEARS",
+    "conf": 0.87
+   }
+  ],
+  "n_text_lines": 6,
+  "text_area_frac": 0.3008,
+  "text_max_h_frac": 0.235,
+  "text_med_h_frac": 0.133,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.476,
+  "text_cy": 0.501,
+  "wcag_min": 1.1,
+  "wcag_med": 8.8,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 0.67,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.1031,
+  "red_frac": 0.0845,
+  "grp": "CT_TOP"
+ },
+ "top_00335000_aH0fnO4w-dg_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00335000_aH0fnO4w-dg_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 224230,
+  "ext": ".jpg",
+  "sat_mean": 0.562,
+  "val_mean": 0.505,
+  "rms_contrast": 0.308,
+  "clip_hi": 0.0124,
+  "clip_lo": 0.105,
+  "colorfulness": 106.2,
+  "global_detail": 2477.6,
+  "seams": [],
+  "seam_zmax": 11.7,
+  "faces": [
+   [
+    151,
+    165,
+    204,
+    204
+   ],
+   [
+    1007,
+    211,
+    84,
+    84
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.283,
+  "face_2nd_h_frac": 0.117,
+  "text": [
+   {
+    "box": [
+     405,
+     18,
+     381,
+     139
+    ],
+    "txt": "SMUG",
+    "conf": 0.64
+   },
+   {
+    "box": [
+     415,
+     159,
+     370,
+     111
+    ],
+    "txt": "IEAMT",
+    "conf": 0.54
+   },
+   {
+    "box": [
+     424,
+     275,
+     358,
+     89
+    ],
+    "txt": "EKPOSET",
+    "conf": 0.68
+   },
+   {
+    "box": [
+     1008,
+     298,
+     94,
+     59
+    ],
+    "txt": "Smug",
+    "conf": 0.68
+   },
+   {
+    "box": [
+     340,
+     483,
+     100,
+     17
+    ],
+    "txt": "Stepmare",
+    "conf": 0.53
+   },
+   {
+    "box": [
+     27,
+     517,
+     512,
+     94
+    ],
+    "txt": "JUDGEBOYD",
+    "conf": 0.89
+   },
+   {
+    "box": [
+     13,
+     645,
+     1151,
+     45
+    ],
+    "txt": "OWNSLAWYER WHO ATTACKED PROBATION OFFICER",
+    "conf": 0.91
+   }
+  ],
+  "n_text_lines": 7,
+  "text_area_frac": 0.2529,
+  "text_max_h_frac": 0.193,
+  "text_med_h_frac": 0.124,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.46,
+  "text_cy": 0.492,
+  "wcag_min": 1.2,
+  "wcag_med": 8.2,
+  "n_text_lines_210": 5,
+  "ocr_survival_210": 0.71,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1139,
+  "red_frac": 0.0627,
+  "grp": "CT_TOP"
+ },
+ "top_00354000_ePdAxp1Zs8Y_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00354000_ePdAxp1Zs8Y_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 198923,
+  "ext": ".jpg",
+  "sat_mean": 0.593,
+  "val_mean": 0.516,
+  "rms_contrast": 0.298,
+  "clip_hi": 0.01,
+  "clip_lo": 0.1057,
+  "colorfulness": 107.3,
+  "global_detail": 1724.6,
+  "seams": [],
+  "seam_zmax": 11.1,
+  "faces": [
+   [
+    747,
+    81,
+    303,
+    303
+   ],
+   [
+    151,
+    165,
+    204,
+    204
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.421,
+  "face_2nd_h_frac": 0.283,
+  "text": [
+   {
+    "box": [
+     415,
+     29,
+     297,
+     73
+    ],
+    "txt": "VSITOR",
+    "conf": 0.7
+   },
+   {
+    "box": [
+     1129,
+     26,
+     138,
+     38
+    ],
+    "txt": "UPDATED",
+    "conf": 0.83
+   },
+   {
+    "box": [
+     414,
+     115,
+     301,
+     125
+    ],
+    "txt": "MOM",
+    "conf": 0.72
+   },
+   {
+    "box": [
+     407,
+     246,
+     310,
+     98
+    ],
+    "txt": "CUFFED",
+    "conf": 0.66
+   },
+   {
+    "box": [
+     337,
+     481,
+     63,
+     20
+    ],
+    "txt": "Step",
+    "conf": 0.69
+   },
+   {
+    "box": [
+     25,
+     516,
+     515,
+     97
+    ],
+    "txt": "JUDGEBOYD",
+    "conf": 0.89
+   },
+   {
+    "box": [
+     14,
+     642,
+     1147,
+     53
+    ],
+    "txt": "OWNS THE CARZIEST ENTITLED PUNK IN COURT!",
+    "conf": 0.91
+   }
+  ],
+  "n_text_lines": 7,
+  "text_area_frac": 0.2245,
+  "text_max_h_frac": 0.174,
+  "text_med_h_frac": 0.101,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.5,
+  "text_cy": 0.501,
+  "wcag_min": 1.2,
+  "wcag_med": 13.1,
+  "n_text_lines_210": 5,
+  "ocr_survival_210": 0.71,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1205,
+  "red_frac": 0.0429,
+  "grp": "CT_TOP"
+ },
+ "top_00379000_urZza-9kdP0_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00379000_urZza-9kdP0_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 163777,
+  "ext": ".jpg",
+  "sat_mean": 0.562,
+  "val_mean": 0.445,
+  "rms_contrast": 0.276,
+  "clip_hi": 0.0338,
+  "clip_lo": 0.0765,
+  "colorfulness": 88.2,
+  "global_detail": 1334.3,
+  "seams": [],
+  "seam_zmax": 6.3,
+  "faces": [
+   [
+    820,
+    87,
+    242,
+    242
+   ],
+   [
+    150,
+    163,
+    208,
+    208
+   ],
+   [
+    1138,
+    282,
+    55,
+    55
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.336,
+  "face_2nd_h_frac": 0.289,
+  "text": [
+   {
+    "box": [
+     438,
+     41,
+     359,
+     171
+    ],
+    "txt": "EXPOSE",
+    "conf": 0.61
+   },
+   {
+    "box": [
+     338,
+     481,
+     112,
+     18
+    ],
+    "txt": "Slenane",
+    "conf": 0.68
+   },
+   {
+    "box": [
+     24,
+     526,
+     618,
+     69
+    ],
+    "txt": "CAUGHT INLIES!",
+    "conf": 0.84
+   },
+   {
+    "box": [
+     25,
+     612,
+     819,
+     67
+    ],
+    "txt": "JUDGE BOYD UNSTOPPABLE!",
+    "conf": 0.91
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.1746,
+  "text_max_h_frac": 0.237,
+  "text_med_h_frac": 0.094,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.339,
+  "text_cy": 0.5,
+  "wcag_min": 1.1,
+  "wcag_med": 8.4,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 0.5,
+  "primary_survives_210": 0,
+  "yellow_frac": 0.0425,
+  "red_frac": 0.0453,
+  "grp": "CT_TOP"
+ },
+ "top_00529000_6Tp2eiBjGB8_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00529000_6Tp2eiBjGB8_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 239898,
+  "ext": ".jpg",
+  "sat_mean": 0.435,
+  "val_mean": 0.545,
+  "rms_contrast": 0.297,
+  "clip_hi": 0.0227,
+  "clip_lo": 0.1095,
+  "colorfulness": 103.1,
+  "global_detail": 3070.0,
+  "seams": [
+   0.139,
+   0.186,
+   0.359
+  ],
+  "seam_zmax": 6.8,
+  "faces": [
+   [
+    837,
+    55,
+    390,
+    390
+   ],
+   [
+    462,
+    21,
+    114,
+    114
+   ],
+   [
+    652,
+    533,
+    50,
+    50
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.542,
+  "face_2nd_h_frac": 0.158,
+  "text": [
+   {
+    "box": [
+     7,
+     441,
+     829,
+     155
+    ],
+    "txt": "HIGH NURSE",
+    "conf": 0.82
+   },
+   {
+    "box": [
+     17,
+     599,
+     1003,
+     113
+    ],
+    "txt": "CUFFED IN COURT",
+    "conf": 0.8
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.2624,
+  "text_max_h_frac": 0.215,
+  "text_med_h_frac": 0.186,
+  "text_on_face_frac": 0.01,
+  "text_cx": 0.401,
+  "text_cy": 0.801,
+  "wcag_min": 7.0,
+  "wcag_med": 10.7,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0338,
+  "red_frac": 0.0622,
+  "grp": "CT_TOP"
+ },
+ "top_00553000_rcub_Jev9NE_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00553000_rcub_Jev9NE_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 178033,
+  "ext": ".jpg",
+  "sat_mean": 0.442,
+  "val_mean": 0.518,
+  "rms_contrast": 0.301,
+  "clip_hi": 0.0216,
+  "clip_lo": 0.1022,
+  "colorfulness": 100.6,
+  "global_detail": 1340.0,
+  "seams": [
+   0.202,
+   0.234,
+   0.308,
+   0.417
+  ],
+  "seam_zmax": 9.6,
+  "faces": [
+   [
+    838,
+    46,
+    401,
+    401
+   ],
+   [
+    103,
+    80,
+    141,
+    141
+   ]
+  ],
+  "n_faces": 2,
+  "face_max_h_frac": 0.557,
+  "face_2nd_h_frac": 0.196,
+  "text": [
+   {
+    "box": [
+     8,
+     442,
+     638,
+     149
+    ],
+    "txt": "REFUSETO",
+    "conf": 0.88
+   },
+   {
+    "box": [
+     11,
+     584,
+     1060,
+     132
+    ],
+    "txt": "FACEJUDGEBOYD",
+    "conf": 0.85
+   }
+  ],
+  "n_text_lines": 2,
+  "text_area_frac": 0.255,
+  "text_max_h_frac": 0.207,
+  "text_med_h_frac": 0.195,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.421,
+  "text_cy": 0.804,
+  "wcag_min": 5.0,
+  "wcag_med": 11.7,
+  "n_text_lines_210": 2,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0546,
+  "red_frac": 0.103,
+  "grp": "CT_TOP"
+ },
+ "top_00790000__-WRN7q01OY_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00790000__-WRN7q01OY_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 152515,
+  "ext": ".jpg",
+  "sat_mean": 0.602,
+  "val_mean": 0.467,
+  "rms_contrast": 0.283,
+  "clip_hi": 0.0081,
+  "clip_lo": 0.1121,
+  "colorfulness": 104.2,
+  "global_detail": 1180.5,
+  "seams": [],
+  "seam_zmax": 11.6,
+  "faces": [
+   [
+    152,
+    164,
+    204,
+    204
+   ],
+   [
+    692,
+    108,
+    202,
+    202
+   ],
+   [
+    782,
+    204,
+    87,
+    87
+   ]
+  ],
+  "n_faces": 3,
+  "face_max_h_frac": 0.283,
+  "face_2nd_h_frac": 0.281,
+  "text": [
+   {
+    "box": [
+     512,
+     330,
+     135,
+     76
+    ],
+    "txt": "THE",
+    "conf": 0.63
+   },
+   {
+    "box": [
+     523,
+     413,
+     614,
+     129
+    ],
+    "txt": "CRAZIEST",
+    "conf": 0.85
+   },
+   {
+    "box": [
+     16,
+     548,
+     387,
+     61
+    ],
+    "txt": "JUDGEBOYD",
+    "conf": 0.84
+   },
+   {
+    "box": [
+     13,
+     636,
+     1177,
+     58
+    ],
+    "txt": "OWNS THE MOST DISRESPECTFUL ATTORNEY",
+    "conf": 0.92
+   }
+  ],
+  "n_text_lines": 4,
+  "text_area_frac": 0.1968,
+  "text_max_h_frac": 0.179,
+  "text_med_h_frac": 0.095,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.47,
+  "text_cy": 0.711,
+  "wcag_min": 4.9,
+  "wcag_med": 12.8,
+  "n_text_lines_210": 4,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.1121,
+  "red_frac": 0.0189,
+  "grp": "CT_TOP"
+ },
+ "top_00891000_ERPX6JpX5OU_maxresdefault.jpg": {
+  "path": "C:\\Users\\natha\\Projects\\boyd-clips\\research\\reference\\courtroomtime\\thumbs\\top_00891000_ERPX6JpX5OU_maxresdefault.jpg",
+  "src_w": 1280,
+  "src_h": 720,
+  "bytes": 174660,
+  "ext": ".jpg",
+  "sat_mean": 0.546,
+  "val_mean": 0.494,
+  "rms_contrast": 0.292,
+  "clip_hi": 0.0401,
+  "clip_lo": 0.0365,
+  "colorfulness": 90.2,
+  "global_detail": 1480.9,
+  "seams": [
+   0.158
+  ],
+  "seam_zmax": 7.6,
+  "faces": [
+   [
+    151,
+    164,
+    207,
+    207
+   ]
+  ],
+  "n_faces": 1,
+  "face_max_h_frac": 0.287,
+  "face_2nd_h_frac": 0.0,
+  "text": [
+   {
+    "box": [
+     758,
+     389,
+     401,
+     110
+    ],
+    "txt": "SIEOCKING",
+    "conf": 0.74
+   },
+   {
+    "box": [
+     28,
+     548,
+     681,
+     61
+    ],
+    "txt": "PHONE CONFISCATED!",
+    "conf": 0.83
+   },
+   {
+    "box": [
+     29,
+     644,
+     1010,
+     51
+    ],
+    "txt": "JUDGE BOYD HANDCUFFS A VISITOR MOM!",
+    "conf": 0.87
+   }
+  ],
+  "n_text_lines": 3,
+  "text_area_frac": 0.1488,
+  "text_max_h_frac": 0.153,
+  "text_med_h_frac": 0.085,
+  "text_on_face_frac": 0.0,
+  "text_cx": 0.464,
+  "text_cy": 0.753,
+  "wcag_min": 3.7,
+  "wcag_med": 14.3,
+  "n_text_lines_210": 3,
+  "ocr_survival_210": 1.0,
+  "primary_survives_210": 1,
+  "yellow_frac": 0.0608,
+  "red_frac": 0.0289,
+  "grp": "CT_TOP"
+ }
+}

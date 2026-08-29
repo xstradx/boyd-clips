@@ -206,9 +206,19 @@ def main() -> None:
                     help="START:END in absolute source seconds; repeatable, "
                          "plays in the order given")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--no-tighten", action="store_true")
-    ap.add_argument("--no-captions", action="store_true",
-                    help="skip burned captions - the auto-captions are not accurate")
+    # Exact is the DEFAULT. Tightening used to be on, and it silently re-cut what
+    # the editor had already decided: a hand-picked 12.0s segment came out as 7
+    # pieces totalling 9.16s. Measured, not guessed. The editor is authoritative
+    # about where a cut starts and ends; this renders what it was handed.
+    ap.add_argument("--tighten", action="store_true",
+                    help="remove silence INSIDE each segment (off by default; it "
+                         "moves cuts the editor already placed)")
+    ap.add_argument("--captions", action="store_true",
+                    help="burn captions (off by default - speaker attribution and "
+                         "the auto-transcript are both still wrong)")
+    # accepted so older commands keep working; they are the defaults now
+    ap.add_argument("--no-tighten", action="store_true", help=argparse.SUPPRESS)
+    ap.add_argument("--no-captions", action="store_true", help=argparse.SUPPRESS)
     args = ap.parse_args()
 
     srcs = sorted(glob.glob(str(ROOT / "work" / args.video / (args.video + "_h_*.mp4"))))
@@ -237,7 +247,7 @@ def main() -> None:
 
     keep = []
     for s0, s1 in segs:
-        keep += [(s0, s1)] if args.no_tighten else keep_intervals(src, s0, s1)
+        keep += keep_intervals(src, s0, s1) if args.tighten else [(s0, s1)]
     kept = sum(e - s for s, e in keep)
     raw = sum(y - x for x, y in segs)
     print("segments %d   pieces %d   %.1fs of %.1fs (%.0f%%)"
@@ -245,7 +255,7 @@ def main() -> None:
     if kept > LIMIT_S:
         print("  WARNING: %.1fs exceeds the %.0fs Shorts limit" % (kept, LIMIT_S))
 
-    if not args.no_captions:
+    if args.captions:
         tj = glob.glob(str(ROOT / "work" / args.video / "*.transcript.json"))
         ws = json.load(open(tj[0], encoding="utf-8"))["words"]
         build_ass(ws, sec, keep, ROOT / "work" / "_short.ass")
@@ -261,8 +271,8 @@ def main() -> None:
           + "[p]" + top + ",scale=%d:%d,setsar=1[t];" % (W, HALF)
           + "[q]" + bot + ",scale=%d:%d,setsar=1[u];" % (W, HALF)
           + "[t][u]vstack=inputs=2[vv]"
-          + ("" if args.no_captions else ";[vv]subtitles=_short.ass[vc]"))
-    last = "[vv]" if args.no_captions else "[vc]"
+          + (";[vv]subtitles=_short.ass[vc]" if args.captions else ""))
+    last = "[vc]" if args.captions else "[vv]"
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -288,6 +298,38 @@ def main() -> None:
                        "src_end": round(ke + sec, 2)})
         acc += ke - ks
     side = out.with_suffix(".map.json")
+    # ---- guard: report the quality of every cut we just rendered -------------
+    # Nathan noticed "it could just be cut a tad bit better" only by watching.
+    # This makes it visible at render time instead, so a bad cut cannot ship
+    # quietly again.
+    try:
+        from boydclips import refine as _rf
+        _sil = render.detect_silences(src, noise_db=-32.0, min_silence_s=0.18)
+        _sp = _rf.speech_spans(_sil, 0.0, 1e9)
+        _bad = 0
+        print("cut quality:")
+        for _i, (_a, _b) in enumerate(keep, 1):
+            _bi = _rf._burst_at(_sp, _a)
+            if _bi and _a - _bi[0] > 0.12:
+                _in = "opens %.2fs INTO speech" % (_a - _bi[0])
+            elif not _bi:
+                _n = _rf._next_start(_sp, _a)
+                _in = ("opens on %.2fs of dead air" % (_n - _a)) if _n and _n - _a > 0.35 else "clean in"
+            else:
+                _in = "clean in"
+            _bo = _rf._burst_at(_sp, _b)
+            _out = "cuts MID-WORD" if _bo else "clean out"
+            if _in != "clean in" or _out != "clean out":
+                _bad += 1
+                print("  %d. %-32s %s" % (_i, _in, _out))
+        if _bad:
+            print("  %d of %d cuts are rough - 'Tighten to speech' in the editor fixes them"
+                  % (_bad, len(keep)))
+        else:
+            print("  all %d cuts land on speech boundaries" % len(keep))
+    except Exception as _e:                          # noqa: BLE001
+        print("cut quality: not checked (%s)" % str(_e)[:80])
+
     side.write_text(json.dumps({"video": args.video, "section_start_s": sec,
                                 "duration_s": round(acc, 2), "pieces": pieces},
                                indent=1), encoding="utf-8")

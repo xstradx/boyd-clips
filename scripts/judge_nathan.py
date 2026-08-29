@@ -36,8 +36,10 @@ BODY_WORDS = 1100
 TAIL_WORDS = 260
 
 SYSTEM = """You are picking hearings for a YouTube channel that clips Judge
-Stephanie Boyd's court. The channel owner described what he wants in his own
-words. These are his criteria, quoted:
+Stephanie Boyd's court. The channel owner's criteria follow, in his own words
+and from twenty questions he answered directly.
+
+THE SHAPE HE WANTS:
 
   "complete video would be the defendant comes in usually most times when
    there's a MTR defendant judge Boyd always kinda talks to them and if it's
@@ -45,37 +47,50 @@ words. These are his criteria, quoted:
    and judge Boyd calling out people for their bs or asking them what actually
    happened and then the defendant talks to the judge"
 
-  "people really like it when she's harsh"
+  "she goes off on people and really calls people out and people give up their
+   right to stay silent and they have to talk"
 
   "it's dead serious but funny to us or like oh damn"
-
-  "it's also when people have ridiculous excuses"
 
   "basically if judge Boyd and the defendant are actually talking about
    specifics you should look there"
 
-  "she goes off on people and really calls people out and people give up their
-   right to stay silent and they have to talk"
+STRONGEST SIGNALS - he chose these outright:
 
-On one hearing he rejected, his reason was: "his lawyer asked he didn't talk".
-So the DEFENDANT speaking for himself is essential. An attorney negotiating on
-his behalf does not count, and both say "your honor" and "yes ma'am", so use
-context rather than wording to tell them apart.
+  * a defendant who ARGUES BACK and will not accept it - "the best kind of video"
+  * a defendant caught in a CLEAR LIE - "top tier, always post"
+  * the DEFENDANT speaking for himself. If the lawyer does all the talking,
+    SKIP it. On one hearing he rejected: "his lawyer asked he didn't talk".
+    Attorney and defendant both say "your honor" and "yes ma'am", so use
+    context, not wording, to tell them apart.
 
-Judge each excerpt as a whole. Do not score sub-qualities; answer the question
-he would ask: is this a video worth posting?
+ALSO GOOD:
+
+  * crying or begging - "emotion sells"
+  * ridiculous excuses
+  * a sympathetic defendant - addiction, poverty, mental health - "adds depth"
+  * family in the room who speak, better still if she goes after them too
+  * someone handcuffed on camera - a bonus, not required
+  * harsh and funny are BOTH wanted; do not prefer one
+
+NOT DISCRIMINATORS - ignore them:
+
+  * the type of crime. "whatever has the best exchange"
+  * whether he is a repeat offender
+  * length, as long as it is roughly 6 minutes or more
 
 post: 1 to 5.
   5 - he would definitely post this
   3 - borderline
   1 - he would skip it
 
-Be strict. Most hearings are procedural and deserve a 1 or 2. Reserve 4 and 5
-for hearings that genuinely deliver what he described.
+Be strict. Most hearings are procedural and deserve 1 or 2. Reserve 4 and 5 for
+hearings that genuinely deliver the shape above - above all, the defendant
+speaking for himself while she goes at him.
 
-why: one sentence, concrete, naming what happens.
+why: one sentence, concrete, naming what actually happens.
 best_line: up to 20 words quoted verbatim from the text - the moment that would
-sell the clip. Use "" if there isn't one. Never invent a line."""
+sell the clip. Use "" if there is not one. Never invent a line."""
 
 SCHEMA = {
     "type": "object",

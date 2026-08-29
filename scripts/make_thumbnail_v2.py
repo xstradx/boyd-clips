@@ -154,14 +154,51 @@ def _arrow(canvas: Image.Image, cx: float, cy: float,
     canvas.paste(merged, (0, 0))
 
 
+def _paste_cut(canvas: Image.Image, occupied: Image.Image, cut_path: Path,
+               subject_w: float, subject_cx: float, head_top: float) -> None:
+    """Paste one traced subject, bottom-anchored, and record where it lands.
+
+    `head_top` is the highest fraction of H the subject is allowed to reach.
+    Nathan, 2026-08-23: "the words should never be on defendants or judges face
+    or body". The only way to guarantee that is to reserve the band ABOVE the
+    subjects and keep them out of it, rather than placing type and hoping — so
+    the subject is scaled to a HEIGHT budget of (1 - head_top) * H as well as
+    its width budget, and whichever budget binds first wins.
+    """
+    cut = Image.open(cut_path).convert("RGBA")
+    box = cut.getchannel("A").getbbox()
+    if box:
+        cut = cut.crop(box)
+    scale = min((W * subject_w) / cut.width,
+                (H * (1.0 - head_top)) / cut.height)
+    cut = cut.resize((max(1, round(cut.width * scale)),
+                      max(1, round(cut.height * scale))), Image.LANCZOS)
+    x = int(round(W * subject_cx - cut.width / 2))
+    x = max(0, min(x, W - cut.width))
+    canvas.paste(cut, (x, H - cut.height), cut)
+    occupied.paste(cut.getchannel("A"), (x, H - cut.height))
+
+
 def build(bg: Path, subject: Path, white_part: str, yellow_part: str,
           out: Path, arrow: tuple[float, float] | None = None,
           cutout: Path | None = None,
           subject_w: float = SUBJECT_W,
-          subject_cx: float = SUBJECT_CX) -> Path:
+          subject_cx: float = SUBJECT_CX,
+          cutout2: Path | None = None,
+          subject_w2: float = SUBJECT_W,
+          subject_cx2: float = 0.23,
+          head_top: float = 0.26) -> Path:
     canvas = _cover(Image.open(bg).convert("RGB"), W, H)
+    # Alpha of everything pasted on top of the plate, so the type can be kept
+    # off it by measurement instead of by eye.
+    occupied = Image.new("L", (W, H), 0)
 
-    if cutout is not None:
+    if cutout is not None and cutout2 is not None:
+        # Two traced subjects — the defendant and the judge — over the plate.
+        # Both are held below `head_top` so the band above them is clear.
+        _paste_cut(canvas, occupied, cutout2, subject_w2, subject_cx2, head_top)
+        _paste_cut(canvas, occupied, cutout, subject_w, subject_cx, head_top)
+    elif cutout is not None:
         # A traced cut-out over the courtroom plate — the construction 9/12 of
         # theirs use. Masked with BiRefNet-portrait (MIT). NOT the rembg
         # default, which is BRIA RMBG-2.0 under CC BY-NC 4.0 and therefore
@@ -252,6 +289,46 @@ def build(bg: Path, subject: Path, white_part: str, yellow_part: str,
     x0 = int(W * TEXT_SIDE_FRAC)
     y0 = int(H * TEXT_TOP_FRAC)
 
+    # ---- keep the type off every face and body -------------------------- #
+    #
+    # Nathan, 2026-08-23, on the previous build: "the words should never be on
+    # defendants or judges face or body and it just looks horrible".
+    #
+    # TEXT_TOP_FRAC alone cannot promise that — it is a fixed 0.30 H, and where
+    # a subject's head reaches depends on how the cut-out scaled. So the block
+    # is SLID UPWARD until it clears the pasted alpha entirely, and if no clear
+    # position exists the build fails rather than shipping type over a face.
+    # `occupied` is empty in the single-subject path, which leaves the old
+    # behaviour untouched.
+    text_h = line_h * len(lines) + 2 * stroke
+    if occupied.getbbox() is not None:
+        import numpy as _np
+        occ = _np.asarray(occupied, dtype=_np.uint8) > 8
+        band_x0 = max(0, x0 - stroke)
+        band_x1 = min(W, x0 + max_w + stroke)
+        rows = occ[:, band_x0:band_x1].any(axis=1)
+        # LOWEST clear position, not the highest. Measured on @courtroomtime
+        # (the closest-matched channel, same Boyd docket): share of text rows
+        # above y=0.20 is 6.5% for their winners against 25.8% for their
+        # losers, and the 10th-percentile row centre is 0.236 vs 0.067. High
+        # type is the loser signature, so having reserved a clear band the type
+        # should sit at the BOTTOM of it, as close to TEXT_TOP_FRAC as the
+        # subjects allow.
+        placed = None
+        for cand in range(H - text_h, -1, -1):
+            if cand > int(H * TEXT_TOP_FRAC):
+                continue
+            if not rows[cand:cand + text_h].any():
+                placed = cand
+                break
+        if placed is None:
+            raise RuntimeError(
+                "no band clear of the subjects fits the quote — shorten the "
+                "copy or lower head_top; refusing to draw type over a face")
+        if placed != y0:
+            print(f"  text moved y {y0} -> {placed} to clear the subjects")
+        y0 = placed + stroke
+
     # Zero-offset black glow: the glyph mask, blurred, composited as black.
     # Verified symmetric in their set (up6 vs down6 within 1.5 L), so it is a
     # glow and not a shadow — offsetting it would be the wrong artefact.
@@ -294,6 +371,13 @@ def main() -> int:
                     help="traced subject width as a fraction of the canvas")
     ap.add_argument("--subject-cx", type=float, default=SUBJECT_CX,
                     help="subject centre x as a fraction of the canvas")
+    ap.add_argument("--cutout2", default=None, type=Path,
+                    help="second traced subject (e.g. the defendant)")
+    ap.add_argument("--subject-w2", type=float, default=SUBJECT_W)
+    ap.add_argument("--subject-cx2", type=float, default=0.23)
+    ap.add_argument("--head-top", type=float, default=0.26,
+                    help="highest fraction of H a subject may reach; the band "
+                         "above it is reserved for the quote")
     ap.add_argument("--cutout", default=None, type=Path,
                     help="RGBA png of the subject, masked; overrides --subject")
     a = ap.parse_args()
@@ -302,7 +386,9 @@ def main() -> int:
         x, y = (float(v) for v in a.arrow.split(","))
         tip = (x, y)
     build(a.bg, a.subject, a.white, a.yellow, a.out, arrow=tip,
-          cutout=a.cutout, subject_w=a.subject_w, subject_cx=a.subject_cx)
+          cutout=a.cutout, subject_w=a.subject_w, subject_cx=a.subject_cx,
+          cutout2=a.cutout2, subject_w2=a.subject_w2,
+          subject_cx2=a.subject_cx2, head_top=a.head_top)
     return 0
 
 

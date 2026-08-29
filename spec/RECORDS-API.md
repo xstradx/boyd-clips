@@ -75,7 +75,7 @@ Each row carries `DefendantName`, `CaseNumber`, `CaseTypeId` (Felony/Misd),
 `HearingDate`, `HearingTime`, `HearingTypeId` (e.g. Probation Hearing),
 `CourtRoom`, `JudgeParsed`, and `CaseLoadUrl` / `EncryptedCaseId`.
 
-## 4. Register of Actions — full docket sheet, SESSION-BOUND
+## 4. Register of Actions — case summary, needs a carried session
 
 ```
 GET /app/RegisterOfActionsService/CaseSummariesSlim?key={EncryptedCaseId}&mode=
@@ -85,11 +85,10 @@ Templates the page loads show the payload covers Case Info, Causes, **Charges**,
 Related Cases, Lower Court Cases, **Dispositions**, **Warrants**, **Bonds** —
 i.e. the conviction/felony data the jail search cannot give.
 
-**Unsolved:** replaying the key in a fresh session returns
-`No case found for id`, and the app's own call 404s with `mode=undefined`. The
-`EncryptedCaseId` appears bound to the session that produced it. Fix is almost
-certainly to carry the hearing-search cookie jar straight into this call rather
-than starting fresh. Not yet verified.
+**Solved** (was "Unsolved" here until 2026-08-23). Carry the hearing-search
+cookie jar in and GET the case's own ROA page first to scope the session, then
+call with `mode=portalembed`. This is what `records.case_detail()` does and it
+works. But note the payload does **not** include charges or causes — see §9.
 
 ## 5. Jail Activity CSVs — WORKS, but expires in 7 days
 
@@ -123,13 +122,71 @@ Magistration/arrest/release timestamps, per-charge case number, offense class,
 bond amount, disposition, comments. No auth. Useless for Boyd's dockets on its
 own (hearings happen months after booking) but precise on bond at intake.
 
-## 7. Smart Search — reCAPTCHA'd
+## 7. Smart Search — reCAPTCHA'd, and NOT needed
 
-`/Portal/Home/Dashboard/29`. The only source of general case-record search.
-Anonymous access is permitted but gated by reCAPTCHA, so it cannot be driven
-unattended. Do not build a solver. If case-record search is needed, drive it
-with a human solving the challenge, or reach the same data through Hearings →
-Register of Actions, which is not gated.
+`/Portal/Home/Dashboard/29`. Anonymous access is permitted but gated by
+reCAPTCHA, so it cannot be driven unattended. Do not build a solver.
+
+**It is not the only route to a case record — see §8.** The earlier claim that
+it was "the only source of general case-record search" is wrong, measured
+2026-08-23.
+
+## 8. Case lookup by cause number — WORKS HEADLESS, no CAPTCHA
+
+The hearing-search form (§3) accepts `SearchByType=CaseNumber`, verified from
+its own `<option value="CaseNumber">Case Number</option>` on Dashboard/26. That
+turns the ungated hearings portlet into a cause-number lookup:
+
+```
+SearchCriteria.SelectedCourt        = District Clerk
+SearchCriteria.SelectedHearingType  = District Clerk Criminal
+SearchCriteria.SearchByType         = CaseNumber
+SearchCriteria.SearchValue          = 2024CR011920
+SearchCriteria.DateFrom/DateTo      = wide range, e.g. 01/01/2024–12/31/2026
+```
+then `POST /Portal/Hearing/HearingResults/Read` as in §3. Returns the rows for
+that cause with its `EncryptedCaseId` and `CaseLoadUrl`.
+
+Gotchas, all observed:
+- The exact zero-padded form matters. `2024CR011920` → Total=2;
+  `2024CR11920` and `DC2024CR11920` → Total=0.
+- `SelectedHearingType=All Hearings` with an empty `SelectedCourt` makes the
+  Read endpoint return **HTTP 500**. Keep the District Clerk pair above.
+- Searching by judicial officer + date is **not exhaustive**: Boyd's docket for
+  07/14/2025 returned Total=30 and did not include a case that the ROA proves
+  was disposed in her court that day. Anchor on the cause number, not the
+  docket.
+
+## 9. Charges are NOT in CaseSummariesSlim — separate OData endpoints
+
+`CaseSummariesSlim` returns `CauseInformation: null` and no charge list. The
+real endpoints, read out of the ROA bundle
+(`/app/RegisterOfActions/bundles/RegisterOfActionsJs`, which builds them as
+`serviceUri + "Charges('" + caseId + "')" + buildQueryString(...)`):
+
+```
+GET /app/RegisterOfActionsService/Charges('{longCaseId}')?mode=portalembed
+GET /app/RegisterOfActionsService/PartyNames('{longCaseId}')?mode=portalembed
+GET /app/RegisterOfActionsService/CombinedEvents('{longCaseId}')?mode=portalembed&$top=300
+GET /app/RegisterOfActionsService/CaseEvents('{longCaseId}')?mode=portalembed&$top=300
+GET /app/RegisterOfActionsService/DispositionEvents('{longCaseId}')?mode=portalembed&$top=300
+```
+
+**The key differs from the one `CaseSummariesSlim` takes.** These take the
+*long* `id` from `CaseLoadUrl` (~300 hex chars), not the 32-char
+`EncryptedCaseId`. Passing the short key returns nothing useful.
+
+`Charges(...)` gives `ChargeOffenseDescription`, `Degree` / `DegreeDescription`,
+`Statute`, `OffenseDate`, `FiledDate`, arrests and `ArrestControlNumber`.
+`CombinedEvents(...)` is the full docket sheet — every filing and setting, past
+and future — and is what actually answers "what is the status now".
+
+Same session discipline as §4: GET Dashboard/26, then GET the case's own
+`/app/RegisterOfActions/?id=...` page, carrying one cookie jar.
+
+**Pace these.** Firing ~18 endpoint-name guesses back to back made the service
+return 500s with zero-byte bodies until it was left alone. `records._request`
+throttling is not optional here.
 
 ---
 

@@ -1,0 +1,372 @@
+[
+ {
+  "grp": "ATC",
+  "file": "1200000_yzv_uxBSgu0.jpg",
+  "views": 1200000,
+  "flat_native": 0.5717230902777778,
+  "flat_3x": 0.7798896846064814,
+  "white_tot": 55291,
+  "white_logo": 0,
+  "hue": 0.6056416400678152
+ },
+ {
+  "grp": "ATC",
+  "file": "301000_qyETv1lTSuA.jpg",
+  "views": 301000,
+  "flat_native": 0.5284537760416667,
+  "flat_3x": 0.7913861159336419,
+  "white_tot": 15785,
+  "white_logo": 1023,
+  "hue": 0.7515815321207417
+ },
+ {
+  "grp": "ATC",
+  "file": "364000_AAVDROvkXsU.jpg",
+  "views": 364000,
+  "flat_native": 0.3924533420138889,
+  "flat_3x": 0.6977180989583334,
+  "white_tot": 78006,
+  "white_logo": 288,
+  "hue": 0.4686615348672094
+ },
+ {
+  "grp": "ATC",
+  "file": "412000_IPpy830CJkQ.jpg",
+  "views": 412000,
+  "flat_native": 0.49970377604166666,
+  "flat_3x": 0.7831565875771604,
+  "white_tot": 53119,
+  "white_logo": 8722,
+  "hue": 0.5178480792442881
+ },
+ {
+  "grp": "ATC",
+  "file": "414000_Ek3Ah3NZYVo.jpg",
+  "views": 414000,
+  "flat_native": 0.4956239149305556,
+  "flat_3x": 0.7793592062114197,
+  "white_tot": 81296,
+  "white_logo": 20825,
+  "hue": 0.4775311724318126
+ },
+ {
+  "grp": "ATC",
+  "file": "42000_muF8LBaKZrI.jpg",
+  "views": 42000,
+  "flat_native": 0.5629709201388889,
+  "flat_3x": 0.8219033323688272,
+  "white_tot": 13746,
+  "white_logo": 0,
+  "hue": 0.33774910340185005
+ },
+ {
+  "grp": "ATC",
+  "file": "439000_lzOg8heXmV0.jpg",
+  "views": 439000,
+  "flat_native": 0.4437836371527778,
+  "flat_3x": 0.7304757426697531,
+  "white_tot": 42181,
+  "white_logo": 0,
+  "hue": 0.27670793850557696
+ },
+ {
+  "grp": "ATC",
+  "file": "444000_5VLPFCTlyss.jpg",
+  "views": 444000,
+  "flat_native": 0.5216872829861111,
+  "flat_3x": 0.7936387201003087,
+  "white_tot": 10124,
+  "white_logo": 193,
+  "hue": 0.7838516003965325
+ },
+ {
+  "grp": "ATC",
+  "file": "552000_SpO2yU2mG78.jpg",
+  "views": 552000,
+  "flat_native": 0.3872580295138889,
+  "flat_3x": 0.667061149691358,
+  "white_tot": 27412,
+  "white_logo": 94,
+  "hue": 0.4332446983959444
+ },
+ {
+  "grp": "ATC",
+  "file": "59000_bXbyg2vK6CI.jpg",
+  "views": 59000,
+  "flat_native": 0.5483854166666666,
+  "flat_3x": 0.815932315779321,
+  "white_tot": 13462,
+  "white_logo": 4540,
+  "hue": 0.5463312019661342
+ },
+ {
+  "grp": "ATC",
+  "file": "591000_amiWU58HFpM.jpg",
+  "views": 591000,
+  "flat_native": 0.4594455295138889,
+  "flat_3x": 0.712368465470679,
+  "white_tot": 14999,
+  "white_logo": 997,
+  "hue": 0.40552603252489794
+ },
+ {
+  "grp": "ATC",
+  "file": "971000_4kIjd7CLp7c.jpg",
+  "views": 971000,
+  "flat_native": 0.3736306423611111,
+  "flat_3x": 0.6744785638503087,
+  "white_tot": 15129,
+  "white_logo": 773,
+  "hue": 0.3993327170429323
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00000388_q1Fo7x_0ItI_maxresdefault.jpg",
+  "views": 388,
+  "flat_native": 0.4702094184027778,
+  "flat_3x": 0.6701132089120371,
+  "white_tot": 8871,
+  "white_logo": 0,
+  "hue": 0.2720542554580242
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00000749_RfF0ouKeE0w_maxresdefault.jpg",
+  "views": 749,
+  "flat_native": 0.2956781684027778,
+  "flat_3x": 0.5366610001929012,
+  "white_tot": 21849,
+  "white_logo": 0,
+  "hue": 0.2618585095955218
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00000988_79nw7lP0jm0_maxresdefault.jpg",
+  "views": 988,
+  "flat_native": 0.2686328125,
+  "flat_3x": 0.5357285638503086,
+  "white_tot": 40764,
+  "white_logo": 19480,
+  "hue": 0.35078352388820083
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001000_95HqsmyM-zI_maxresdefault.jpg",
+  "views": 1000,
+  "flat_native": 0.3594704861111111,
+  "flat_3x": 0.5666989776234568,
+  "white_tot": 14633,
+  "white_logo": 10664,
+  "hue": 0.2418757798250262
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001100_--Mpaln4jx8_maxresdefault.jpg",
+  "views": 1100,
+  "flat_native": 0.06416449652777778,
+  "flat_3x": 0.194921875,
+  "white_tot": 8988,
+  "white_logo": 3033,
+  "hue": 0.4079500928783477
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001100_U204YIfp-rc_maxresdefault.jpg",
+  "views": 1100,
+  "flat_native": 0.275087890625,
+  "flat_3x": 0.5300130208333333,
+  "white_tot": 31054,
+  "white_logo": 15908,
+  "hue": 0.36453788464134607
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001200_qlDoZCJs620_maxresdefault.jpg",
+  "views": 1200,
+  "flat_native": 0.24968315972222221,
+  "flat_3x": 0.5061168981481482,
+  "white_tot": 10985,
+  "white_logo": 1637,
+  "hue": 0.313693839463601
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001300_rUJ__Sb3Y8w_maxresdefault.jpg",
+  "views": 1300,
+  "flat_native": 0.3470648871527778,
+  "flat_3x": 0.6192637201003086,
+  "white_tot": 13973,
+  "white_logo": 8172,
+  "hue": 0.3073019642470295
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001500_gVVI_SdlsvA_maxresdefault.jpg",
+  "views": 1500,
+  "flat_native": 0.29673285590277776,
+  "flat_3x": 0.5789173418209876,
+  "white_tot": 32849,
+  "white_logo": 0,
+  "hue": 0.2073599080831239
+ },
+ {
+  "grp": "CT_bot",
+  "file": "bot_00001700_-YRHSSLanxk_maxresdefault.jpg",
+  "views": 1700,
+  "flat_native": 0.36782769097222223,
+  "flat_3x": 0.5680295138888889,
+  "white_tot": 6534,
+  "white_logo": 0,
+  "hue": 0.3466587160359555
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00204000_J3LdwHAZR2E_maxresdefault.jpg",
+  "views": 204000,
+  "flat_native": 0.26869791666666665,
+  "flat_3x": 0.4711500530478395,
+  "white_tot": 12507,
+  "white_logo": 3766,
+  "hue": 0.3256789951202676
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00209000_z05aWSTzw0k_maxresdefault.jpg",
+  "views": 209000,
+  "flat_native": 0.32219184027777775,
+  "flat_3x": 0.5539685812114198,
+  "white_tot": 15988,
+  "white_logo": 4466,
+  "hue": 0.2708238925644949
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00214000__eMKRoRaE_w_maxresdefault.jpg",
+  "views": 214000,
+  "flat_native": 0.369912109375,
+  "flat_3x": 0.6460992959104939,
+  "white_tot": 34355,
+  "white_logo": 20934,
+  "hue": 0.3670623248982842
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00233000_-iPnSFl434E_maxresdefault.jpg",
+  "views": 233000,
+  "flat_native": 0.18703016493055555,
+  "flat_3x": 0.4148312114197531,
+  "white_tot": 49329,
+  "white_logo": 0,
+  "hue": 0.27755702601956234
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00241000_8lxIY35zb6Q_maxresdefault.jpg",
+  "views": 241000,
+  "flat_native": 0.17622504340277778,
+  "flat_3x": 0.3735953173225309,
+  "white_tot": 48423,
+  "white_logo": 149,
+  "hue": 0.35508891975981904
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00277000_k69GmELAgVw_maxresdefault.jpg",
+  "views": 277000,
+  "flat_native": 0.26937174479166665,
+  "flat_3x": 0.5637484326774691,
+  "white_tot": 15973,
+  "white_logo": 4380,
+  "hue": 0.40599898208044133
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00305000_8n5raFtKul8_maxresdefault.jpg",
+  "views": 305000,
+  "flat_native": 0.37689561631944446,
+  "flat_3x": 0.6219771170910494,
+  "white_tot": 56487,
+  "white_logo": 0,
+  "hue": 0.37032582088292393
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00308000_lfAlCDsEQZ4_maxresdefault.jpg",
+  "views": 308000,
+  "flat_native": 0.2405859375,
+  "flat_3x": 0.4935777150848765,
+  "white_tot": 13882,
+  "white_logo": 2418,
+  "hue": 0.30785602471731627
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00335000_aH0fnO4w-dg_maxresdefault.jpg",
+  "views": 335000,
+  "flat_native": 0.2612717013888889,
+  "flat_3x": 0.46672972125771606,
+  "white_tot": 20209,
+  "white_logo": 2342,
+  "hue": 0.3418899118682616
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00354000_ePdAxp1Zs8Y_maxresdefault.jpg",
+  "views": 354000,
+  "flat_native": 0.2742458767361111,
+  "flat_3x": 0.5147837094907407,
+  "white_tot": 13414,
+  "white_logo": 1966,
+  "hue": 0.25519067243987686
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00379000_urZza-9kdP0_maxresdefault.jpg",
+  "views": 379000,
+  "flat_native": 0.3545692274305556,
+  "flat_3x": 0.6072634548611111,
+  "white_tot": 38033,
+  "white_logo": 17161,
+  "hue": 0.39216440588537804
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00529000_6Tp2eiBjGB8_maxresdefault.jpg",
+  "views": 529000,
+  "flat_native": 0.2219140625,
+  "flat_3x": 0.3939256606867284,
+  "white_tot": 27832,
+  "white_logo": 0,
+  "hue": 0.19448588829163757
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00553000_rcub_Jev9NE_maxresdefault.jpg",
+  "views": 553000,
+  "flat_native": 0.2657389322916667,
+  "flat_3x": 0.44842508198302466,
+  "white_tot": 33108,
+  "white_logo": 0,
+  "hue": 0.2864965270747317
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00790000__-WRN7q01OY_maxresdefault.jpg",
+  "views": 790000,
+  "flat_native": 0.4220703125,
+  "flat_3x": 0.6695750144675926,
+  "white_tot": 13484,
+  "white_logo": 3134,
+  "hue": 0.26350909751079193
+ },
+ {
+  "grp": "CT_top",
+  "file": "top_00891000_ERPX6JpX5OU_maxresdefault.jpg",
+  "views": 891000,
+  "flat_native": 0.308603515625,
+  "flat_3x": 0.5539684606481482,
+  "white_tot": 43960,
+  "white_logo": 20838,
+  "hue": 0.3664886118224543
+ }
+]

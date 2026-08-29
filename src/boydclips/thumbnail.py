@@ -290,6 +290,22 @@ def build(
 
 
 def grade(path: Path, cfg: dict[str, Any] | None = None) -> Path:
+    """File-in-place wrapper around `grade_image`.
+
+    WARNING: if the file already has type burned into it, this grades the type
+    too. `render.py` documents why that is wrong for video — "grading after
+    `ass=` would lift the caption white too ... it would clip the text edges and
+    eat the black outline that makes them readable" — and the same applies here.
+    Prefer `grade_image` on the picture BEFORE the type is drawn.
+    """
+    cfg = cfg or {}
+    with Image.open(path) as im:
+        out = grade_image(im.convert("RGB"), cfg)
+    out.save(path, "JPEG", quality=int(cfg.get("jpeg_quality", 92)), subsampling=0)
+    return path
+
+
+def grade_image(img: "Image.Image", cfg: dict[str, Any] | None = None) -> "Image.Image":
     """Make the thumbnail read at feed size. Applied in place.
 
     Court Zoom footage is flat: low-contrast, slightly grey, softened by the
@@ -328,8 +344,40 @@ def grade(path: Path, cfg: dict[str, Any] | None = None) -> Path:
     import numpy as np
 
     cfg = cfg or {}
-    with Image.open(path) as im:
-        img = im.convert("RGB")
+    img = img.convert("RGB")
+
+    # ---- tone curve, the same correction the VIDEO gets -------------------
+    #
+    # Nathan, 2026-08-23: "the same way you corrected the color to natural of
+    # the short do that as well to the thumbnail maybe even bump it up a level
+    # too". That correction is `curves=all='0/0.02 0.25/0.31 0.5/0.57
+    # 0.75/0.80 1/0.97'` in config/pipeline.yaml, applied to every rendered
+    # cut. The thumbnail was never getting it — it went straight to
+    # contrast+saturation, which is why the plate reads flatter than the video
+    # it is a thumbnail for.
+    #
+    # The curve does what raising contrast cannot: it lifts shadows and
+    # midtones HARD while pulling the top end DOWN to 0.97, so the picture
+    # brightens without the paper on the bench, the overhead lights and Judge
+    # Boyd's collar blowing out. Contrast alone crushes both ends, which is the
+    # measured defect in our own set (clipped highlights 0.145 against the
+    # competitor's 0.076).
+    #
+    # `curve_strength` is the "bump". 1.0 is exactly the video's curve; above
+    # 1.0 scales each control point's DISPLACEMENT from linear, so the shape
+    # stays the same and only its depth changes — no new clipping is invented.
+    pts = cfg.get("curve", [(0.0, 0.02), (0.25, 0.31), (0.5, 0.57),
+                            (0.75, 0.80), (1.0, 0.97)])
+    strength = float(cfg.get("curve_strength", 1.0))
+    if pts and strength > 0:
+        import numpy as _np
+        xs = _np.array([p[0] for p in pts], dtype=_np.float64)
+        ys = _np.array([p[1] for p in pts], dtype=_np.float64)
+        ys = _np.clip(xs + (ys - xs) * strength, 0.0, 1.0)
+        ramp = _np.interp(_np.linspace(0.0, 1.0, 256), xs, ys)
+        lut = _np.clip(ramp * 255.0 + 0.5, 0, 255).astype("uint8")
+        img = img.point(list(lut) * 3)
+
     img = ImageEnhance.Contrast(img).enhance(float(cfg.get("contrast", 1.06)))
 
     # Saturation and highlights are done in HSV, not with ImageEnhance.Color.
@@ -340,6 +388,25 @@ def grade(path: Path, cfg: dict[str, Any] | None = None) -> Path:
     # factor moved the mean from 0.343 to 0.367 against a 0.52 target. The
     # colour that matters (orange jumpsuits, jail blues, wood) is a minority of
     # pixels and needs a gain applied to S directly.
+    # ---- chroma denoise, BEFORE any saturation work ---------------------
+    #
+    # Nathan, 2026-08-28: "fix the background where its all bright and then it
+    # looks blocky". Measured on the ceiling of SANCHEZ_thumbnail: chroma
+    # deviation from neutral was 1.33 ungraded and 8.13 after this function —
+    # the grade was manufacturing the blocking, not revealing it.
+    #
+    # The source is 4:2:0 YouTube video upscaled ~4x, so its chroma planes are
+    # quarter-resolution and carry 16x16 block noise that is invisible until
+    # saturation amplifies it. A median filter on Cb/Cr only removes that noise
+    # while leaving luma — and therefore all real detail and edge sharpness —
+    # untouched.
+    if cfg.get("chroma_denoise", True):
+        r = int(cfg.get("chroma_denoise_radius", 5))
+        y, cb, cr = img.convert("YCbCr").split()
+        cb = cb.filter(ImageFilter.MedianFilter(r))
+        cr = cr.filter(ImageFilter.MedianFilter(r))
+        img = Image.merge("YCbCr", (y, cb, cr)).convert("RGB")
+
     hsv = np.asarray(img.convert("HSV"), dtype=np.float32) / 255.0
     # 1.45, pulled back from 1.85. Nathan, 2026-08-18: "too saturated".
     #
@@ -349,10 +416,26 @@ def grade(path: Path, cfg: dict[str, Any] | None = None) -> Path:
     # their FRAME mean over-cooks the one surface that dominates our source and
     # theirs does not. Their number was measured on their footage, not ours.
     s_gain = float(cfg.get("sat_gain", 1.45))
-    # A floor lifts the near-neutrals that Color() cannot touch; without it the
-    # saturated regions cook long before the mean reaches target.
-    s_floor = float(cfg.get("sat_floor", 0.06))
-    hsv[:, :, 1] = np.clip(hsv[:, :, 1] * s_gain + s_floor, 0.0, 1.0)
+
+    # The additive floor is GONE. It read `S * gain + 0.06`, applied to every
+    # pixel including near-neutral ones, which took a white ceiling pixel at
+    # S~0.01 to 0.074 — a 7x lift on something that should stay white. Since
+    # the source's chroma noise differs block to block, each block landed on a
+    # different tint. That is the blocking Nathan saw.
+    #
+    # Its stated purpose was to drag the FRAME MEAN saturation up to
+    # @courtroomtime's measured 0.546. That reason is dead: the 2026-08-23
+    # winners-vs-losers pass measured saturation across 25 files on that channel
+    # and it does not separate winners from losers at all — their losers came
+    # out slightly MORE saturated (0.575 vs 0.546, trend running the wrong way).
+    # So there is no target mean worth defending and no reason to cook neutrals.
+    #
+    # Instead the gain ramps in over the first `sat_knee` of saturation, so a
+    # near-neutral pixel keeps a gain of ~1.0 and only real colour gets boosted.
+    knee = float(cfg.get("sat_knee", 0.10))
+    s_ch = hsv[:, :, 1]
+    ramp = np.clip(s_ch / max(knee, 1e-6), 0.0, 1.0)
+    hsv[:, :, 1] = np.clip(s_ch * (1.0 + (s_gain - 1.0) * ramp), 0.0, 1.0)
 
     # Highlight rolloff, because lifting brightness globally is what drove our
     # clipped-highlight fraction to 0.145 against their 0.076. A soft knee
@@ -370,12 +453,12 @@ def grade(path: Path, cfg: dict[str, Any] | None = None) -> Path:
     img = img.filter(ImageFilter.UnsharpMask(
         radius=float(cfg.get("sharpen_radius", 2.0)),
         percent=int(cfg.get("sharpen_percent", 115)),
-        threshold=int(cfg.get("sharpen_threshold", 3)),
+        # Threshold raised from 3. At 3 the mask sharpened compression noise in
+        # flat regions, which crisped the edges of exactly the chroma blocks
+        # above. 10 leaves genuinely flat areas alone and still sharpens faces.
+        threshold=int(cfg.get("sharpen_threshold", 10)),
     ))
-    # quality=92: YouTube re-encodes anyway, but handing it a soft JPEG means
-    # compressing an already-compressed image and the text edges go first.
-    img.save(path, "JPEG", quality=int(cfg.get("jpeg_quality", 92)), subsampling=0)
-    return path
+    return img
 
 
 def _run_builder(cmd: list[str], out: Path) -> Path:

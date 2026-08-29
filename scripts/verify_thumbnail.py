@@ -39,6 +39,15 @@ THRESH = dict(
     blown_blob_frac=0.020,    # max 1.37%                       -> 2.0%
     crushed_frac=0.080,       # max 6.26%                       -> 8.0%
     edge_len_frac=0.40,       # all 12 at 0.00 (0/12 outlined)  -> 0.40
+    # --- added 2026-08-28, after shipping three defects Nathan caught by eye
+    # that no existing check looked for ---
+    arrow_person_overlap=0.02,  # Thompson: 0 of 3822 arrow px on a person
+    arrow_aim_miss_frac=0.16,   # the ray from the tip must reach a face box
+                                # within 16% of the frame width
+    limb_loss_frac=0.010,       # a silhouette that loses >1% of its own area
+                                # against the untouched plate has been cut
+    flat_chroma_dev=3.5,        # ungraded ceiling measures 1.33; the broken
+                                # grade measured 8.13
 )
 
 _CASCADES = ("haarcascade_frontalface_default.xml",
@@ -325,6 +334,118 @@ def _ridge_score(binr, h):
     return dict(edge_len=total / float(h), edge_worst=worst / float(h))
 
 
+def arrow_mask(bgr):
+    """The red arrow, isolated. Pure red only — the orange jail scrubs sit at
+    G>70 and would otherwise be picked up as arrow."""
+    import scipy.ndimage as _nd
+    b, g, r = bgr[:, :, 0].astype(int), bgr[:, :, 1].astype(int), bgr[:, :, 2].astype(int)
+    m = (r > 170) & (g < 45) & (b < 45)
+    return _nd.binary_opening(m, np.ones((5, 5), bool))
+
+
+def person_mask(path):
+    """Everyone in the frame, via the MIT-licensed matte."""
+    from rembg import new_session, remove
+    from PIL import Image
+    key = ("pm", path)
+    if key in _CACHE:
+        return _CACHE[key]
+    im = Image.open(path).convert("RGBA")
+    a = np.asarray(remove(im, session=new_session("birefnet-general"))
+                   .getchannel("A")) > 28
+    _CACHE[key] = a
+    return a
+
+
+def arrow_checks(path, bgr, faces):
+    """Two things, because the first fix satisfied one and broke the other.
+
+    OVERLAP  — measured on the shipped Thompson thumbnail: 3,822 arrow pixels,
+               zero of them on a person. The arrow lives in the gap.
+    AIM      — and it must POINT AT SOMEONE. An early auto-placement scored a
+               perfect 0% overlap while aiming at empty ceiling, because
+               "avoid bodies" was the only thing being tested. Cast a ray from
+               the tip along the arrow's axis; it has to reach a face.
+    """
+    am = arrow_mask(bgr)
+    n = int(am.sum())
+    if n < 200:
+        return None, None, 0
+    pm = person_mask(path)
+    overlap = float((am & pm).sum()) / n
+
+    ys, xs = np.where(am)
+    H, W = am.shape
+    # tip = the arrow pixel furthest from the mask's centroid
+    cx, cy = xs.mean(), ys.mean()
+    d = (xs - cx) ** 2 + (ys - cy) ** 2
+    ti = int(np.argmax(d))
+    tx, ty = float(xs[ti]), float(ys[ti])
+    ux, uy = (tx - cx), (ty - cy)
+    L = max(1e-6, (ux * ux + uy * uy) ** 0.5)
+    ux, uy = ux / L, uy / L
+
+    miss = 1.0
+    for step in range(4, int(W * 0.45), 4):
+        px, py = tx + ux * step, ty + uy * step
+        if not (0 <= px < W and 0 <= py < H):
+            break
+        for (fx, fy, fw, fh) in faces:
+            if fx <= px <= fx + fw and fy <= py <= fy + fh:
+                miss = step / W
+                break
+        else:
+            continue
+        break
+    return overlap, miss, n
+
+
+def silhouette_loss(path, source_plate):
+    """Did the subject lose a limb?
+
+    The regroup step cuts the defendant out and moves him. When the matte
+    fragments him, taking one component leaves an arm behind — which is exactly
+    what shipped, and what the previous verification missed because it checked
+    the luminance of the strip he VACATED rather than whether he was still
+    whole. This compares his silhouette area before and after.
+    """
+    if not source_plate or not os.path.exists(source_plate):
+        return None
+    a0 = person_mask(source_plate)
+    a1 = person_mask(path)
+    f0, f1 = a0.mean(), a1.mean()
+    if f0 <= 0:
+        return None
+    return max(0.0, (f0 - f1) / f0)
+
+
+def flat_chroma(bgr):
+    """Chroma deviation in the flattest bright region — the blocking check.
+
+    A luma blockiness metric misses this entirely: the damage from an
+    over-eager saturation floor lands in the chroma planes only.
+    """
+    from PIL import Image
+    im = Image.fromarray(bgr[:, :, ::-1])
+    y = np.asarray(im.convert("YCbCr"), dtype=float)
+    L = y[:, :, 0]
+    H, W = L.shape
+    best = None
+    for yy in range(int(H * 0.08), int(H * 0.75), 20):
+        for xx in range(int(W * 0.03), int(W * 0.92), 40):
+            q = L[yy:yy + 100, xx:xx + 100]
+            if q.shape != (100, 100) or q.std() > 12:
+                continue
+            if best is None or q.mean() > best[0]:
+                best = (q.mean(), xx, yy)
+    if best is None:
+        return None
+    _, xx, yy = best
+    cb = y[yy:yy + 100, xx:xx + 100, 1]
+    cr = y[yy:yy + 100, xx:xx + 100, 2]
+    return float(np.sqrt((cb - 128) ** 2 + (cr - 128) ** 2).mean())
+
+
 def measure(path):
     bgr = cv2.imread(path, cv2.IMREAD_COLOR)
     if bgr is None:
@@ -349,10 +470,28 @@ def measure(path):
              feed_min=(min(fc) if fc else None), feed_all=fc)
     m.update(clipping(bgr, tmask))
     m.update(edge_artefact(bgr, tmask))
+    try:
+        ao, am_, apx = arrow_checks(path, bgr, faces)
+        m.update(arrow_overlap=ao, arrow_miss=am_, arrow_px=apx)
+    except Exception as exc:                                   # noqa: BLE001
+        m.update(arrow_overlap=None, arrow_miss=None, arrow_px=0,
+                 arrow_error=str(exc))
+    try:
+        m["flat_chroma"] = flat_chroma(bgr)
+    except Exception:                                          # noqa: BLE001
+        m["flat_chroma"] = None
+    m["limb_loss"] = None
+    sp = os.environ.get("THUMB_SOURCE_PLATE")
+    if sp:
+        try:
+            m["limb_loss"] = silhouette_loss(path, sp)
+        except Exception:                                      # noqa: BLE001
+            pass
     return m
 
 
 def check(m):
+    """Returns (failures, warnings). New checks appended below the originals."""
     """-> (list_of_failures, list_of_warnings)."""
     t, bad, warn = THRESH, [], []
     if m["n_faces"] == 0:
@@ -379,6 +518,21 @@ def check(m):
     if m["edge_len"] > t["edge_len_frac"]:
         bad.append(f"EDGE_ARTEFACT: cut-out outline/halo, ridge length "
                    f"{m['edge_len']:.2f}H (longest {m['edge_worst']:.2f}H)")
+    # ---- checks added 2026-08-28 ----
+    if m.get("arrow_px", 0) >= 200:
+        ao, miss = m.get("arrow_overlap"), m.get("arrow_miss")
+        if ao is not None and ao > THRESH["arrow_person_overlap"]:
+            bad.append(f"ARROW_ON_PERSON {ao*100:.0f}% of the arrow sits on a "
+                       f"person (Thompson: 0%)")
+        if miss is not None and miss > THRESH["arrow_aim_miss_frac"]:
+            bad.append("ARROW_AIMS_AT_NOTHING the ray from the tip reaches no "
+                       "face - it points at empty background")
+    if m.get("flat_chroma") is not None and             m["flat_chroma"] > THRESH["flat_chroma_dev"]:
+        bad.append(f"CHROMA_BLOCKING flat bright area deviates "
+                   f"{m['flat_chroma']:.1f} from neutral (clean is ~1.3)")
+    if m.get("limb_loss") is not None and             m["limb_loss"] > THRESH["limb_loss_frac"]:
+        bad.append(f"SILHOUETTE_CUT subject lost {m['limb_loss']*100:.1f}% of "
+                   f"its area against the source plate - a limb was cut")
     return bad, warn
 
 

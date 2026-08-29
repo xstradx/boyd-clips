@@ -1226,6 +1226,7 @@ def _watermark_chain(
     width_frac: float,
     wm_index: int = 1,
     y: int | list[int] | None = None,
+    right_x: int | None = None,
 ) -> tuple[list[str], str]:
     """Overlay the channel mark top-right. Returns (extra ffmpeg inputs, filter).
 
@@ -1262,11 +1263,23 @@ def _watermark_chain(
     tops = [margin] if y is None else ([y] if isinstance(y, int) else list(y))
     tops = [int(v) for v in tops]
 
+    # `right_x` is the right edge of the PICTURE to hug, in canvas pixels. The
+    # canvas edge is only the right place to hug when the footage fills the
+    # frame. This docket's 2-up does not: measured on 2XkPnvstmRQ, Judge Boyd's
+    # tile ends at x=1791 of 1920, so the canvas-relative default put 53 of the
+    # mark's 115 px on the black beside her tile and the mark read as broken.
+    # Half the outer margin inside the tile, so it sits as a corner bug rather
+    # than floating.
+    if right_x is None:
+        x_expr = f"W-w-{margin}"
+    else:
+        x_expr = str(max(0, int(right_x) - wm_w - margin // 2))
+
     if len(tops) == 1:
         return (
             ["-i", str(path.resolve())],
             f"[{wm_index}:v]scale={wm_w}:-1[wm];"
-            f"[{in_label}][wm]overlay=W-w-{margin}:{tops[0]}[{out_label}]",
+            f"[{in_label}][wm]overlay={x_expr}:{tops[0]}[{out_label}]",
         )
 
     n = len(tops)
@@ -1275,7 +1288,7 @@ def _watermark_chain(
     src = in_label
     for i, top in enumerate(tops):
         dst = out_label if i == n - 1 else f"{out_label}_{i}"
-        parts.append(f"[{src}][wm{i}]overlay=W-w-{margin}:{top}[{dst}]")
+        parts.append(f"[{src}][wm{i}]overlay={x_expr}:{top}[{dst}]")
         src = dst
     return ["-i", str(path.resolve())], ";".join(parts)
 
@@ -1289,6 +1302,7 @@ def render_longform(
     crop: str | None = None,
     intro: Path | None = None,
     watermark_y: int | None = None,
+    watermark_right_x: int | None = None,
 ) -> float:
     """The case, trimmed, optionally behind a branded intro.
 
@@ -1316,7 +1330,8 @@ def render_longform(
 
     wm_index = 1 if intro_idx is None else 2
     wm_in, wm_filter = _watermark_chain(cfg, w, h, "vbase", "vwm", 0.06,
-                                        wm_index=wm_index, y=watermark_y)
+                                        wm_index=wm_index, y=watermark_y,
+                                        right_x=watermark_right_x)
     if not wm_in:                      # no watermark file -> nothing to index
         wm_index = None
     inputs += wm_in
