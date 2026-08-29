@@ -1451,15 +1451,15 @@ def verify(name, path, b, rep, ox, oy, stroke):
 
     # ---- free rectangle ----
     ppl = (G["occ"] > 0.5)
-    up = cv2.resize((P["people"] > 0.5).astype(np.uint8),
-                    (int(cw * kx), int(ch * ky)), interpolation=cv2.INTER_NEAREST)
     up = cv2.resize((P["people"][y0:y0 + ch, x0:x0 + cw] > 0.5).astype(np.uint8),
                     (W, H), interpolation=cv2.INTER_NEAREST) > 0
     allp = ppl | up
     for f in faces:
         allp |= _bm(f)
-    small = cv2.resize(allp.astype(np.uint8), (W // 4, H // 4),
-                       interpolation=cv2.INTER_MAX if hasattr(cv2, "INTER_MAX") else cv2.INTER_NEAREST) > 0
+    # dilate before the 4x decimation so the free rect can never claim a
+    # person pixel that decimation happened to skip
+    big = cv2.dilate(allp.astype(np.uint8), np.ones((5, 5), np.uint8))
+    small = cv2.resize(big, (W // 4, H // 4), interpolation=cv2.INTER_NEAREST) > 0
     area, fx0, fy0, fx1, fy1 = max_free_rect(~small)
     R = [fx0 * 4, fy0 * 4, fx1 * 4, fy1 * 4]
     inside = int(ink[R[1]:R[3], R[0]:R[2]].sum())

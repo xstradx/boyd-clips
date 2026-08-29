@@ -70,6 +70,41 @@ thumbnail path was violating its own rule: type burned in, saved, THEN graded.
 `thumbnail.grade_image(img, cfg)` now works in memory so the builder can grade
 before drawing type.
 
+## 2026-08-29 — Nathan picked Q3 for thumbnails
+
+His words: "q3 thumbnail is fire". `scripts/thumb_Q3_detail.py` — our
+construction executed at maximum detail. Measured against the other three builds,
+our current output and the Thompson reference:
+
+| | luma | blacks | arrow px | chroma | detail full / feed |
+|---|---|---|---|---|---|
+| **Q3_detail** | **118.6** | 13.3% | 2727 | 5.54 | **1442 / 5410** |
+| Q1_noregroup | 109.3 | 10.2% | 3346 | 4.80 | 1334 / 4780 |
+| Q2_surgical | 105.1 | 7.0% | 2563 | 14.96 | 1307 / 5037 |
+| Q4_light | 115.0 | 10.0% | 3032 | 5.93 | 1012 / 4284 |
+| ours | 105.8 | 13.8% | 4520 | 2.11 | 1412 / 6031 |
+| Thompson | 124.9 | 9.0% | 3904 | 3.29 | 512 / 4638 |
+
+Highest detail of the four and the luma closest to Thompson. Q2 is disqualified
+on chroma (14.96 — the blocky artefact back at seven times the reference).
+
+**Q3's mechanism:** realesr-general-x4v3 (BSD-3, so commercially usable) at 4x
+then resampled down, with every restorative step moved to the NATIVE side of the
+upscale; BiRefNet-matting into a ViTMatte-S trimap refine, measured on the judge
+tile at alignment +7.4%, colour fringe −26%, matting residual −20%, soft hair
+mass +35%; the defendant moved only when the solver proves he must be, only the
+vacated sliver inpainted, then re-matted with the area loss measured — over 1%
+and the move is REJECTED and the looser composition ships, because a severed limb
+is worse than a loose composition; and an arrow that must both carry zero pixels
+on a person AND cast a ray striking the defendant first, since an earlier version
+scored a perfect 0% overlap while pointing at empty ceiling.
+
+**Open on Q3:** chroma deviation 5.54, above the 3.5 gate and worse than our
+current 2.11 — check the blocking has not returned. And it carries only a
+`carthief` preset, while SANCHEZ and OFFERUP put the judge on the RIGHT. If it
+needs per-case tuning it is not yet the daily pipeline, which is what the
+composition workflow exists to solve.
+
 ## The one command for shorts — `scripts/make_short_auto.py`
 
 ```

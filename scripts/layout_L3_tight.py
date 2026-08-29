@@ -44,6 +44,7 @@ CACHE = os.path.join(
     "L3_tight_cache")
 
 W, H = 1280, 720
+GY, GX = np.mgrid[0:720, 0:1280]
 
 # =========================================================================== #
 # House constants. Every one carries the measurement it came from. NONE of
@@ -905,7 +906,11 @@ def build(name, verbose=True):
         hero = place_hero(hero_tile, hero_alpha, hero_face, side, step["fh"],
                           step["lead"], log)
         tried_cfg += 1
+        _t = time.time()
         cand = search(plates, hero, ts, log)
+        print(f"   ladder {tried_cfg:>3} fh={step['fh']} lead={step['lead']} "
+              f"cap={step['cap']} wmax={step['wmax']} -> "
+              f"{'HIT' if cand else 'miss'} {time.time()-_t:.1f}s", flush=True)
         if cand:
             best = cand
             best["step"] = step
@@ -929,9 +934,10 @@ def perceive_plates(cfg, rect, plate_pool, defe_c, log, k=3):
     """
     ctw, cth, ctx, cty = rect
     out = []
-    for t_plate, dfe in plate_pool:
+    for i, (t_plate, dfe) in enumerate(plate_pool[:24]):
         if len(out) >= k:
             break
+        print(f"   plate {i} t={t_plate:.1f}", flush=True)
         fr = grab(cfg["src"], cfg["off"], t_plate)
         tile = fr[cty:cty + cth, ctx:ctx + ctw]
         faces = detect(tile)
@@ -1003,6 +1009,7 @@ def type_candidates(hero, ts, log):
                         hair=hair_frac, ink_l=ink_l, ink_r=ink_r,
                         ink_t=ink_t, ink_b=ink_b, side=type_side,
                         iy=np.nonzero(ink)[0], ix=np.nonzero(ink)[1],
+                        iy4=np.nonzero(ink)[0][::4], ix4=np.nonzero(ink)[1][::4],
                         dt=cv2.distanceTransform((~(ink > 0)).astype(np.uint8),
                                                  cv2.DIST_L2, 5)))
     # L3_TIGHT: prefer the placement that sits just above the collision FLOOR
@@ -1073,15 +1080,20 @@ def search(plates, hero, ts, log):
                     # cheapest type gate: zero ink on the plate's people
                     tp = None
                     for yc in ycands:
-                        sy = np.clip((y0 + yc["iy"] / ky).astype(np.int32), 0, Ht - 1)
-                        sx = np.clip((x0 + yc["ix"] / kx).astype(np.int32), 0, Wt - 1)
-                        on = float((people[sy, sx] > 0.5).mean())
-                        if on > HOUSE["ink_on_plate_people_max"]:
-                            continue
                         tX0 = int(x0 + yc["ink_l"] / kx); tX1 = min(x0 + cw, int(x0 + yc["ink_r"] / kx) + 1)
                         tY0 = int(y0 + yc["ink_t"] / ky); tY1 = min(y0 + ch, int(y0 + yc["ink_b"] / ky) + 1)
                         if tX1 <= tX0 or tY1 <= tY0:
                             continue
+                        # fast path: if no person pixel lies in the ink's BOUNDING
+                        # BOX there can be none under the ink, so skip the gather
+                        if rsum(pl["ii_people"], tX0, tY0, tX1, tY1) <= 0.5:
+                            on = 0.0
+                        else:
+                            sy = np.clip((y0 + yc["iy4"] / ky).astype(np.int32), 0, Ht - 1)
+                            sx = np.clip((x0 + yc["ix4"] / kx).astype(np.int32), 0, Wt - 1)
+                            on = float((people[sy, sx] > 0.5).mean())
+                            if on > HOUSE["ink_on_plate_people_max"]:
+                                continue
                         area = float((tX1 - tX0) * (tY1 - tY0))
                         occ = rsum(pl["ii_sal"], tX0, tY0, tX1, tY1) / area
                         rea = rsum(pl["ii_grad"], tX0, tY0, tX1, tY1) / area
@@ -1126,7 +1138,7 @@ def score_full(row, hero, ts, head_mul, funnel):
     dfx1, dfy1 = (target.x + target.w - x0) * kx, (target.y + target.h - y0) * ky
     dfbox = (dfx0, dfy0, dfx1, dfy1)
 
-    gy, gx = np.mgrid[0:H, 0:W]
+    gy, gx = GY, GX
     py_ = np.clip((y0 + gy / ky).astype(np.int32), 0, Ht - 1)
     px_ = np.clip((x0 + gx / kx).astype(np.int32), 0, Wt - 1)
     comp_people = (people[py_, px_] > 0.5) | (hero["occ"] > 0.10)
