@@ -1151,6 +1151,35 @@ quoted lines per hearing. Not automated, said out loud: whether the lines are
 funny or shocking is still read by me, and the digest is not normalised per
 minute - a long hearing accumulates hits.
 
+### R51 - the cut-outs are graded to the accepted envelope, and no two builds share a plate
+
+2026-09-02, on five thumbnails that had already passed A, C and D: *"I don't
+like the way the judge and defendant look. Looks very cheap and
+colored/brightness wrong and don't have that professional hd look"*. The old
+gates measured posterisation, blow-out and duplicate faces - nothing measured
+the GRADE, so five flat, crunchy builds shipped as SHIP.
+
+Measured with `tools/floor_measure.py` (the code that derived the floor) on
+the five he accepted against the five he rejected the same day:
+
+| metric | accepted | rejected |
+|---|---|---|
+| `grain_hf` | 0.87-1.72 | 4.04-4.65 (4 of 5) - oversharpened |
+| `background_L` | 107.2-149.1 | 90.8-101.8 (5 of 5) - plate too dark |
+| `contrast_sd` | 78.2-82.8 | 72.4-77.9 (5 of 5) - flat |
+| plate `bg_raw.png` | one per case | `9e01114e2875` on all five |
+
+RULE: every thumbnail sits inside the accepted envelope (5% slack per end, so
+the gate moves with the floor and is never hand-tuned), and its background
+plate is its own. A batch that reuses one plate across cases posts as a wall
+of the same image and is refused.
+
+CHECK: `tools/check_thumb_grade.py CASE OUT.jpg --peers <other cases>` ->
+`THUMB_GRADE_OK`; `--selftest` proves it both ways - the five accepted builds
+pass, the five in `tools/fixtures/rejected_2026_09_02/` (the control he
+rejected) all fail. Not automated, said out loud: "professional HD look" is
+still read by eye at 100% before he sees it (`GATES-THUMBS-0902.md` G9).
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured
@@ -1180,6 +1209,7 @@ the selftest suite when a row lies.
 | `scripts/build_case_longform.py` | MANUAL | long-form body builder; run by hand per case; R47: does NOT master - `tools/master_audio.py` runs on its output before posting; R49: `--coldopen A:B` required (or `--no-coldopen`, said out loud), runs `tools/check_coldopen.py` on its output |
 | `tools/check_coldopen.py` | WIRED | R49 - run by `scripts/build_case_longform.py` on the rendered file (FAIL = refused build); `tools/selftest_all.py` (`--selftest`: synthetic with/without cold open, no-sidecar, renderer refusals, `tools/fixtures/torres_longform_pre_r49_head.mp4` + real sidecar as the real known-bad) |
 | `tools/banger_digest.py` | WIRED | R50 - entertainment layer on the picker; `tools/selftest_all.py` (`--selftest`: banger vs reset-hearing control 3x, turn split); `--rows` on `state/recent_hearings_*.json` for a shortlist |
+| `tools/check_thumb_grade.py` | WIRED | R51 - grade envelope + shared-plate gate; `tools/selftest_all.py` (`--selftest`: accepted five pass, the five he rejected 2026-09-02 all fail); run per build beside `tools/verify_thumb.py` |
 | `tools/hearing_measure.py` | MANUAL | R50 - the density picker (questions/min, narrative, MTR); run by hand over a stream to produce the rows the digest reads; finds hearings, does not judge them |
 | `scripts/build_body.py` | MANUAL | older long-form builder; calls `tools/master_audio.py` |
 | `scripts/build_short_editor.py` | MANUAL | R48 - editor page builder, run by hand per case; the page's Copy button emits `tools/short_chain.py` and nothing else (`tools/check_short_entry.py`) |

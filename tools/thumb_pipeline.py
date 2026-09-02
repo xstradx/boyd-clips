@@ -34,6 +34,7 @@ this way since pick_clean_plate; the judge caught up 2026-09-01.
     python tools/thumb_pipeline.py --selftest      # library reuse, no GPU
 """
 import os, sys, json, argparse, subprocess, shutil
+import hashlib
 import io
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -242,9 +243,21 @@ def hypir(src_png, out_png, caption, upscale=4):
     if os.path.exists(out_png):
         print(f"  [skip] {os.path.basename(out_png)}")
         return out_png
+    # THE STAGING DIRS MUST BE UNIQUE PER RUN, NOT PER TAG.
+    # `tag` is the output BASENAME ("defendant_hypir"), which is identical for
+    # every case, so two builds running at once shared `_in_defendant_hypir` /
+    # `_out_defendant_hypir` - and this function rmtree's both on entry. The
+    # second build deleted the first build's result between HYPIR writing it
+    # and the copy below, and the first build died on "HYPIR produced nothing"
+    # with the model's own "Done. Enjoy your results in ..." still in its log.
+    # Measured 2026-09-02 building LOPEZGONZALEZ while four sibling agents
+    # built PERKINS / GARCIA_J / CLAYTON / PACE. The work dir is what actually
+    # distinguishes one build from another, so it goes into the name.
     tag = os.path.splitext(os.path.basename(out_png))[0]
-    lq = os.path.join(HYPIR_DIR, f"_in_{tag}")
-    hq = os.path.join(HYPIR_DIR, f"_out_{tag}")
+    uniq = hashlib.sha1(
+        os.path.abspath(out_png).encode("utf-8", "replace")).hexdigest()[:10]
+    lq = os.path.join(HYPIR_DIR, f"_in_{tag}_{uniq}")
+    hq = os.path.join(HYPIR_DIR, f"_out_{tag}_{uniq}")
     shutil.rmtree(lq, ignore_errors=True)
     shutil.rmtree(hq, ignore_errors=True)
     os.makedirs(lq, exist_ok=True)
@@ -277,6 +290,22 @@ MATTE_PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
 # cannot pass the gates with the crush back in.
 ALPHA_FLOOR = 6.0
 ALPHA_CEIL = 246.0
+
+
+def _stray_island_px():
+    """The stray-alpha-island threshold, read from the gate that refuses it.
+
+    ONE source of truth with `verify_build.MIN_STRAY_COMPONENT` - a second
+    constant here would drift the moment the gate is retuned. The import is
+    lazy because verify_build imports THIS module (inside its own functions),
+    so a module-level import would be a cycle.
+    """
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import verify_build
+        return int(verify_build.MIN_STRAY_COMPONENT)
+    except Exception:
+        return 4000
 
 
 def matte(src, dst):
@@ -326,6 +355,33 @@ def matte(src, dst):
     # matting model exists to produce. ALPHA_FLOOR / ALPHA_CEIL, gated.
     a = np.clip((a.astype(np.float32) - ALPHA_FLOOR) * (255.0 / (ALPHA_CEIL - ALPHA_FLOOR)), 0, 255)
     a = a.astype(np.uint8)
+    # ONE SUBJECT PER MATTE (R8 / verify_build gate L: "it looks weird how his
+    # lawyer is right behind judge boyd"). Gate L has always REFUSED a stray
+    # alpha island >= MIN_STRAY_COMPONENT px, and nothing on the build path ever
+    # removed one - so the rule was a rejection with no fix, and the only way
+    # past it was to hunt for a frame the matting model happened to miss the
+    # bystander in. Measured 2026-09-02 on LOPEZGONZALEZ: the defendant's matte
+    # carried a second island of 19,708 px - a woman in the gallery holding a
+    # folder, 750 px clear of him - so the build failed L. A component that
+    # does not touch the subject is by definition not the subject, and dropping
+    # it is alpha-only, so it cannot be a hard cut of him (gate K still judges
+    # that). Keep the largest component; drop any other >= the gate's own
+    # threshold, out loud. Smaller islands are left alone - they are the faint
+    # hair and edge specks the matting model exists to produce, and the accepted
+    # five carry a largest secondary island of 12 px.
+    _stray_px = _stray_island_px()
+    _n, _lab, _st, _ = cv2.connectedComponentsWithStats((a > 8).astype(np.uint8), 8)
+    if _n > 2:
+        _areas = [(_st[i, cv2.CC_STAT_AREA], i) for i in range(1, _n)]
+        _areas.sort(reverse=True)
+        _dropped = [(ar, i) for ar, i in _areas[1:] if ar >= _stray_px]
+        for _ar, _i in _dropped:
+            a[_lab == _i] = 0
+        if _dropped:
+            print(f"  matte {os.path.basename(dst):28} dropped "
+                  f"{len(_dropped)} stray island(s) "
+                  f"({', '.join(str(int(ar)) + 'px' for ar, _ in _dropped)}) - "
+                  f"not connected to the subject (R8 / gate L)")
     # A tile-seam cliff in this matte (R29) is NOT patched here: thumb.cut()
     # grows the layer until the cut leaves the canvas - see thumb.find_cliff.
     Image.fromarray(np.dstack([rgb, a])).save(dst)

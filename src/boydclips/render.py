@@ -1417,6 +1417,25 @@ def render_longform(
         wm_index = None
     inputs += wm_in
 
+    # THE COLD OPEN GETS ITS OWN DECODER, SEEKED. Reading it as a sixth
+    # `[0:v]trim` off input 0 makes the concat ask for the hook FIRST while the
+    # split behind it is still pushing body frames from second one, so every
+    # frame between the body's start and the hook is held in the graph.
+    # Measured 2026-09-02 on CLAYTON (hook 409 s into the body, 1280x720):
+    # "Error while filtering: Cannot allocate memory", frame=0, twice, with
+    # 21 GB free - 409 s * 30 fps * 1.38 MB is ~17 GB of buffer. TORRES (hook
+    # 337 s in) fit and hid the defect; every longer hearing hits it.
+    # A second `-i` with an input `-ss` seeks straight to the hook and buffers
+    # nothing. Input seek is frame-exact here: measured on this file,
+    # `-ss T -i F` and `-i F -ss T` produced identical pixels (p99 |diff| 0),
+    # and `trim=start=0` after the input seek gave the same frame again.
+    cold_idx = None
+    if coldopen is not None:
+        cold_idx = 1 + (1 if intro_idx is not None else 0) \
+                     + (1 if wm_index is not None else 0)
+        inputs += ["-ss", f"{max(0.0, float(coldopen[0]) - offset_s):.3f}",
+                   "-i", str(source)]
+
     fps = cfg.get("fps", 30)
     chain = (
         f"{vlabel}{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
@@ -1467,7 +1486,7 @@ def render_longform(
             else:
                 cwm = "[cbase]null[cwm]"
             parts.append(
-                f"[0:v]trim=start={a0:.3f}:end={a1:.3f},setpts=PTS-STARTPTS,"
+                f"[{cold_idx}:v]trim=start=0:end={cdur:.3f},setpts=PTS-STARTPTS,"
                 f"{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
                 f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,fps={fps}[cbase]"
             )
@@ -1478,7 +1497,7 @@ def render_longform(
                 f"format=yuv420p,setsar=1[cv]"
             )
             parts.append(
-                f"[0:a]atrim=start={a0:.3f}:end={a1:.3f},asetpts=PTS-STARTPTS,"
+                f"[{cold_idx}:a]atrim=start=0:end={cdur:.3f},asetpts=PTS-STARTPTS,"
                 f"afade=t=in:st=0:d=0.015,"
                 f"afade=t=out:st={fade_st:.3f}:d={COLDOPEN_FADE_S:.3f},{norm}[ca]"
             )

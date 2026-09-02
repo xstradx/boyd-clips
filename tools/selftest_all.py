@@ -75,9 +75,12 @@ SUITE = [
     # entertaining banger clips": R50. The digest must rank a synthetic banger
     # hearing 3x over a reset-and-PSI hearing and split every >> turn.
     ("banger_digest R50 entertainment layer on the picker; dull control scores ~0", ["tools/banger_digest.py", "--selftest"]),
+    # 2026-09-02, "looks very cheap and colored/brightness wrong": R51. The
+    # five he rejected that day are the control and must all fail the gate.
+    ("check_thumb_grade R51 grade envelope + shared plate; the five rejected builds are the control", ["tools/check_thumb_grade.py", "--selftest"]),
 ]
 
-PASS_TOKENS = ("SELFTEST_PASS", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
+PASS_TOKENS = ("SELFTEST_PASS", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
                "FLOOR_MEASURE_OK", "CASE_SEARCH_OK", "SHORT_ENTRY_OK", "COLDOPEN_OK")
 FAIL_TOKENS = ("SELFTEST_FAIL", "RULES_REFS_FAIL", "FLOOR_GATES_FAIL",
                "FLOOR_MEASURE_STALE", "FLOOR_MEASURE_INCOMPLETE",

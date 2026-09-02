@@ -101,7 +101,7 @@ q = PipelineQuantizationConfig(quant_mapping={
 # kind of failure, because it looks like a flake.
 pipe = QwenImageEditPipeline.from_pretrained(model, quantization_config=q,
                                              torch_dtype=torch.bfloat16,
-                                             device_map="balanced")
+                                             device_map="cuda")
 im = Image.open(src).convert("RGB")
 w, h = im.size
 # cap the working size - a 2448px crop through a 20B model is not worth the

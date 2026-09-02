@@ -61,6 +61,8 @@ BUILD_PATH = (
     "scripts/build_case_longform.py",
     # R50 (2026-09-02): selftest_all runs the digest; the picker path is manual.
     "tools/banger_digest.py",
+    # R51 (2026-09-02): the grade gate, run per build and in selftest_all.
+    "tools/check_thumb_grade.py",
 )
 # The publish path lives in the skills, outside the repo. Read if present.
 PUBLISH_PATH = (

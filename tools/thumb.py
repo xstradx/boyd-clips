@@ -191,6 +191,19 @@ SKIN_L_BAND = 5.0
 SEPARATION_DL = 18.6
 DB_DODGE = 0.26   # centre lift
 DB_BURN = 0.22    # perimeter deepen
+# A DODGE MAY NOT CLIP A FACE. The lift is a MULTIPLY (canvas * (1 + amt)), so
+# a T-zone pixel already at 200 comes out at 252 - paper white, flat, with the
+# hard edge of the ellipse around it. That is exactly the defect verify_build
+# gate J exists to catch, and it is what refused CLAYTON: Boyd's own layer
+# measured 3.0% of her face over L*210 with p95 205, and the build turned that
+# into 18-23% - a hard-edged white patch across her cheek and nose - while
+# face_l_bias, the documented brightness lever, moved it only 0.43 %/unit
+# (23.3% at bias 0, 18.2% at -12: ~34 units to fix, which would have made her
+# a silhouette). Clipped pixels do not scale back. So the dodge is limited per
+# pixel to the headroom under this luma: a pixel already at or above it gets
+# no lift, and no pixel is lifted past it. 205 sRGB luma is just under the
+# L*210 the gate measures (L* 210/2.55 = 82.4 -> ~207 sRGB).
+DB_DODGE_CEILING = 205.0
 # Knee raised back to 178. At 158 it was compressing most of a LIT FACE, not
 # just blown highlights, and measured face contrast fell 62.2 -> 57.3 - the
 # "they look super processed / flat" defect. Brightness is now handled by the
@@ -1078,6 +1091,34 @@ class Thumb:
         self.log["arrow"] = dict(x=int(ix), y=int(iy), w=aw, overlap=round(float(ov[iy, ix]), 4))
         return lay
 
+    def _final_grain(self, canvas):
+        """The whole-frame grain layer, applied on BOTH exits of build().
+
+        Nathan: "I meant a layer of grain over the entire thumbnail". It lived
+        inline after the arrow paste, and `if not self.arrow_on:` returns
+        BEFORE that - so every --no-arrow build saved ungrained. That is the
+        iterate-without-the-arrow workflow the skill prescribes, and MONKEY,
+        which ships arrowless on purpose, was shipped without it. Measured
+        2026-09-02 on CLAYTON: the arrowless build logged no `final_grain`,
+        the house-style checklist printed "MISSING grain layer over the whole
+        frame", and gate A read flat_g_p90 0.3934 against a 0.30 limit -
+        i.e. the preview being judged was a different image from the one that
+        would ship. One method, called from both exits, so the two cannot
+        drift apart again.
+        """
+        if FINAL_GRAIN <= 0:
+            return canvas
+        _rng = np.random.default_rng(11)
+        _n = _rng.normal(0.0, FINAL_GRAIN, canvas.shape[:2]).astype(np.float32)
+        _y = (canvas * LUMA_W).sum(axis=2) / 255.0
+        # midtone-weighted with a floor, so flat black type and paper-white
+        # highlights still receive some - a completely ungrained region is
+        # the tell this exists to remove
+        _w = 0.45 + 0.55 * (4.0 * _y * (1.0 - _y)).clip(0, 1)
+        canvas = canvas + (_n * _w)[..., None]
+        self.log["final_grain"] = FINAL_GRAIN
+        return canvas
+
     def build(self, out_path):
         # The title is sized by WIDTH (he wants it near edge to edge), so its
         # height is an OUTPUT, not a constant. Subject placement therefore derives
@@ -1499,6 +1540,7 @@ class Thumb:
         try:
             import expression as _X
             _u8 = np.clip(canvas, 0, 255).astype(np.uint8)
+            _clipped = 0.0
             for _f in _X.blendshapes(cv2.cvtColor(_u8, cv2.COLOR_RGB2BGR)):
                 _bx, _by, _bw, _bh = [int(v) for v in _f["box"]]
                 if _bw * _bh < 12000:
@@ -1515,8 +1557,20 @@ class Thumb:
                 _m = (getattr(self, "_subject_alpha", np.ones((H, W))) > 0.5)
                 _amt = np.where(_m, _dodge - _burn, 0.0).astype(np.float32)
                 _amt = cv2.GaussianBlur(_amt, (0, 0), max(_bw, _bh) * 0.06)
+                # headroom limit - see DB_DODGE_CEILING. Only the POSITIVE
+                # (dodge) side is limited; the burn is unbounded downward and
+                # cannot clip to white. The limit is a smooth function of the
+                # luma already under the brush, so it does not put an edge
+                # back into the blurred map.
+                _yl = (canvas * LUMA_W).sum(axis=2)
+                _head = np.clip(DB_DODGE_CEILING / np.maximum(_yl, 1.0) - 1.0,
+                                0.0, None).astype(np.float32)
+                _clipped = float((_amt > _head).mean())
+                _amt = np.where(_amt > 0, np.minimum(_amt, _head), _amt)
                 canvas = canvas * (1.0 + _amt[..., None])
-            self.log["dodge_burn"] = dict(dodge=DB_DODGE, burn=DB_BURN)
+            self.log["dodge_burn"] = dict(dodge=DB_DODGE, burn=DB_BURN,
+                                          ceiling=DB_DODGE_CEILING,
+                                          limited_px_frac=round(_clipped, 4))
         except Exception as _e:
             self.log["dodge_burn"] = f"skipped: {_e}"
 
@@ -1539,7 +1593,16 @@ class Thumb:
                 # Measured before this: every face clipped to L*255, up to 30.5%
                 # of one face above L*210. The identical shoulder had existed on
                 # the BACKGROUND layer only.
-                _u = np.clip(canvas, 0, 255).astype(np.uint8)
+                # CLAMP FIRST. The ratio below is computed from the CLIPPED
+                # gray and was applied to the UNCLIPPED float canvas, so any
+                # pixel the earlier multiplies had pushed past 255 survived
+                # the shoulder: gray reads 255, the ratio is 201/255 = 0.788,
+                # and 0.788 of a float 320 is still 252 - paper white. That is
+                # why gate J kept failing on CLAYTON with the shoulder in
+                # place (16.4% of Boyd's face over L*210 while her own layer
+                # was 3.0%), and why turning face_l_bias could not fix it.
+                canvas = np.clip(canvas, 0, 255)
+                _u = canvas.astype(np.uint8)
                 _g = cv2.cvtColor(_u, cv2.COLOR_RGB2GRAY).astype(np.float32)
                 _t = np.where(_g > SUBJ_SHOULDER,
                               SUBJ_SHOULDER + (_g - SUBJ_SHOULDER) * SUBJ_SHOULDER_K, _g)
@@ -1741,6 +1804,7 @@ class Thumb:
 
         if not self.arrow_on:
             self.log["arrow"] = "off"
+            canvas = self._final_grain(canvas)
             out = np.clip(canvas, 0, 255).astype(np.uint8)
             Image.fromarray(out).save(out_path, quality=95, subsampling=0)
             self._log_ink_vs_subjects(tmask, kmask, jal, dal)
@@ -1779,16 +1843,7 @@ class Thumb:
         # is exactly what makes vector art read as pasted onto a photo. A real
         # grain pass is the last thing that happens, over everything, because
         # that is what makes the whole frame look like one captured image.
-        if FINAL_GRAIN > 0:
-            _rng = np.random.default_rng(11)
-            _n = _rng.normal(0.0, FINAL_GRAIN, canvas.shape[:2]).astype(np.float32)
-            _y = (canvas * LUMA_W).sum(axis=2) / 255.0
-            # midtone-weighted with a floor, so flat black type and paper-white
-            # highlights still receive some - a completely ungrained region is
-            # the tell this exists to remove
-            _w = 0.45 + 0.55 * (4.0 * _y * (1.0 - _y)).clip(0, 1)
-            canvas = canvas + (_n * _w)[..., None]
-            self.log["final_grain"] = FINAL_GRAIN
+        canvas = self._final_grain(canvas)
 
         out = np.clip(canvas, 0, 255).astype(np.uint8)
         # 4:4:4. Pillow defaults to 4:2:0, which halves chroma resolution and makes a*
