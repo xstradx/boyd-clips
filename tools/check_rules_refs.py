@@ -63,6 +63,8 @@ BUILD_PATH = (
     "tools/banger_digest.py",
     # R51 (2026-09-02): the grade gate, run per build and in selftest_all.
     "tools/check_thumb_grade.py",
+    # R52 (2026-09-02): the comparison sheet, read before any build is shown.
+    "tools/vs_accepted.py",
 )
 # The publish path lives in the skills, outside the repo. Read if present.
 PUBLISH_PATH = (

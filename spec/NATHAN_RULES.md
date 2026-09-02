@@ -1180,6 +1180,38 @@ pass, the five in `tools/fixtures/rejected_2026_09_02/` (the control he
 rejected) all fail. Not automated, said out loud: "professional HD look" is
 still read by eye at 100% before he sees it (`GATES-THUMBS-0902.md` G9).
 
+### R52 - a thumbnail is compared to the accepted five before it is judged, and the people keep their own pixels
+
+2026-09-02. Five rejected builds, then five invented scalar metrics from me
+(skin chroma, micro-texture, hair alpha, face luminance, skin a*), none of
+which separated his accepted builds from the rejected ones - one of them said
+the opposite, and I reported another to him as clean off a 4-face sample when
+it overlapped across ten. His words: *"Fix the reason why you're not able to
+see or detect that maybe and find and fix root cause"* and *"maybe we're over
+complicating everything pls just fix"*.
+
+RULE 1 - COMPARE, DO NOT SCORE. `tools/vs_accepted.py OUT.jpg` builds the
+six-up sheet (his five accepted + the candidate) and it is READ at 100% before
+any thumbnail is gated or shown. On the first sheet the answer was immediate:
+the accepted five are dark, dense and contrasty and ours was the only
+high-key, flat, pale tile - nothing in the numbers had found that.
+
+RULE 2 - THE PEOPLE KEEP THEIR OWN PIXELS. `BOYD_SIMPLE=1` disables the
+subject colour surgery (rim glow, skin-saturation balance, skin-chroma lift,
+skin L target). Measured on PACE: the white halo through her hair, the magenta
+fringe on her collar and the plastic rim on his head all disappear.
+
+RULE 3 - THE FRAME PICKER OWES REAL PIXELS. It scores expression only. It
+returned a defendant frame with 11.7% of the scalp blown past L225 (the
+bald-dome head he pointed at; a rescan found 0.1% at t=5150), and it picks
+crops as small as 132-250 px that are then upscaled 4x, so most of the face is
+invented - his accepted CARTHIEF started from 620 px. Face size in SOURCE
+pixels and blow-out are selection criteria, not afterthoughts.
+
+CHECK: `tools/vs_accepted.py --selftest` - no sheet is refused, a sheet older
+than the thumbnail is refused (VS_ACCEPTED_SELFTEST_OK). Not automated, said
+out loud every time: the comparison itself is mine, by eye, at 100%.
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured
@@ -1210,6 +1242,7 @@ the selftest suite when a row lies.
 | `tools/check_coldopen.py` | WIRED | R49 - run by `scripts/build_case_longform.py` on the rendered file (FAIL = refused build); `tools/selftest_all.py` (`--selftest`: synthetic with/without cold open, no-sidecar, renderer refusals, `tools/fixtures/torres_longform_pre_r49_head.mp4` + real sidecar as the real known-bad) |
 | `tools/banger_digest.py` | WIRED | R50 - entertainment layer on the picker; `tools/selftest_all.py` (`--selftest`: banger vs reset-hearing control 3x, turn split); `--rows` on `state/recent_hearings_*.json` for a shortlist |
 | `tools/check_thumb_grade.py` | WIRED | R51 - grade envelope + shared-plate gate; `tools/selftest_all.py` (`--selftest`: accepted five pass, the five he rejected 2026-09-02 all fail); run per build beside `tools/verify_thumb.py` |
+| `tools/vs_accepted.py` | WIRED | R52 - the six-up comparison sheet against the accepted five; `tools/selftest_all.py` (`--selftest`: missing sheet refused, stale sheet refused); read at 100% before any build is shown |
 | `tools/hearing_measure.py` | MANUAL | R50 - the density picker (questions/min, narrative, MTR); run by hand over a stream to produce the rows the digest reads; finds hearings, does not judge them |
 | `scripts/build_body.py` | MANUAL | older long-form builder; calls `tools/master_audio.py` |
 | `scripts/build_short_editor.py` | MANUAL | R48 - editor page builder, run by hand per case; the page's Copy button emits `tools/short_chain.py` and nothing else (`tools/check_short_entry.py`) |

@@ -78,9 +78,12 @@ SUITE = [
     # 2026-09-02, "looks very cheap and colored/brightness wrong": R51. The
     # five he rejected that day are the control and must all fail the gate.
     ("check_thumb_grade R51 grade envelope + shared plate; the five rejected builds are the control", ["tools/check_thumb_grade.py", "--selftest"]),
+    # 2026-09-02, "fix the reason why you're not able to see or detect that":
+    # R52. Five invented scalars failed; the comparison sheet found it at once.
+    ("vs_accepted R52 six-up sheet vs the accepted five; missing and stale sheets refused", ["tools/vs_accepted.py", "--selftest"]),
 ]
 
-PASS_TOKENS = ("SELFTEST_PASS", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
+PASS_TOKENS = ("SELFTEST_PASS", "VS_ACCEPTED_SELFTEST_OK", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
                "FLOOR_MEASURE_OK", "CASE_SEARCH_OK", "SHORT_ENTRY_OK", "COLDOPEN_OK")
 FAIL_TOKENS = ("SELFTEST_FAIL", "RULES_REFS_FAIL", "FLOOR_GATES_FAIL",
                "FLOOR_MEASURE_STALE", "FLOOR_MEASURE_INCOMPLETE",

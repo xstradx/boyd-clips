@@ -109,6 +109,20 @@ BG_BLUR_DEFAULT = 1.1  # sigma. The 1.6 ceiling is the mush he rejected.
 SAT_TRIM = 1.00
 ARROW_NUDGE_X = 0    # superseded: the arrow now targets his measured centre
 RIM_PX = 2           # crisp white outline, then a soft glow OUTSIDE it.
+# ---------------------------------------------------------------- SIMPLE --
+# 2026-09-02, after five rejected builds and five invented metrics:
+# "the engine that actually picks what faces to use and the engine to edit
+#  the people probably needs to be redone ... or idk maybe we're over
+#  complicating everything pls just fix".
+#
+# The subjects pass through ten stages that each move colour: per-layer luma
+# and saturation grade, skin-saturation balance, face-brightness midpoint,
+# skin-chroma lift, rim glow, dodge/burn, then a global LOOK. He looked at a
+# raw restored crop and said it was good, then at the composite and said the
+# people were ruined. BOYD_SIMPLE=1 turns the colour surgery OFF and keeps
+# only geometry, matte, and the plate darkening that gives separation - the
+# people keep their own pixels. Compare the two on the vs_accepted sheet.
+SIMPLE = os.environ.get('BOYD_SIMPLE', '') == '1'
 RIM_MODE = 'glow'    # 'line' | 'smooth' | 'glow' | 'none'
 # 2026-08-29 he picked 'smooth' (hard white outline + wide glow) from four
 # options. 2026-08-31 he called that a defect: "Surgically fix all the mistakes
@@ -255,6 +269,15 @@ BG_TARGET = dict(L=82.0, S=42.0)
 FACE_L_TARGET = 120.0                   # HS_REMAKE 121, WORKING 118 (median L*)
 SUBJECT_S_TARGET = 86.0                 # the plate's own skin/scrubs saturation
 LOOK = dict(luma=113.5, sd=73.8, definition=0.28)
+if SIMPLE:
+    # No shared destinations, no lifts, no rim. Dead-bands so wide the skin
+    # stages can never fire, and the pull to a shared saturation is zero.
+    RIM_MODE = 'none'
+    SKIN_SAT_PULL = 0.0
+    SKIN_CHROMA_BAND = 999.0
+    SKIN_L_BAND = 999.0
+    print('  thumb: BOYD_SIMPLE=1 - subject colour surgery OFF '
+          '(rim, skin balance, chroma lift, skin L all disabled)')
 # LOOK measured off Nathan's own regrade of the 2026-08-29 build: he took luma
 # 119.9->109.7, contrast 59.5->69.3, definition +24%. Applied ONCE, at the end,
 # as a look - not as a stage repairing another stage.
