@@ -132,7 +132,19 @@ is on disk, not in a context window):
   is now taken by the digest - number the close-out R51);
   frame-picker audit; task-observer skill (learn from this whole chat); tags /
   retro-tagging offer on the two live videos; Qwen regeneration failure.
-- **Blocked:** his pick from the recent five (then, in order: clip via
+- **In progress (2026-09-02, "make all of them ... in a batch"):** Workflow
+  `wf_c0d45047-544` - five build agents in parallel (PERKINS, GARCIA_J,
+  LOPEZGONZALEZ, CLAYTON, PACE), each: source clip -> short_chain -> cold-open
+  long-form + master -> thumb_pipeline -> COPY-PASTE -> STATUS.md under
+  `D:/Boyd Clips/READY-TO-POST/<KEY>/`, then a verify agent per case re-runs
+  every gate on the files. Nothing posted. If this session died mid-run:
+  each folder's STATUS.md says what finished; resume with
+  `Workflow({scriptPath: ~/.claude/projects/C--Users-natha-Projects-boyd-clips/
+  91451db0-.../workflows/scripts/boyd-batch-five-wf_c0d45047-544.js,
+  resumeFromRunId: "wf_c0d45047-544"})` or rebuild the missing pieces by hand
+  from the TORRES commands below. Then: read all five thumbnails at 100%, and
+  ask him before posting (publishing = hard stop).
+- **Blocked:** posting - his yes per video (build order: clip via
   `tools/short_chain.py`, long-form via `scripts/build_case_longform.py
   --coldopen` + `tools/master_audio.py`, thumbnail via
   `tools/thumb_pipeline.py`, post via youtube-channel §1 — publishing = ask
