@@ -1796,11 +1796,11 @@
   "note": "Plea + sentencing, possession CS PG1 <1g (state jail felony). Docket call 4669.92 (\"Court is calling ... state versus Jameson Pace\"), hearing ends 5213.5 (\"You understand? All right. Thank you.\"; \"Who is next?\" 5217.2, next defendant Joe Romero 5260). Layout: defendant LEFT tile at x~0.22 of frame, his attorney at ~0.43; Judge Boyd RIGHT (crop=628:348:646:186). Ruling 5129.3-5148 (27 days Bexar County Jail, no contact with Jessica Guzman, no unsupervised contact with minors) - OUTCOME, kept out of the short.",
   "judge_source_note": "judge_source='video' was BUILT and rejected by eye (D:/Boyd Clips/thumbwork/PACE_v/PACE_v_noarrow.jpg, gates all PASS): the fresh cut puts Boyd's face against the right canvas edge and blows her hair up. The library cutout boyd_THOMPSON_approved.png wins on the pipeline's own expression score too (0.1494 vs 0.1127 searched at t=5022).",
   "title_note": "Verbatim, Boyd at 5020.7: 'Right. So, was the baby born positive?'. The first build used 'Your child was probably / born positive for meth' (45 chars) and the type solver sized it 65 - every accepted build sizes 91-104 (CARTHIEF 104, SANCHEZ 91, OFFERUP/MONKEY/THOMPSON 104). Length is the driver, so the title was shortened to 27 characters.",
-  "judge_source": "video",
   "judge_t": 5087,
   "judge_expression_window": [
    40,
    560
-  ]
+  ],
+  "judge_source": "video"
  }
 }

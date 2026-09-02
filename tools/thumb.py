@@ -347,11 +347,28 @@ def measure(f, mask=None):
 
 def grade_to(f, L_target, S_target, mask=None, iters=30):
     """Bring ONE layer to ONE target. Owns luma and saturation for that layer and
-    returns nothing else - it cannot move geometry, sharpness or any other layer."""
+    returns nothing else - it cannot move geometry, sharpness or any other layer.
+
+    2026-09-02: the luminance step was an RGB MULTIPLY. On pale skin the red
+    channel is already near the ceiling, so brightening clips R first, then G,
+    and the highlight drains to white - his 'heavy white highlight on their
+    faces'. Measured: our defendant's highlight chroma 6.0 against a base of
+    11.5, while his accepted builds run 21.9-26.0 highlight over 15.0-21.7
+    base (the highlight keeps, or gains, skin colour). Luminance now moves in
+    Lab L* with a* and b* untouched, which cannot desaturate anything.
+    """
     for _ in range(iters):
         L, S = measure(f, mask)
         if abs(L - L_target) < 0.8 and abs(S - S_target) < 0.8:
             break
+        # REVERTED 2026-09-02, same day it was added. Moving this into Lab was
+        # meant to stop highlights desaturating; measured, it moved the
+        # highlight chroma 6.0 -> 7.1 (nothing) and it round-trips
+        # float->uint8->Lab->uint8 on EVERY iteration, up to 30 times, on the
+        # background layer too. Ceiling noise went 8.07 -> 13.70 against 3.85
+        # on his accepted build: 'now u messed up the background'. The float
+        # multiply stays; highlight colour is handled where it is actually
+        # lost, not here.
         f = f * (L_target / max(L, 1e-3)) ** 0.55
         L2, S2 = measure(f, mask)
         k = float(np.clip(1.0 + (S_target - S2) / 170.0, 0.86, 1.16))
@@ -1435,6 +1452,20 @@ class Thumb:
             if sel.sum() > 500:
                 lm = m if m.sum() > 300 else sel
                 _cur0 = face_L[key]
+                # R31 CLAUSE 2 IS WRONG - REVERTED SAME DAY (2026-09-02). It says
+                # 'Lift the defendant UP to the judge - never pull the judge
+                # down', but the SANCHEZ he APPROVED took her from L 149.2 in
+                # the crop to L 116.8 in the final - pulled DOWN 32 levels, with
+                # skin chroma pushed UP 9.3 -> 15.0. The artifact he signed off
+                # contradicts the rule written from his words, so the rule loses.
+                # Enforcing lift-only measured WORSE (her L 122.7 -> 125.5 against
+                # an approved 116.8). What IS true: every guard here is
+                # one-directional - the BLOWN_CAP search runs only on a lift, R55
+                # never brightens, gate J bounds brightness only - and there is
+                # no minimum face luminance anywhere. The real gap is that
+                # nothing drives skin TOWARD the approved tone (L ~117, base
+                # chroma ~15, highlight chroma ~22); the targets are the fix,
+                # not the direction.
                 _goal = (_cur0 + (midL - _cur0) * FACE_L_PULL
                          + float(_bias.get(key, 0.0)))
                 # BLOW-OUT CEILING ON THE LIFT (2026-09-02).
@@ -1766,7 +1797,11 @@ class Thumb:
                               & (_Cb > 85) & (_Cb < 135))
                     _soft = cv2.GaussianBlur(_paint.astype(np.float32), (0, 0), 6.0)
                     if abs(_ch - _goal_ch) > SKIN_CHROMA_BAND:
-                        _kc = float(np.clip(_goal_ch / max(_ch, 1e-3), 0.6, 1.6))
+                        # 2026-09-02: ceiling raised 1.6 -> 2.4. Boyd's tile in the
+                        # PACE stream arrives at base chroma 7.2 against a corpus of
+                        # 15-19, and at 1.6 the lift could not reach it - her highlight
+                        # stayed colourless, which is his 'heavy white highlight'.
+                        _kc = float(np.clip(_goal_ch / max(_ch, 1e-3), 0.6, 2.4))
                         _w = 1.0 + (_kc - 1.0) * _soft
                         _lab[..., 1] = 128.0 + _a * _w
                         _lab[..., 2] = 128.0 + _b * _w
