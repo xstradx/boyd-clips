@@ -109,6 +109,15 @@ is on disk, not in a context window):
   Frame grab that works: `yt-dlp --download-sections "*T.00-T.50"
   --force-keyframes-at-cuts -f b --extractor-args youtube:player_client=android
   -o - URL | ffmpeg -i pipe:0 -frames:v 1` (`bv*[height<=480]` = 403).
+- **Next (his idea, 2026-09-02):** *"I was thinking about covering Durks
+  trial and Tyler Robinson just because they're such huge cases"*. Not
+  decided. Before anything: (1) Lil Durk is a FEDERAL case - Fed. R. Crim. P.
+  53 bars cameras/broadcast, so there is no courtroom video or audio to clip,
+  only commentary; (2) Tyler Robinson is Utah state court - camera access is
+  the judge's call per hearing, CHECK what has actually streamed and who is
+  posting it (`tools/case_search.py`) before building; (3) both are off the
+  Texas Trial Tracker / Boyd brand - a format decision, his call. Offer him
+  the readings, do not build unasked.
 - **Next:** picker audit close-out (`tools/check_picker.py --selftest`, R50
   is now taken by the digest - number the close-out R51);
   frame-picker audit; task-observer skill (learn from this whole chat); tags /
