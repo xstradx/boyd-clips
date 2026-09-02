@@ -1097,6 +1097,19 @@ def pick_expression_t(case, c, white, yellow, side="right", span=None,
     if not best:
         print("  expression: NO usable face in the window - keeping judge_t")
         return None
+    # R54 (2026-09-02): EXPRESSION IS NOT ENOUGH. This picker scored the face
+    # only on what it was DOING, so it returned a defendant frame with 11.7%
+    # of the scalp blown past L235 (the bald-dome head he pointed at) and a
+    # judge frame with 16.7% of the face under harsh specular patches. A frame
+    # the light has already destroyed cannot be rescued downstream. So the
+    # top expression candidates are re-ranked on the LIGHT they arrive in, and
+    # what was traded is printed.
+    scored = _rerank_on_light(video, rows or [best], prof, side, off=float(c.get("offset", 0)))
+    if scored and scored[0] is not best:
+        print(f"  expression: re-ranked on light - was t={best['t']:.1f}s "
+              f"expr={best['expr']:.4f}, now t={scored[0]['t']:.1f}s "
+              f"expr={scored[0]['expr']:.4f} (blown/patchy light rejected)")
+        best = scored[0]
     off = float(c.get("offset", 0))
     t_src = off + best["t"]
     flag = "" if best["expr"] >= X.FLOOR else "  BELOW FLOOR - near-neutral face"
@@ -1104,6 +1117,58 @@ def pick_expression_t(case, c, white, yellow, side="right", span=None,
           f"expr={best['expr']:.4f} floor={X.FLOOR}{flag}")
     return t_src, best, prof
 
+
+def _rerank_on_light(video, rows, prof, side, off=0.0, keep=12):
+    """Re-rank the top expression candidates on the light they arrive in.
+
+    Measured 2026-09-02 on his accepted five vs the batch he rejected: a face
+    is unusable when the frame already carries blown or patchy light, and no
+    grade downstream puts it back. Two terms, both measured on the SOURCE
+    frame: fraction of the face over L235 (blow-out) and fraction more than
+    45 L above the face median (harsh specular patches). Expression still
+    leads; light breaks the tie and vetoes a ruined frame.
+    """
+    import cv2
+    import numpy as np
+    cand = sorted([r for r in rows if r.get("expr") is not None],
+                  key=lambda r: -r["expr"])[:keep]
+    if len(cand) < 2:
+        return cand
+    cap = cv2.VideoCapture(video)
+    det = None
+    out = []
+    for r in cand:
+        cap.set(cv2.CAP_PROP_POS_MSEC, float(r["t"]) * 1000)
+        ok, fr = cap.read()
+        if not ok:
+            continue
+        h, w = fr.shape[:2]
+        half = fr[:, w // 2:] if side == "right" else fr[:, :w // 2]
+        if det is None:
+            det = cv2.FaceDetectorYN.create(
+                os.path.join(ROOT, "models", "yunet2023.onnx"), "",
+                (half.shape[1], half.shape[0]), 0.7, 0.3, 5000)
+        det.setInputSize((half.shape[1], half.shape[0]))
+        _, f = det.detect(half)
+        if f is None:
+            continue
+        b = max(f, key=lambda q: q[2])
+        x, y, bw, bh = (max(0, int(v)) for v in b[:4])
+        face = half[y:y + bh, x:x + bw]
+        if face.size < 900:
+            continue
+        L = cv2.cvtColor(face, cv2.COLOR_BGR2LAB)[..., 0].astype(float)
+        blown = float((L > 235).mean())
+        patchy = float((L > np.median(L) + 45).mean())
+        r = dict(r)
+        r["blown"] = round(blown, 4)
+        r["patchy"] = round(patchy, 4)
+        # expression leads; a blown or patchy frame is pushed down hard
+        r["light_score"] = r["expr"] * (1.0 - min(blown * 6.0, 0.9)) * (1.0 - min(patchy * 2.5, 0.8))
+        out.append(r)
+    cap.release()
+    out.sort(key=lambda r: -r["light_score"])
+    return out
 
 def build(case, work, out_jpg, white=None, yellow=None, kicker=None, arrow=True,
           type_style=None):

@@ -1246,6 +1246,42 @@ p99 recorded in the build log; the 1:1 A/B that proved it is
 `D:/Boyd Clips/thumbwork/PACE/_shoulder_ab.jpg`. Not automated, said out loud:
 the comparison itself (R52).
 
+### R54 - the frame picker scores the LIGHT a face arrives in, not just the expression
+
+2026-09-02. `pick_expression_t` scored what the face was DOING and nothing
+else. It returned a defendant frame with 11.7% of the scalp blown past L235
+(the bald-dome head he pointed at) and a judge frame with 16.7% of the face
+under hard specular patches (*"It's the heavy white highlight on their
+faces"*). A frame the light has already ruined cannot be rescued downstream.
+
+RULE: the top expression candidates are re-ranked on two terms measured on the
+SOURCE frame - fraction of the face over L*210, and fraction more than 45 L
+above the face median - and the trade is printed
+(`_rerank_on_light`, `tools/thumb_pipeline.py`). Expression still leads; light
+vetoes a ruined frame. A hand-set `judge_t` bypasses all of this, so it is an
+ANCHOR with `judge_expression_window`, never the final say.
+
+### R55 - the last thing that touches a subject is a headroom pull, never a lift
+
+The LOOK stage normalises GLOBAL luma to a constant. With a dark plate it
+scales the whole canvas up, so faces that arrived correct leave clipped -
+measured on PACE: Boyd reached the composite at 1.9% of her face over L*210
+out of HYPIR and left at 16.8%, while the accepted SANCHEZ went 16.8% -> 1.5%
+only because its plate was bright enough that LOOK had nothing to lift. Same
+code, opposite result, decided by the plate.
+
+RULE: after LOOK and every global operation, each subject is measured on gate
+J's own metric (percent of face over L*210) and its luminance is scaled back
+until it is under `BLOWN_CAP` (6%, against his accepted 0.1-6.7% and the
+gate's 12% limit). It only ever darkens. Measured on PACE: gate J 16.8%/10.5%
+FAIL -> 0.9%/4.6% PASS.
+
+Derived at the same time, replacing invented constants: `SUBJ_SHOULDER`
+178.0/0.30 -> 215.0/0.40. At 178 the shoulder crushed every face's specular
+into paste (face p99 208, 0.0% over L235 - the look he rejected); with no
+clamp at all faces ran 21-24% blown; 215/0.40 lands at p99 234 and 0.2-0.3%,
+inside his accepted five (p99 188-255, 0.02-2.5%).
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured

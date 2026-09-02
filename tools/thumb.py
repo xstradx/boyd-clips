@@ -123,6 +123,17 @@ RIM_PX = 2           # crisp white outline, then a soft glow OUTSIDE it.
 # only geometry, matte, and the plate darkening that gives separation - the
 # people keep their own pixels. Compare the two on the vs_accepted sheet.
 SIMPLE = os.environ.get('BOYD_SIMPLE', '') == '1'
+
+def _envf(name, default):
+    """Sweepable constant. The defaults below are DERIVED from the five he
+    accepted (gate C subject_max_L 124-156 on those, 192-194 on the batch he
+    rejected; face highlight p99 188-255, median 227, with 0.02-2.5% of the
+    face over L235). A sweep sets these from the environment so the value is
+    chosen by comparing renders, never by taste in a constant."""
+    try:
+        return float(os.environ.get(name, '') or default)
+    except ValueError:
+        return float(default)
 RIM_MODE = 'glow'    # 'line' | 'smooth' | 'glow' | 'none'
 # 2026-08-29 he picked 'smooth' (hard white outline + wide glow) from four
 # options. 2026-08-31 he called that a defect: "Surgically fix all the mistakes
@@ -222,8 +233,16 @@ DB_DODGE_CEILING = 205.0
 # just blown highlights, and measured face contrast fell 62.2 -> 57.3 - the
 # "they look super processed / flat" defect. Brightness is now handled by the
 # skin L target instead, so the shoulder only has to catch real clipping.
-SUBJ_SHOULDER = 178.0
-SUBJ_SHOULDER_K = 0.30
+# 2026-09-02, DERIVED from the five he accepted, replacing 178.0 / 0.30.
+# At 178 the shoulder crushed every face's specular into paste - his 'smooth
+# and pale', 'looks like slop'. Measured on PACE across a sweep:
+#   178/0.30  face p99 208, 0.0% of the face over L235   (the rejected look)
+#   255/1.00  face p99 255, 21-24% blown                 (no clamp at all)
+#   215/0.40  face p99 234, 0.2-0.3% blown               <- accepted corpus
+# His five sit at p99 188-255 with 0.02-2.5% blown, so 215/0.40 is the only
+# setting in the sweep that lands inside them.
+SUBJ_SHOULDER = _envf('BOYD_SHOULDER', 215.0)
+SUBJ_SHOULDER_K = _envf('BOYD_SHOULDER_K', 0.40)
 # WHITE BALANCE: TRIED AND REVERTED, 2026-08-31. It found the brightest
 # low-chroma cloth in each subject and pulled it to neutral. On THOMPSON that
 # cloth is Boyd's PINK COLLAR - genuinely pink, not grey - so "correcting" it
@@ -266,7 +285,12 @@ KICKER_EMPHASIS_BLUR = 13.0  # px sigma
 # S is deliberately left near the corpus q1 floor of 41 rather than targeted:
 # background saturation IQR is 41-146, too variable to aim at.
 BG_TARGET = dict(L=82.0, S=42.0)
-FACE_L_TARGET = 120.0                   # HS_REMAKE 121, WORKING 118 (median L*)
+FACE_L_TARGET = _envf('BOYD_FACE_L', 120.0)
+# Measured on the SAME metric gate J uses (verify_build MAX_FACE_BLOWOUT:
+# percent of face pixels over L*210, limit 12). His accepted five score
+# 0.1-6.7% on it (MONKEY 17.8 is the known outlier that fails its own gate),
+# so the lift is capped at 6% - inside the corpus and half the gate's limit.
+BLOWN_CAP = _envf('BOYD_BLOWN_CAP', 0.06)                   # HS_REMAKE 121, WORKING 118 (median L*)
 SUBJECT_S_TARGET = 86.0                 # the plate's own skin/scrubs saturation
 LOOK = dict(luma=113.5, sd=73.8, definition=0.28)
 if SIMPLE:
@@ -282,6 +306,12 @@ if SIMPLE:
     SUBJ_SHOULDER = 255.0
     SUBJ_SHOULDER_K = 1.0
     DB_BURN = 0.0
+    # The dodge is the fake studio glow: a centre lift of 0.26 across the
+    # subject reads as a light source that is not in the room, and it is what
+    # makes an otherwise natural restored crop look airbrushed next to a plate
+    # that never gets it. 2026-09-02: 'looks weird' on every exposure variant
+    # while the dodge was still on.
+    DB_DODGE = 0.0
     SKIN_SAT_PULL = 0.0
     SKIN_CHROMA_BAND = 999.0
     SKIN_L_BAND = 999.0
@@ -1407,6 +1437,36 @@ class Thumb:
                 _cur0 = face_L[key]
                 _goal = (_cur0 + (midL - _cur0) * FACE_L_PULL
                          + float(_bias.get(key, 0.0)))
+                # BLOW-OUT CEILING ON THE LIFT (2026-09-02).
+                # The midpoint rule is his - 'the defendant as bright as the
+                # judge' - but a midpoint between a pale face in bright light
+                # and a dark face in shadow LIFTS the dark one until it clips.
+                # Measured on PACE: Boyd's face went source mean 114 / 0.38%
+                # over L235 to composite mean 146 / 21.4% blown, while his
+                # accepted SANCHEZ went 149 -> 117 with 2.51% blown. The five
+                # he accepted sit at 0.02-2.5% (one outlier at 12.4), so a
+                # lift that would push this face past BLOWN_CAP is shortened
+                # to the largest lift that stays under it. Balance still
+                # happens; it just cannot clip a face to do it.
+                if _goal > _cur0:
+                    _u0 = np.clip(rgb, 0, 255).astype(np.uint8)
+                    _L0 = cv2.cvtColor(_u0, cv2.COLOR_RGB2LAB)[..., 0].astype(np.float32)
+                    _fm = lm if lm.sum() > 300 else sel
+                    _lo, _hi = _cur0, _goal
+                    for _ in range(12):
+                        _mid = (_lo + _hi) / 2.0
+                        _blown = float(((_L0[_fm] * (_mid / max(_cur0, 1e-3))) > 210).mean())
+                        if _blown > BLOWN_CAP:
+                            _hi = _mid
+                        else:
+                            _lo = _mid
+                    if _lo < _goal - 0.5:
+                        self.log.setdefault('face_L_blowout_limit', {})[key] = dict(
+                            wanted=round(_goal, 1), allowed=round(_lo, 1),
+                            cap_pct=round(BLOWN_CAP * 100, 1))
+                        print(f'  face L: {key} lift {_cur0:.0f} -> {_goal:.0f} would blow '
+                              f'{BLOWN_CAP*100:.0f}%+ of the face; held at {_lo:.0f}')
+                    _goal = _lo
                 for _ in range(12):
                     u = np.clip(rgb, 0, 255).astype(np.uint8)
                     lab = cv2.cvtColor(u, cv2.COLOR_RGB2LAB).astype(np.float32)
@@ -1718,6 +1778,52 @@ class Thumb:
                     self.log.setdefault("skin_final", {})[_key] = dict(
                         L=round(_sl, 1), chroma=round(_ch, 1), chroma_goal=round(_goal_ch, 1))
 
+        # ---- R55 FACE HEADROOM: after LOOK, before anything reads the file --
+        # The LOOK stage normalises GLOBAL luma to a constant. With a dark
+        # plate it scales the whole canvas up, and faces that arrived correct
+        # leave clipped. Measured 2026-09-02 on PACE: Boyd's face reached the
+        # composite at 1.9% over L*210 out of HYPIR and left at 16.8%, while
+        # his accepted SANCHEZ went the other way (16.8% -> 1.5%) because its
+        # plate was bright enough that LOOK had nothing to lift.
+        # So the LAST thing that touches the subjects is a headroom pull: if a
+        # face is over BLOWN_CAP on gate J's own metric, that subject's
+        # luminance is scaled back until it is not. Never brightens.
+        _sa2 = getattr(self, '_subject_alpha', None)
+        _ab = getattr(self, '_alpha_by', {})
+        if _sa2 is not None and _ab:
+            try:
+                _u = np.clip(canvas, 0, 255).astype(np.uint8)
+                _dt = cv2.FaceDetectorYN.create(
+                    os.path.join(ROOT, 'models', 'yunet2023.onnx'), '', (W, H), 0.6, 0.3, 5000)
+                _dt.setInputSize((W, H))
+                _, _rr = _dt.detect(cv2.cvtColor(_u, cv2.COLOR_RGB2BGR))
+            except Exception:
+                _rr = None
+            for _row in (sorted(_rr, key=lambda q: -q[3])[:2] if _rr is not None else []):
+                _x, _y, _w2, _h2 = (max(0, int(v)) for v in _row[:4])
+                _key = 'defendant' if _x + _w2 / 2 < W / 2 else 'boyd'
+                _pa = _ab.get(_key)
+                if _pa is None:
+                    continue
+                _sel = _pa > 0.5
+                _fbox = np.zeros((H, W), bool)
+                _fbox[_y:_y + _h2, _x:_x + _w2] = True
+                _fm2 = _fbox & _sel
+                if _fm2.sum() < 300:
+                    _fm2 = _fbox
+                for _ in range(14):
+                    _u = np.clip(canvas, 0, 255).astype(np.uint8)
+                    _L = cv2.cvtColor(_u, cv2.COLOR_RGB2LAB)[..., 0].astype(np.float32)
+                    _pct = float((_L[_fm2] > 210).mean())
+                    if _pct <= BLOWN_CAP:
+                        break
+                    _soft = cv2.GaussianBlur(_sel.astype(np.float32), (0, 0), 6.0)
+                    canvas = canvas * (1.0 - 0.04 * _soft)[..., None]
+                else:
+                    _pct = float((_L[_fm2] > 210).mean())
+                self.log.setdefault('face_headroom', {})[_key] = round(_pct * 100, 1)
+                print(f'  face headroom: {_key} settled at {_pct*100:.1f}% over L210 '
+                      f'(cap {BLOWN_CAP*100:.0f}%, gate J limit 12%)')
         # ---- SEPARATION SOLVE: LAST, after every subject operation ----------
         # Third time this exact ordering mistake has bitten today. Placed before
         # the dodge/burn and highlight shoulder, it solved for a subject
