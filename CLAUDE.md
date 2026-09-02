@@ -1,5 +1,11 @@
 # Boyd Clips — read this before doing anything
 
+> **Thumbnails: the `boyd-thumbnail` skill owns the build order, the gates and
+> the rules table; `spec/NATHAN_RULES.md` holds every rule verbatim with its
+> checker and the Checker registry.** Frame by expression first, arrow LAST;
+> no hard cuts; rebuild the background whenever geometry changes; arrow and
+> spacing are solved per-image, never constants.
+
 Automated daily clipping of Judge Stephanie Boyd's 187th District Court
 livestream. Architecture is in `README.md`; **current state is in `STATE.md`.**
 
@@ -52,12 +58,61 @@ true:
 5. **Short** with a real hook, in the Thompson style: full-bleed 2-up, each tile
    cropped to the half-canvas and centred on its subject, captions moving to the
    speaker's half via per-event ASS `MarginV`.
-6. **Thumbnail** — house style (traced judge over the courtroom plate,
-   feathered, unstroked, no arrow) **and graded** so it pops at feed size.
+6. **Thumbnail** — built by `tools/thumb_pipeline.py` in the order the
+   `boyd-thumbnail` skill gives (frame by expression → layout → subjects →
+   title → kicker → grade → arrow last), floor-stamped, and gated inside the
+   build. "House style" is whatever `config/quality_floor.json` measures on the
+   five accepted builds — not a description from memory.
 
 Every one of these has silently degraded to "off" at some point because the
 code accepted a missing asset and logged a line instead of failing. If a render
 finishes and any of the six is absent, that is a bug, not a preference.
+
+**Before any of that: pick the case.** His words, 2026-08-30: *"I've told you
+10 times soto case was high profile and no one was posting it there are no
+trials like that and even if cases are jury trial boyd doesn't let anyone in
+the room so there's very low quality zoom audio that's all we get"*. Selection
+outranks packaging - a high-profile case nobody else is posting beats a
+well-packaged ordinary one. Jury trials are closed-room Zoom audio and are not
+clip material. Before packaging, search YouTube for the defendant / case and
+record who has posted it in `config/cases.json`.
+
+**A pick is read, not ranked.** 2026-09-02: *"I think you have to use observer
+skill to actually pic actual entertaining banger clips"*. The picker finds
+hearings; `tools/banger_digest.py` scores what viewers stay for and prints the
+lines. A shortlist row without the digest score, three quoted lines, the
+ruling, an on-camera frame and the rival count is a lead, not a pick
+(`spec/NATHAN_RULES.md` R50).
+
+**When a floor moves, everything pending is rebuilt.** 2026-08-31: *"that short
+was made off the old rules or whatever and should be made with our new ones"*.
+Every render carries a floor stamp (`tools/floor_stamp.py`); an artifact whose
+stamp differs from the current `config/quality_floor.json` /
+`config/short_floor.json` is rebuilt before it is shown or posted.
+
+## Before reporting ANY thumbnail or short as done
+
+Read `spec/NATHAN_RULES.md` and run its checks. It holds every rule Nathan has
+stated, his verbatim words, the measurement that decides each one, and a count of
+how many times he has had to repeat it — three times for speaker-side captions,
+three for surgical cuts, three for the arrow.
+
+He said, 2026-08-29: *"i have to keep repeating myself multiple times for each and
+every one and you keep brining me the same exact flaws ... you have taken them all
+as a fix and you didnt rememeber them"*.
+
+The cause was structural: each complaint got fixed in the image in front of me
+instead of becoming a check, so nothing stopped it regressing and he became the
+regression test. **When he states a new flaw, add the rule AND its check in the
+same turn.** A rule that cannot be automated gets reported out loud as
+unautomated every time — a silent gap is how these regressed.
+
+The check has to be on the build path, not just on disk: `python
+tools/check_rules_refs.py` proves every checker the rules name is WIRED (or
+declared MANUAL), and `python tools/selftest_all.py` runs all of them. Both
+must print `ALL_OK` before a build is shown. His verdicts on every build go to
+`docs/verdicts/team_A_verdicts.md` the same turn; the skill gap each one
+exposes goes to `~/.claude/projects/C--Users-natha/skill-observations/`.
 
 ## Standing rules for this project
 
@@ -70,8 +125,10 @@ finishes and any of the six is absent, that is a bug, not a preference.
 - **Court footage is public record.** Do not invent rights, defamation, or
   privacy restrictions around it. If a real restriction applies, quote the
   actual text; if it hasn't been checked, say it hasn't been checked.
-- Nothing has ever been published from this pipeline. "Ready" means rendered
-  and verified on disk — not shipped. Track the shipped outcome, not the file.
+- "Ready" means rendered and verified on disk — not shipped. The first two
+  shipped 2026-08-31 (OFFERUP long `ESSF8lSkNN4` + short `LqAneu_GSOM`); the
+  procedure is the `youtube-channel` skill (`scripts/ui2.ps1`) and it works
+  from this PC. Track the shipped outcome, not the file.
 
 ## Where memory lives
 

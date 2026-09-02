@@ -1,0 +1,72 @@
+[00:02] Okay so this is where we are right now. So I was working with you in some terminal for a couple
+[00:10] hours and it seemed like everything kind of started hallucinating and I don't know how much
+[00:17] you remembered but let me take it back. So this is where we first were earlier this morning
+[00:26] and this one was good. I just said you know some things could be better so you downloaded I think
+[00:36] it was comfy UI to like upscale this and so that was good you upscaled like the background as you
+[00:43] could tell like this background was really weird now it's all nice over here and then you also
+[00:51] upscale the same thing with the guy you know looks really good over here you did it right
+[00:57] you upscale this guy I kept trying to explain to you that this arrow probably would look better
+[01:06] right here in this area so this arrow let me show you probably look good in this area a little bigger
+[01:19] pointed towards him um the defendant right here probably would look better like scooted over if
+[01:32] he was like in the middle over here so him just scoot him over just a tad bit this arrow just a tad bit
+[01:39] maybe make the arrow a little bigger to fit right here you know to make sense but of course you know
+[01:47] better quality give this arrow black shadow effects I liked how you also made this one you look this was
+[01:59] like the the raw footage I guess and you just like put some uh grain over it but then with this one
+[02:06] you kind of went a different area and you started upscaling I like this a lot better so you know
+[02:16] he looks better he looks better uh Judge Boyd she has like this weird tint it's really hard for you to
+[02:21] understand this um honestly we don't have to do that I kind of like how it is right now one thing I
+[02:28] would just say is you know you have to understand that this arrow is not just placed here like for all
+[02:36] of them like this arrow shouldn't be the same the arrow should be it decided where to be placed by
+[02:42] by you and how do you decide you look at it you see where is a good place to place this arrow the arrow
+[02:49] should never be placed on the defendant or the attorney or the judge or under these or on top of
+[02:56] the words like it should be somewhere kind of in the middle you know somewhere even based like that's
+[03:03] why I'm saying scoot this guy over because he's just not evenly spaced with the his attorney and
+[03:08] Judge Boyd and then once you have them evenly spaced and looking good then that's where you decide okay
+[03:15] where is the best place to put this arrow and basically the arrow is coming down from this so I'm not
+[03:25] saying point like a hard angle like this or I'm not saying like you know from here the arrow has to be
+[03:36] right here you know but you know generally like if he was in the middle like I said as ideal the arrow
+[03:42] would kind of be like sort of slanted like this maybe see like that that's a good angle just depends
+[03:50] every single time this is not something you're anchoring in this is I'm I'm showing you this so you
+[03:56] can learn how to make these thumbnails a hundred percent by yourself that's the goal here I need you to
+[04:04] remember that I'm showing you little mistakes to not make this is fine I will pass this overall
+[04:12] but really I wouldn't be happy if this was happening autonomously like like I said defendant should be in
+[04:19] the middle it should look good this should be properly placed it should look good see the problem
+[04:25] with these is like now look at this one for example this thumbnail wait let me let me this thumbnail
+[04:35] this thumbnail and this thumbnail are all three different ones that you tried to make different
+[04:40] this one if you notice you know you added the the outline you added the outline around void a little
+[04:50] bit and you upscaled void you upscaled everybody in here this entire thing is up for uh 4k upscaled you
+[04:58] had a I gave you an open source thing you need to use that every single time the open source upscaler gets
+[05:05] used every single time and once it's upscaled then you can add the outlines you can um you know change
+[05:18] the colors you can make the background a little darker then you could lay this over okay for example
+[05:25] this is a good example right here you didn't um upscale any of this yet so this was like you were still
+[05:35] working on this one with like the old strategy so like to do this one I would say you know you get the
+[05:40] original picture upscale everything separate her from the background blur out the background just a
+[05:48] tad bit like you did right here put her more in the middle like scooter over extend her out so she
+[05:55] could be like right here in this area judge boyd could stay right there but you need to upscale judge
+[06:01] avoid and not just upscale you need to actually regenerate the picture for example look at this
+[06:19] right here this is the original picture that we have from the video this was what my sdxl attempt
+[06:29] this is horrible but this one the hyper restore 4x when you upscale with this look at the detail this is
+[06:38] what i like and this makes it really easy for you to edit it and cut it later so always use this
+[06:45] for the people the background you know if you have to uh you know cut them all like upscale everybody
+[06:56] then cut them all and redo the background and then replace them over it doesn't matter it just needs to
+[07:02] look very professional and this is a really good professional cut uh boyd right here but basically you
+[07:13] need to upscale everything and piece it together just like this you know for example let's just say
+[07:19] i was working on this let's just imagine it was this background and it wasn't void wasn't here i would
+[07:26] get this picture of him and his attorney with the background of his side of the zoom upscale it i would
+[07:36] upscale boyd i would cut boyd i would drag her in exactly how she dragged in right there easy place it
+[07:43] blur out the back a little bit just like this one is slightly blurred and the colors are slightly
+[07:51] darker around boyd the defendant and the attorney all have that slight little glow they all have that
+[08:00] slight color pop such a little slight saturation pop and you know you follow along with all the other
+[08:10] rules and that's basically it um every single time you get a picture of them it should be in the video
+[08:16] it should be one they're having a reaction like you know this one's pretty decent he's looking at him
+[08:21] like this he's looking confused judge boyd's looking like serious or angry you know she's in this one
+[08:31] this woman looks really scared and surprised and it would be better if judge boyd was like you know
+[08:38] like she was like yelling a little bit more but yeah if you have any more questions please let me
+[08:47] know making these and of course uh pay attention to this you're while you're struggling and you know
+[08:54] it's pointing to her the arrow could be a little bigger title could be a little brighter i don't like
+[09:01] these colors but of course this one's not even upscaled and you know colored right like how you would do
+[09:07] it so i can't really say anything right here um if you have any more questions let me know
+[09:15] it might be better to like you know make this one in the style of you trying to make it like this one
+[09:30] like final version of this one how this one is right here i need you to try to copy all that editing
+[09:38] into this one to let me see if you're actually capable of doing it and then show me four variants of
+[09:45] this one and i'll pick the best one and then i'll explain why which one what was wrong with each individual one

@@ -3,7 +3,7 @@
 import bpy, os, math
 
 OUT = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders\arch"
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 d, f = os.path.split(LOGO)
 
 

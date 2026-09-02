@@ -211,14 +211,32 @@ def detect(bgr, thresh=0.55):
 _SESS = {}
 
 
-def matte(bgr, model="birefnet-portrait"):
-    """Alpha in [0,1]. birefnet-* weights are MIT."""
+def matte(bgr, model="birefnet-portrait", key=None):
+    """Alpha in [0,1]. birefnet-* weights are MIT.
+
+    BiRefNet runs at 1024^2 and costs ~1 min per call on this CPU, so results
+    are cached on disk keyed by the model plus a hash of the actual pixels -
+    the cache can never return the wrong frame's matte.
+    """
+    import hashlib
+    os.makedirs(CACHE, exist_ok=True)
+    h = hashlib.sha1(np.ascontiguousarray(bgr)).hexdigest()[:16]
+    cp = os.path.join(CACHE, f"matte_{model}_{h}.png")
+    if os.path.exists(cp):
+        a = cv2.imread(cp, cv2.IMREAD_GRAYSCALE)
+        if a is not None and a.shape == bgr.shape[:2]:
+            return a.astype(np.float32) / 255.0
     from rembg import new_session, remove
     if model not in _SESS:
         _SESS[model] = new_session(model)
+    t0 = time.time()
     rgb = Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB))
     a = remove(rgb, session=_SESS[model], post_process_mask=True).split()[-1]
-    return np.asarray(a, dtype=np.float32) / 255.0
+    arr = np.asarray(a)
+    cv2.imwrite(cp, arr)
+    print(f"   matte {model} {bgr.shape[1]}x{bgr.shape[0]} "
+          f"{time.time()-t0:.1f}s", flush=True)
+    return arr.astype(np.float32) / 255.0
 
 
 _OCR = None
@@ -542,7 +560,7 @@ def grab(src, off, t):
     return fr
 
 
-def pick_hero(name, cfg, cands, bench, sign, log, k=8):
+def pick_hero(name, cfg, cands, bench, sign, log, k=4):
     """Take the gated pool in rank order, matte each, keep the first that
     passes the matte-quality and tile-edge rules."""
     btw, bth, btx, bty = cfg["tiles"][bench]

@@ -54,3 +54,12 @@ research/**/*.pdf
 # Raw competitor captions (~70 MB, re-fetchable with yt-dlp). The derived
 # analysis — ct_meta.jsonl, ct_compact.tsv, research/fit — IS tracked.
 research/**/subs/
+
+# 2026-09-02: scratch/binary outputs, not source
+_upload/
+_scratch/
+live_monkey.jpg
+tools/_lf_full.wav
+models/*.task
+models/*.onnx
+research/**/*.mp4

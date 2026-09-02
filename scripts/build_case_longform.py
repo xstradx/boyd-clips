@@ -27,6 +27,7 @@ never defaulted.
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -41,13 +42,13 @@ ROOT = Path(__file__).resolve().parents[1]
 # The channel sting. sting.mp4 is the 1.4s fade-up to the mark and is what the
 # SHIPPED Thompson long-form carries (verified by extracting its frame at 0.7s),
 # so it is the house default rather than the flashier 2.6s sting_v2.
-INTRO = Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\sting.mp4")
+INTRO = Path(r"D:\Boyd Clips\boyd-brand\sting.mp4")
 
 DEAD_AIR_S = 4.0     # CONTENT_SPEC §2
 KEEP_S = 0.35
 MIN_PIECE_S = 0.5
 
-_BRAND = Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand")
+_BRAND = Path(r"D:\Boyd Clips\boyd-brand")
 WATERMARK_LIGHT = _BRAND / "watermarks_v2" / "wm_brand_halo_40.png"
 WATERMARK_DARK = _BRAND / "watermarks" / "wm_02_mark_dark_55.png"
 
@@ -125,6 +126,12 @@ def main() -> int:
                          "the top row with the box below it: on -4WiCeWxBu0 it "
                          "returned 628x708 tiles, i.e. full frame height, "
                          "because the witness box sits under both columns.")
+    ap.add_argument("--coldopen", default=None, metavar="A:B",
+                    help="R49 cold open: SOURCE-absolute seconds of the hook "
+                         "shown before the sting with the COMING UP label "
+                         "(3-9 s, inside the body). Required unless --no-coldopen.")
+    ap.add_argument("--no-coldopen", action="store_true",
+                    help="build without the cold open (says so out loud)")
     ap.add_argument("--two-up", action="store_true",
                     help="crop to the two participant tiles, dropping the "
                          "unmanned witness box, and centre the pair")
@@ -133,6 +140,23 @@ def main() -> int:
     source = Path(a.source)
     if not source.is_file():
         print(f"source not found: {source}")
+        return 1
+    # R49, Nathan 2026-09-02: "add a 5 second or so clip of the hook or drama
+    # later in the vid in the beginning of long form and put 'Coming up...'".
+    # A long-form without it is a build below the floor unless said so.
+    coldopen = None
+    if a.coldopen:
+        c0, c1 = (float(v) for v in a.coldopen.split(":"))
+        if not (render.COLDOPEN_MIN_S <= c1 - c0 <= render.COLDOPEN_MAX_S):
+            print(f"  REFUSING: cold open {c1 - c0:.2f}s is outside "
+                  f"{render.COLDOPEN_MIN_S:.0f}-{render.COLDOPEN_MAX_S:.0f}s")
+            return 1
+        coldopen = (c0, c1)
+        print(f"cold open {c0:.2f} -> {c1:.2f}  ({c1 - c0:.2f}s)  label {render.COLDOPEN_LABEL!r}")
+    elif a.no_coldopen:
+        print("  NO COLD OPEN (--no-coldopen): R49 not applied to this build")
+    else:
+        print("  REFUSING: no --coldopen A:B (R49). Pass --no-coldopen to build without one.")
         return 1
     cfg = load_config(ROOT / "config" / "pipeline.yaml")
     lf_cfg = dict(cfg.require("output.longform"))
@@ -285,12 +309,31 @@ def main() -> int:
         print(f"  REFUSING: intro missing: {INTRO}")
         return 1
 
+    if coldopen is not None:
+        body0, body1 = pieces[0].start_s, pieces[-1].end_s
+        if not (body0 <= coldopen[0] and coldopen[1] <= body1):
+            print(f"  REFUSING: cold open {coldopen[0]:.2f}-{coldopen[1]:.2f} is not "
+                  f"inside the body {body0:.2f}-{body1:.2f}")
+            return 1
+        if coldopen[0] - body0 < render.COLDOPEN_MIN_AHEAD_S:
+            print(f"  REFUSING: cold open starts {coldopen[0] - body0:.1f}s into the body; "
+                  f"the hook comes from LATER (>= {render.COLDOPEN_MIN_AHEAD_S:.0f}s in)")
+            return 1
+
     out = Path(a.dest)
     out.parent.mkdir(parents=True, exist_ok=True)
     dur = render.render_longform(source, a.offset, pieces, lf_cfg, out,
                                  crop=crop, intro=intro, watermark_y=wm_y,
-                                 watermark_right_x=wm_x)
+                                 watermark_right_x=wm_x, coldopen=coldopen)
     print(f"  rendered {dur:.1f}s ({dur / 60:.1f} min) -> {out}")
+    if coldopen is not None:
+        # measured on the FILE, not on the settings (R49 CHECK)
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "check_coldopen.py"), str(out)],
+                           capture_output=True, text=True)
+        print(r.stdout.rstrip())
+        if r.returncode != 0:
+            print("  REFUSING: cold open check failed on the rendered file")
+            return 1
     return 0
 
 

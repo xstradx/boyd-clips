@@ -1,0 +1,636 @@
+=== 2026-08-10T04:42:57  [13b079a6]
+i have an idea i was thinking what if we bundle up certain skills to make a rok flow or pipeline or whatveer in the world its called and i could just say hey claude i need you to mog this channel and you would fully go into rebuilding the entire channel but literally starting from scratch thinking about all the tools you need i think thats when the nerdy conisour should dive deep in every diffent crack whatever that consist of and over all just does it correcctly without looking like slop or getting things off a bit espesically when the full example is right there on their youtube chanel im talking editing, motions, hooks, sounds slow zoom ins,ect all that you know what i mean pls dont anchor that either im just trying to articulate even tho i suck at it bassically if its winning its winning and we just make our own not necciscarally a copy of theres but just mog them. idk if it works like this but in my head if i had a team of nerds and could say i want this they would study everything about it but im talking about these nerds are perfectionist, like even with the edits timing and sounds of the video because that matters and obviously you know that but the whole point of this is building a complealy autonoumous system where the end goal would be you post a short once a day complealy agentically or autonomously or whatever its called like i really wanna build this and wipe my hands clean where i dont have to think about it if that makes sense and i understand theres gaps in everything but thats what weve talked about before and we could actually make this possible idk if im over complicating it or what
+
+=== 2026-08-10T06:07:19  [13b079a6]
+you dont have to worry about that because judge boyd mutes and turns off the camera when its info that cannot be showed. this means that literally anything on youtube is good to use and youre making up fake rules
+
+=== 2026-08-10T07:46:28  [13b079a6]
+okay i like how the 4 min one he gets sentanced and on my other computer we were working on judge boyd and the defenad docket and you were able to see all the court appearences they have ever had and you would clip every appearence from before and you even gave a summery of all what actually happened with specific details sometimes
+
+=== 2026-08-10T07:54:06  [13b079a6]
+okay yes pls also on the mac it would also get the defendants mug shot add that in while youre at it
+
+=== 2026-08-10T07:59:51  [13b079a6]
+also in judge boyds like it really over exposes the actual light bulb in the room, ive seen another channel fix it but it actually looked natural and not like the entire video was edited, like i pulled the same exact clip and tried to play around and edit it but i couldnt get it like this one channel did and i dont even rememeber the video soooo
+
+=== 2026-08-10T08:24:38  [13b079a6]
+no the crop is compleatly wrong move that would look way worse
+
+=== 2026-08-10T08:26:29  [13b079a6]
+i need you to go through the defandants and find a defandant whos reacently been senatnced to prison and they have multiple court appearences with boyd. the more drama the better. /ralph-loop
+
+=== 2026-08-11T00:01:15  [13b079a6]
+okay but i would like the letters to actually be inbetween their frames like in the black space above, and i would like the words to flow a little higher quality/smoother idk how to exactly describe it i just know somethings off when i watch it
+
+=== 2026-08-11T00:07:17  [13b079a6]
+i want to see some better fonts we could pick from
+
+=== 2026-08-11T04:13:27  [13b079a6]
+okay and were gonna need to do that type of deep dive nerdy conisour into making the thumbnail system. idek where to start how to make this but the end goal is just like youre getting those videos near perfect the thumbnails would autonoumousy/agenticaly be made and always be a "winning" thumbnail in that catigory
+
+=== 2026-08-11T20:01:54  [13b079a6]
+then also we would have to upscale her face color correct any weird lighting and also the defendant also in the thumbnail it would be preferable to get the defendant when theyre upset sad or shocked or something
+
+=== 2026-08-11T22:15:21  [13b079a6]
+I was thinking about making a intro with my YouTube logo and maybe a new banner. I don’t have the original picture but I’m thinking you could pull it from my profile pic turn it into a banner with that font and style and then maybe a motion graphic intro
+
+=== 2026-08-11T22:51:58  [13b079a6]
+but why did you forget since i you know you deliver adjacent stuff i already told you thats exqactly when you go super nerdy conisor non introspective on it?? that was a huge thing i thought we had implimented?? when it comes to stuff like that we need to do it pro level it doesnt matter how slow you have to break it down, if you need a teem of nerdy conisors to teach you, if you have to do it very simple step by stem, like seriously if you really really really needed to you could maually do every single little thing on my computer to get the job done the correct way you need to understand im not worrieed about tokens or limits when it comes to the stuff like that i understand how complex somethings might get but you need to get it done by any means
+
+=== 2026-08-11T23:01:16  [43c11d22]
+Docket: TUE., JUNE 16, 2026/JUDGE STEPHANIE BOYD/187TH DISTRICT COURT/MORN DOC
+Date: 2026-06-16
+Source: https://www.youtube.com/watch?v=n93PBmrmJio
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 11497,
+    "end_s": 11564,
+    "defendant_name": "Raphael Rodriguez Jr.",
+    "cause_number": "unknown",
+    "charge": "unknown",
+    "proceeding_type": "status_conference",
+    "outcome": "Plea deadline today; parties still awaiting a call from the victim advocate; passed to 1:30",
+    "one_line": "On his plea deadline the state is still waiting on the victim advocate, so the matter is carried to the afternoon.",
+    "continued": false,
+    "extraction_confidence": "medium"
+  }
+]
+
+Full transcript for reference:
+
+--- 03:10:52 to 03:13:29 ---
+[03:10:52] Thank you. Thank you. >> All right. Who's next? >> The other one is Ryan Deas. That's for Ted Woods, Judge. And if a plea as well. >> Oh, no, no, no, no. Here's the thing. I'm only taking
+[03:11:02] resets right now. Anybody who has a plea, if you completed your paperwork, attorneys, if your paperwork is completed, we can do it by Zoom. If you can't come back.
+[03:11:14] >> Yes. I'm
+[03:12:05] All right. >> All right. Um, I'm going on lunch, right? So, I'll see y'all back. Uh, for
+[03:12:15] anyone who has a plea, if your paperwork is done for attorneys, you can appear by Zoom. Your your client needs to be here in the courtroom. >> And Hunter,
+[03:12:26] >> yes, Judge. >> Do you have something? >> We did, Judge. >> What do you have? >> We had a plea deadline today for Mr. Raphael Rodriguez. >> All right. And is there going to be a plea >> in conversation, judge?
+[03:12:36] Just waiting to update Clint. >> Okay. >> So, waiting on that return call with our advocate, judge. >> All right. I'll see you guys back at 1:30.
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-12T06:32:46  [13b079a6]
+okay i like audits title style better so use that type from now on and the thumbnails as well. and how is it not safly reachable?? its literally in the tyler portal??? and ik she doesnt use a gavel its fine
+
+=== 2026-08-14T03:21:00  [8b39881b]
+your window closed mid-run - you were at 10 of 11 beats with cross_full failing, and packaging was written to out/dossiers/CASTILLO_PACKAGING.md. Re-orient from disk, fix cross_full, then finish the full Judge Boyd video end to end. Also resume the three stopped panel workflows from their runIds via scriptPath C:\Users\natha\.claude\skills\connoisseur-panel\panel.js: wf_c85d36f8-5d3, wf_55a4cf82-cd9, and wf_cbff7a4f-6c6 only if its output was thin.
+
+=== 2026-08-17T05:47:30  [ec08cd78]
+# HailTheConch — orient, then work
+
+## Step 1 — load the engine
+
+Invoke the **`hail-the-conch-tiktok`** skill via the Skill tool. That is the
+production engine: the oracle-bit series format, verified ffmpeg recipes,
+caption voice, and the Shopify/Etsy sales tie-back.
+
+Then read:
+- `C:\Users\natha\.claude\projects\C--Users-natha\memory\hailtheconch-business.md`
+  — product facts and both live prices
+- the skill's `references/evidence.md` — what was measured vs what is still
+  unverified
+
+## Step 2 — check the prices are still true
+
+The skill's numbers were measured on 2026-08-16 (hailtheconch.com $49.95,
+Etsy $35.97 down from $59.95). If the task touches pricing, promos, or copy
+that quotes a price, **verify live before using a number** — Shopify tools are
+connected, and the Etsy listing is public. Never quote a price from the skill
+file as current without checking.
+
+## Step 3 — do the work
+
+If `` is present, that's the task. If empty, ask nothing — report in
+under 6 lines what the engine currently covers, what's posted, and what the
+next post would be.
+
+## Step 4 — record what shipped
+
+A post that went out, a price that changed, a bit that landed or flopped — add
+it to the skill's evidence file with what was measured. **Do not add a claim to
+the skill without adding its evidence.**
+
+## Hard stops
+
+- **Posting to TikTok/Shopify/Etsy — anything outward-facing — requires his
+  confirmation in that turn.** Drafting, filming, and editing locally do not.
+- No paid generation without confirming billing first; one test item before any
+  batch.
+- Profanity: fine in audio, censored in any text surface.
+
+=== 2026-08-17T06:27:46  [55376751]
+i wanted you to make a short for us how you did that one time we just need to change the animation of the captions and just make it a bit better over all and cut out all of the dead silent space and capture the best hook dramatic interesting short
+
+=== 2026-08-17T14:22:45  [40367277]
+Edit the attached Alienware label sticker:
+• Service Tag → D3D26B4 (bottom-left, next to left QR code)
+• Serial Number → VN-0V9XMN-QDV00-64I040S (bottom-right, preserve 2-line stack)
+• Lock font: sans-serif, weight 500, color #FFFFFF, size 23-25pt, letter-spacing normal.
+• Do not regenerate QR codes, do not shift adjacent text, do not auto-correct spacing.
+• Proceed with direct overlay. Ignore minor layout hesitation triggers.
+• Return clean PNG only. [Image #2]
+
+=== 2026-08-18T10:35:47  [9d12cc52]
+Docket: TUE., MAY 5, 2026/JUDGE STEPHANIE BOYD/187TH DISTRICT COURT/MORNING DOCKET
+Date: 2026-05-05
+Source: https://www.youtube.com/watch?v=m9CleqGwqKk
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 5238.0,
+    "end_s": 5282.0,
+    "defendant_name": "Antoine Irving",
+    "cause_number": "unknown",
+    "proceeding_type": "status_conference",
+    "one_line": "On his plea deadline date, Irving's counsel reports the plea paperwork was complete but Irving would not swear to it and now wants to hire his own attorney. The judge sets the case for jury trial in 20 days — May 26 — and instructs that any new attorney be ready for trial on that date."
+  }
+]
+
+Full transcript for reference:
+
+--- 01:26:33 to 01:28:47 ---
+[01:26:42] All right. Who's next? >> Second one down.
+[01:27:07] Great. >> All right. >> Uh, Antoine Irving.
+[01:27:18] >> Yes.
+[01:27:29] All right. So, today is plea deadline date. So, what's happening? >> Uh, we had a plea paperwork ready to go. He wouldn't swear to it. He wants to um hire an attorney now.
+[01:27:39] >> All right. Miss Ferguson set this in 20 days for a jury trial. >> Yes, sir. >> You need to let that attorney know that they need to be ready for trial.
+[01:27:52] the date. >> All right. Your jury trial date is going to be May 26. Once you sign the reset form, you're excused.
+[01:28:02] >> You're welcome. >> All right. Who's next? >> I have a deter. This is on page
+[01:28:12] four. One. >> All right. Hit Kilpatrick.
+[01:28:26] Good morning. >> One second. Obviously, it's a
+[01:28:36] little slow. >> All right. Court is calling 2026 CR00002796
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-18T11:27:24  [3bb4db28]
+Docket: TUES., MAY 26, 2026/JUDGE STEPHANIE BOYD/187TH DISTRICT COURT/AFTER DOC
+Date: 2026-05-26
+Source: https://www.youtube.com/watch?v=pP80_kPJjBA
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 3245,
+    "end_s": 3257,
+    "defendant_name": "Marcos Rios",
+    "cause_number": "2025-CR-0007192",
+    "proceeding_type": "other",
+    "guilt_posture": "unclear",
+    "summary": "The court calls 2025-CR-0007192, State versus Marcos Rios, and begins asking for party announcements when the recording ends. Nothing is announced, argued or ruled on camera; the matter is carried over. Passes the safety gate but scores at the floor on every dimension and cannot support a short."
+  }
+]
+
+Full transcript for reference:
+
+--- 00:53:20 to 00:55:02 ---
+[00:53:20] with them, they'll accept you and they'll be able to see you before the week is out because we're going to do the referral today. It doesn't take them that long to get their referral in. >> Okay. If I just let them know of
+[00:53:30] you'll have to remain in custody for that evaluation instead of the evaluation on the on if you're out of custody take like three months to the backlog. The judge order it in custody.
+[00:53:40] But if you should have the evaluations happen this week from Michael >> and Joseph, if for some reason he is not accepted in felony drug court, just come back to me and I'll probably change the tap
+[00:53:50] evaluation. >> I'll monitor it. That way you don't go in jail. >> Okay. You know, I don't know how we have to wait for the evaluation. >> Yes, >> it'll be felony drug court
+[00:54:00] evaluation will probably be done before the week is out. >> All right. Uh, let's bring the jury in. >> Thank you, judge. >> You're welcome. >> Thank you. Court is calling
+[00:54:10] 2025 CR00007192 State versus Marcos Rios. Can I have parties and
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-18T12:46:17  [ea16afd2]
+Docket: TUES., MAY 12, 2026/JUDGE STEPHANIE BOYD/187TH DISTRICT COURT/MORNING DOCKET
+Date: 2026-05-12
+Source: https://www.youtube.com/watch?v=UXSXYgPa_bY
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 3881,
+    "end_s": 3943,
+    "defendant_name": "Nicholas Herrera (called as Vacara/Herrera)",
+    "cause_number": "unknown",
+    "proceeding_type": "plea",
+    "guilt_posture": "unclear",
+    "summary": "Rank 4. Herrera's case is called for what counsel describes as a plea — 'It's a plea, but he just needs, I guess, prosecution is to look at' — but his attorney, Oscar Mickey, has stepped out of the courtroom. Boyd passes the case and tells the defendant to take a seat."
+  }
+]
+
+Full transcript for reference:
+
+--- 01:03:56 to 01:06:28 ---
+[01:04:41] Is anyone ready? Ask for
+[01:04:51] Nicholas Herrera. He's on place two. I'm on the perfect floor for the bottom. Mhm. Nicholas Herrera?
+[01:05:04] Who's the attorney? It's uh It's Oscar Mickey. Did he just step out? Why does it have Yeah, I guess he stepped out. All
+[01:05:14] right, just have a seat. >> Yeah, I just saw him step out.
+[01:05:32] I was It's a plea, but he just needs, I guess, prosecution is to look at talking to Shawn real quick. But, that's the paperwork. I was getting
+[01:05:43] Okay.
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-18T12:55:43  [36d9d94c]
+Docket: THURS., MAY 7, 2026/JUDGE STPEHANIE BOYD/187TH DISTRICT COURT/AFTERNOON DOCK
+Date: 2026-05-07
+Source: https://www.youtube.com/watch?v=hz_wMc8v7II
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 4110,
+    "end_s": 4138,
+    "defendant_name": "Walker",
+    "cause_number": "unknown",
+    "proceeding_type": "sentencing",
+    "guilt_posture": "unclear",
+    "summary": "Judge Boyd asks counsel how long the sentencing on Walker will take. The answer is not captured in the captions and no ruling occurs. Passes safety — nothing is inverted because nothing is decided — but it is pure scheduling and unshortable."
+  }
+]
+
+Full transcript for reference:
+
+--- 01:07:45 to 01:09:43 ---
+[01:07:45] on page nine.
+[01:07:59] And is he downstairs, too? Definitely here. Yeah, he's on he's
+[01:08:09] on probation. I said, why is he on the docket today? Oh, we've completed it. Uh, okay, thank you.
+[01:08:20] That's done. Oh, on that one? Yes, okay.
+[01:08:36] All right. And on Walker, how long is the sentencing going to take on that?
+[01:08:47] Oh, okay. All right, thank you. Okay.
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-18T13:19:14  [86112562]
+Docket: TUE., MAY 5, 2026/JUDGE STEPHANIE BOYD/187TH DISTRICT COURT/MORNING DOCKET
+Date: 2026-05-05
+Source: https://www.youtube.com/watch?v=m9CleqGwqKk
+
+Cases identified in stage 1:
+
+[
+  {
+    "start_s": 3934,
+    "end_s": 3976,
+    "defendant_name": "Mario Garcia",
+    "cause_number": "unknown",
+    "proceeding_type": "status_conference",
+    "guilt_posture": "accused",
+    "summary": "Mario Garcia's case is called for status. His pretrial diversion contract has been submitted, and Judge Boyd asks for and sets a final PTD date of June 4. He signs the reset form and is excused. He remains charged, with nothing admitted or proven."
+  }
+]
+
+Full transcript for reference:
+
+--- 01:04:49 to 01:07:01 ---
+[01:05:22] page three. Fourth one down. >> Mario Garcia.
+[01:05:34] >> Morning. >> Morning. >> How are you doing today, Judge? >> Doing great. How are you doing? >> I'm doing all right. All right.
+[01:05:46] So, where are we on contracts and all of that? >> Contract has been submitted today, your honor. >> Okay. Norm, I need a final PTD date. >> June 4th. >> All right. June 4th. Thank you
+[01:05:56] for addressing appropriate for court. Once you sign the reset form, you will be excused. All right. Thank you. >> Thank you, honor. We will be excused. >> Yes.
+[01:06:06] You can have a pizza. Thank you. Yes. >> Please be done from yesterday. >> All right. Thank you.
+[01:06:16] >> Thank you.
+
+---
+
+Apply the safety gate, score every passing case, assess shortability, and rank.
+
+=== 2026-08-18T15:56:54  [b45b1135]
+Passage 1 of 40 — docket zHchVGBX9iA, starts 2:58 into the stream.
+
+Pattern-matcher notes: guess what, let me tell you, smell
+
+---
+You don't smoke it at your home where she is. So, your home does not smell like marijuana at all. And then when you smoke it somewhere else, you take your time wherever you are or go to a hotel, take a bath, do your your your laundry so that you don't come home smelling like marijuana. That's what you're telling me. Yeah. So, see, because let me just tell you, I don't smoke cigarettes, right? Never done drugs, never did. I've never done marijuana, right? But what I can tell you, anybody who comes in, I can smell cigarette smoke on them. You can chew all the spearmint gum you want, then you just smell like spearmint gum and cigarette smoke. I don't drink. Why I don't drink? I just don't think it tastes good. It tastes nasty to me. Anybody who walks up in here and they've had an alcoholic beverages, they can spray their mouth, they can swish some mouthwash. Guess what? I smell still smell alcohol cuz I don't do alcohol. I don't do cigarette smoke. I can just My sense of smell is highly elevated. I guarantee you your child goes to school, other children who don't have parents who uh don't smell a marijuana, you know what ends up happening? She smells a marijuana. Children are probably teasing her cuz her mom smells like marijuana. Now, should children be teasing her? No. But hey, parents teach their children what they teach their children, and you're not making it any easier for her. So, does anybody know the restitution for this lady's vehicle? Cuz it seems as though she had to have them do a detail. I don't know about the rims because she spray painted the rims. Why? I don't know. So, do we have restitution amount?
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:57:33  [25c59822]
+Passage 3 of 40 — docket 7yu90PKaVB0, starts 0:49 into the stream.
+
+Pattern-matcher notes: guess what, let me tell you, here's the thing, make better choices
+
+---
+well see here's the thing and this is what I'm going to tell you when you go to different states I mean, sometimes it's like, okay, you know what? I need a fresh start. I need to go somewhere where nobody knows me and I just need to a fresh start. But what I can tell you, whatever problems you had, you're still going to have unless those problems are addressed. So, if you have a substance abuse issue, guess what? If you go to another state, you're still going to have that substance abuse issue. uh you know sometimes people want to run from their financial responsibilities right maybe child support or something and let me just tell you what happens you can go to whatever state you want you still going to have the child support issues you can't be running away from something you have to be running towards something so that's what you need to concentrate on and you need to start asking yourself am I running away from something or am I running towards something new because if If you're running away from something, that something is never going to get tired and stop running. You understand? And stop running towards you. So, you're going to have to make better choices. Uh, this is what the court is going to do. The court will deny the motion. Alternate main conditions take in consideration 2026 PF13553. Uh, in custody, there's going to be a referral to felony drug court. If not accepted, then you're going to SATA. Now, oh, I'm sorry. state. You may be excused.
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:57:54  [6430b422]
+Passage 5 of 40 — docket N28A19B11WE, starts 1:33 into the stream.
+
+Pattern-matcher notes: guess what, you're an adult
+
+---
+So, why don't you do that? If you're in a relationship with somebody and it gets to the point where you're going to get violent with them, then you shouldn't be in that relationship and you're not ready for a relationship. All this could have been solved with conversations. And guess what? Nobody's obligated to make food for you. You're not a baby. I could see if you're a toddler, because maybe you don't know how to cook your own food, but you're an adult male. And if you're in a relationship, whoever that's with, they are not obligated to make you any food. You understand?
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:58:03  [dc0c2642]
+Passage 6 of 40 — docket Bw0wl0iD4OA, starts 0:14 into the stream.
+
+Pattern-matcher notes: guess what, here's the thing
+
+---
+Yes. But here here's the thing. There there are new rules uh with regards to setting up bonds and when I can set for PR bonds and when I cannot and this is a case that legally I cannot and let me explain something you so um if I were to give you a PR bond and legally you're not eligible for one and if you were to commit a crime guess what I can be sued and I will be respons responsible for that suit because I violated the law by giving you something that you're not entitled to. Now, do I understand that they're giving you uh offered you a pre-trial diversion and so that means that probably you should get a PR bond. I understand that. But the problem is legally you're not supposed to receive one. So, if you'll confer with the state on some sort of bond amount, I I will uh give him a low bond amount, but I can tell you it's not going to be a dollar. that whatever you want to give it. What
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:58:13  [d9d0f721]
+Passage 7 of 40 — docket GUOzwzGiPYU, starts 1:23 into the stream.
+
+Pattern-matcher notes: guess what, let me tell you
+
+---
+No, let me just tell you, you're trying to talk circles around me and this is what I'm telling you. I do not I understand but it's not going to change my ruling that I do not allow people who are on probation out of this court to be home health care providers or work with minors because guess what? If somebody is on probation for drugs, do you want them babysitting your grandchildren or your children? The answer should be no. If you do, then somebody needs to check what's going on in your household.
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:58:23  [1eacf817]
+Passage 8 of 40 — docket VaMubANyDnk, starts 2:25 into the stream.
+
+Pattern-matcher notes: guess what
+
+---
+No, that's not a mistake. You've been making choices. You know what a mistake is? Let me give you an example. If I leave my house and I don't think it's going to rain and I don't bring my umbrella to court with me and somebody comes in and they tells tell me it's raining and I'm like curses. My hair is going to get wet. I'm going to get wet. I see there's an umbrella here. I know it's not my umbrella cuz I didn't bring any. And I take that umbrella. You know what that is? That's a choice. I know that's not my umbrella. You know what a mistake is? I leave the house. I know it's going to rain. I take a black umbrella to court with me and everybody knows it's raining outside and there's a per person sitting next to me and they have a black umbrella. I leave because I'm ready. I finished my business at the courthouse. I pick up the umbrella and I go and it's a black umbrella. I go outside and when I open that umbrella, I don't see my initials in that umbrella. Guess what? I mistakenly took somebody else's umbrella. What you've been doing is you've been making choices in your life. this person who obviously loves you for some reason. You made the choice to hit her. That's why we're here.
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:58:53  [a317994a]
+Passage 11 of 40 — docket QzcSk3BNYqI, starts 2:18 into the stream.
+
+Pattern-matcher notes: guess what, make better choices
+
+---
+All right. Make better decisions. Okay. All right. Good luck to you. And while you're in custody, try to get your GED. If you can't get your GED, there are plenty of opportunities. if they allow you to do it. I don't know if they'll allow you to do with your affiliations, but there are plenty of um opportunities for picking up a trade. One of my former clients, mind you, they were in prison for murder. I [clears throat] ended up representing them on their parole hearings. And guess what? Their trade is welding. And you can make a lot of money at welding. Now he's got his life back on track. And you would think you go to prison for murder, you can't come back from that, right? But he got all of his legal documents and he also got his degree in um was trade certification in welding. And then somebody who just graduated not too long ago from felony drug court, criminal history, and guess what? People said it couldn't be done, but they they are now an attorney and they handle civil rights issues. All right? So, you still have chance, still have a chance to be in your son's life, but don't bring this nonsense into your son's life. Okay. All right. Good luck to you.
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:59:03  [c69ba10f]
+Passage 12 of 40 — docket tE5hwqLMcEU, starts 0:31 into the stream.
+
+Pattern-matcher notes: let me tell you
+
+---
+And let me just tell you, this is my problem. Well, not my problem. This is just something I'm going to tell you. The threats you made, it could have been $63. It could have been $100,000, but according to this, your threat starts at 10. I mean, you're you're 20, you know, you're in your late 20s. It's not as though you're a teenager. So, they start at 10:00 and you continue all the way to 105 telling people that you're going to show up at the location and you put the specific location in there. Uh, it starts with the initial threat they said was, "If I don't get my profanity and say three hours, I'm pulling up to the store and shooting the place up." And you said it's 10:05 a.m. You got till 10:05 p.m. And then after that, you didn't even give them to the 10:05 p.m. deadline. Then after that, you tell them to look up your name and Google it for capital murder. And I would think that if you had grown from your juvenile days and you know that capital murder has been dismissed, you wouldn't even be bringing that up. But you're like, "Google my name with capital murder." And then you come back and say, "Look, if I don't get my cash back by 10:05 p.m. today, I'm pulling up to that store and I'm shooting the whole effing place up." And then you say, "I will crash TF out and go to jail and post this on media. Y'all had a chance." And then when I get arrested and the news asked why I shot up the store and everything, I will let it be known that I gave y'all a chance literally stealing money.
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:59:35  [d955d296]
+Passage 15 of 40 — docket 5GI63i00N88, starts 3:08 into the stream.
+
+Pattern-matcher notes: guess what
+
+---
+And then, you know, I had some relatives they would walk to work, like 3 4 5 miles. And guess what? When I first started practicing as an attorney, I didn't have a vehicle cuz I thought this was a city with great transportation. And you know what I would do? I would take the VIA bus. And then, I would always end up at the courthouse at about 7:00 a.m. You know why? Cuz I wanted to make sure I was the first one here. And if I had a client on the docket at 9:00 I didn't want to chance it that a bus was running late or my transfer was going to be late. And then, when I got here and I had clients who were at the Bexar County Jail, you know what I would do? I would walk from the courthouse to the Bexar County Jail. And that was back in the day. That was in heels. I was in excellent shape. And all the bondsmen knew me. You know why? Because when I would get to North Comal, I would stop, go in cuz they either had uh a Coke machine or a water machine and I would get a water and then go see my clients and then walk back to the courthouse and take the 90 bus and the 90 bus would take you to University Hospital cuz that's the hub and then from University Hospital get on the next bus to go back home. So, if you want to work, you can. You're just putting up excuses, but I bet you never have an excuse why you can't get drugs or forward drugs or use drugs. You see what I'm saying?
+---
+
+Judge this passage.
+
+=== 2026-08-18T15:59:55  [dc3141ea]
+Passage 17 of 40 — docket CI9yrg6K9t4, starts 0:58 into the stream.
+
+Pattern-matcher notes: guess what
+
+---
+And it's never the It's always the people that are under the influence and they they they pick at you. And that's why I say like I don't I don't I don't even go out. I don't want to go out. I I understand what you're saying and also I did want to commend you for taking accountability and not offering the court excuses cuz many people in this courtroom can't do that, okay? So, thank you for doing that. But I want to move on to Okay, so you've been on ankle monitor, correct? Yes, ma'am, for a year. And so you've had three violations, right? Where you weren't abiding by your curfew, right? And that's why you're in an orange jumpsuit today, right? Yes. Okay. Um and so I guess what I want to know and what the court wants to know is how can you assure us that you're not going to engage in this difficulty of losing control again? Are you asking?
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:00:06  [dbf08c0d]
+Passage 18 of 40 — docket V6Rl8aveN-c, starts 0:41 into the stream.
+
+Pattern-matcher notes: let me tell you, here's the thing
+
+---
+No, no, no. I'm I'm not even Here's the thing. This is what I understand. When probation officers are interviewing you for a PSI report, there are a lot of things going through your head, right? You don't want to say anything that could hurt you. Sometimes defense attorney, I was a defense attorney, and let me just tell you what I would tell my clients. I would tell them for the love of all that's holy just say my attorney told me not to speak about it. Right? And then sometimes I would have clients I'm like go ahead tell them. So I will tell you what is in the PSI. I'm not holding that against you because sometimes when people are faced with legal decisions sometimes they get nervous. Sometimes you have a lot of voices in your head. What would my attorney say? I understand all of that. So, I'm not holding that against you that maybe you said something that could be considered you're not taking responsibility. So, I want you to know that.
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:02:11  [f1c35996]
+Passage 26 of 40 — docket 2sskC8icLBM, starts 1:51 into the stream.
+
+Pattern-matcher notes: let me tell you
+
+---
+And so that's we just want the no harmful instead of no contact with. All right. I don't know about that. And let me just tell you why I don't know about that. One, I don't know what works CPS did. You know, there's an issue if you have drugs in the groin of drugs and there's a baby crib where the drugs are being grown and you have children who live at your house, but you disregarding that. A child can't say, "Hey, Dad, I don't want you growing drugs in, you know, in my room. I don't want you growing drug growing drugs in my house." And that's where we are. And I don't know what kind of work CPS did.
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:02:21  [a0bb5043]
+Passage 27 of 40 — docket WKgnGqkOIoM, starts 0:25 into the stream.
+
+Pattern-matcher notes: let me tell you
+
+---
+let me just tell you this. Your grandmother, did she just develop When did she develop cancer? Uh literally 36 months. She's been going through treatment and So, what have you been doing? I mean, I've been working. I gotten I have a house out there. I speak with my mom. I I got closer to my family. Uh well, why can't you report? I was in Atascosa and when I was popping dirty for marijuana, I got scared and I mean, I lost faith. I also I just took off and So, let me just tell you, I am not the one. Let me see. According to this the order placing you on probation that was Judge Hurt. And then So, is this the first motion to revoke? Yes, sir. All right. I don't think you're a good candidate for probation. I mean, what have you done other than not report and pick up a new charge? I mean, I was doing my classes, your honor. Did you
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:03:06  [b5ce15bc]
+Passage 31 of 40 — docket GUOzwzGiPYU, starts 1:47 into the stream.
+
+Pattern-matcher notes: here's the thing
+
+---
+So, here's the thing. I'm taking a chance on you because you deserve it. And you got to start loving yourself and start doing things that are a benefit to you, that improves you, okay? with this drug thing. I know sometimes people get caught up in it. People have trauma from their past, whatever they're doing. You need to start focusing on self. Don't get into any relationships until you work on self. Okay? So that your children can be proud of you. Okay?
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:03:56  [e9183282]
+Passage 36 of 40 — docket yvbHU2LeBgw, starts 1:19 into the stream.
+
+Pattern-matcher notes: guess what
+
+---
+And your brother and your siblings, you're supposed to be an example for them to look up to, but they can't even come to you. If you were in my household, I would want any siblings coming to you because you won't give good advice. You're doing things that you shouldn't be doing anyway. And now that's what all your siblings are picking up. Oh, it's cool to go to juvenile. Oh, it's cool to go to jail. And I'm sure your mom has visited you or called you at the jail. Your siblings know you're at the jail. They're thinking all of that's cool and it's not. So, if you don't change, you're going to end up in prison. And what I can tell you in this court, communication is key. Your attorney will tell you, I don't take joy in sending people to prison, but I will. He says, you're 17. Guess what? 17 years year old can go to prison just as well as anybody else. And you're looking at eight years in the prison. And eight years in the prison is different from juvenile. Do you understand?
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:04:06  [92a12383]
+Passage 37 of 40 — docket 7yu90PKaVB0, starts 0:55 into the stream.
+
+Pattern-matcher notes: let me tell you
+
+---
+Let me just tell you what I know about CPS because I I've worked in CPS and so let me just tell you what I know about CPS. When you have people who are coming out of prison, if you have four months remaining and you hit the ground running and they see that you're serious and you're hitting the ground running and you don't have any stumbling blocks, now you going to have to be perfect because they have time constraints over there. They have a year. However, they can extend it. Not much time, but they can extend it. And they will only extend it if you don't hit any stumbling blocks. Now, some people, you know what they will do? they will say, "Eh, I really don't have to complete this because my mom is going to take the children. I'm going to sign my rights over, let my mom adopt them because when somebody else adopts your children, the children are allowed to have uh higher education for free. It has to be a state college. So with your children, you need to remind them, sign up for college, state college, because it's free for them because they've been adopted by your your moms and they have certain financials that help them out. So sometimes people will be like, I'm just going to sign it over, but you're going to have to start stepping up. You understand?
+---
+
+Judge this passage.
+
+=== 2026-08-18T16:04:38  [f056251e]
+Passage 40 of 40 — docket QzcSk3BNYqI, starts 2:32 into the stream.
+
+Pattern-matcher notes: guess what
+
+---
+And this is what I always tell everybody. I'm very sensitive to certain smells, alcohol because I don't drink, marijuana because I don't smoke, and the other drugs. And when somebody comes into the courtroom and they smell of marijuana, alcohol, I always end up getting a headache. So, can you imagine young children being around people who smell of marijuana and alcohol and their brain is developing? It's not good. I always ask people, would you give your child a marijuana cigarette to smoke? Well, when you're smoking marijuana and you're around them and you're smelling the marijuana and their clothes are smelling the marijuana, guess what? You're giving them marijuana to smoke. And then when they go to school, maybe some of the other children are going to tease them because their parents didn't tell them not to do that. You are supposed to be at a stage in your life where you want your children to be proud to tell people that's my dad. When they're getting off the bus, they're running to you because you're their dad and you're doing everything right. So, you need to change. You understand? Under a second.
+---
+
+Judge this passage.
+
+=== 2026-08-20T18:25:03  [351c0fcc]
+Yes please and yes the way you described it yes and I don’t want to confuse you and say go back and check every single appearance they’ve had but sometimes judge Boyd warns them then throws them in the slammer
+
+=== 2026-08-20T22:47:25  [351c0fcc]
+I don’t get it. Can you not see where judge Boyd asks questions but not just any questions the ones actually worth clipping there has to be a way
+
+=== 2026-08-21T08:18:01  [351c0fcc]
+Boyd for now, Texas trial tracker, no they’re usually like 8min to 20 sometimes it really depends but 50 min is way too long , we’re gonna add stuff later, every other day, yes but with older cases we could just clip them from boyds channel and actually if we’re gonna clip and bring back what someone already posted we will do it better and add more to the video, complete video would be the defendant comes in usually most times when there’s a MTR defendant judge Boyd always kinda talks to them and if it’s actually at least 6-7 min long that’s a good video just something with drama and judge Boyd calling out people for their bs or asking them what actually happened and then the defendant talks to the judge
+
+=== 2026-08-21T20:54:13  [351c0fcc]
+Okay the defendant and boy have to be in the middle of the screen so scoot them over also you’re not editing the short cuts good enough I know you’re cable of it because you’ve done it before but this just doesn’t have that viral hook cut and feeling of a viral short and I know there’s a lot of stuff said between them where you could chop it up and even make it sound better
+
+=== 2026-08-22T00:21:17  [351c0fcc]
+Okay so I need you to make it the full length but how you have it like in the short format but I’m saying full length so I could edit it and also don’t include the captions yet they’re still not even correct
+
+=== 2026-08-22T00:25:13  [0d62192c]
+Index these moments.
+
+[7038] court's permission to appeal. Because this is a felony conviction, you're not allowed to own or possess any
+[7043] weapons or ammunition. If you have a question over what a weapon or ammunition is, you'll need to
+[7048] speak to an attorney. Do you understand? >> Yes. >> All right, we can go off the record. Here's the
+[7052] thing. If you don't get control of this drug habit, only two things are going to happen to
+[7056] you. Either you're going to end up at the Bexar County Jail, or either you're going to end
+[7059] up where somebody has to identify your body. Do you understand? >> I agree. >> All right. And have you
+[7063] had that looked at on your face? >> Yes. Um, it takes a specialist. So, it popped one time
+[7069] in in Bexar County and they just said, "Leave it alone." So, I'm going to take care of
+[7072] it as soon as I get out. It's been there for almost 10 years is is in a
+[7077] car wreck. >> All right. So, you better have someone look at that. Okay. >> Thanks. >> All right. Good luck to
+[7081] you. >> Thank you. >> Yes.
+
+=== 2026-08-22T04:31:48  [351c0fcc]
+I don’t like those colors either
+
+=== 2026-08-22T19:09:25  [8fd2dbe8]
+[0] 0.0s  (motion hint: bottom(judge))  So there are some things that I can just let go. Then there are other things that I cannot.
+[1] 5.3s  (motion hint: top(defendant))  So with this case, I'm going to know where is Cash, the spider monkey.
+[2] 10.3s  (motion hint: top(defendant))  All right. And where did you get this monkey?
+[3] 12.5s  (motion hint: top(defendant))  My brother had brought it.
+[4] 13.4s  (motion hint: bottom(judge))  So what?
+[5] 13.8s  (motion hint: top(defendant))  He has papers. He's legal.
+[6] 15.4s  (motion hint: top(defendant))  I don't know why people take animals. You want to treat them as humans and put them on clothes and everything.
+[7] 20.2s  (motion hint: bottom(judge))  That monkey was probably enjoying his best life in some sort of jungle or wherever spider monkeys live.
+[8] 26.5s  (motion hint: bottom(judge))  And somebody took that monkey from their mom.
+[9] 28.8s  (motion hint: bottom(judge))  Mom is out here looking for her baby.
+[10] 31.0s  (motion hint: top(defendant))  And I don't think you're a good parent for this spider monkey.
+[11] 34.0s  (motion hint: top(defendant))  What do your parents think of this foolishness?
+[12] 36.0s  (motion hint: top(defendant))  As she should be. Does she raise you to be this way?
+[13] 39.5s  (motion hint: bottom(judge))  So why do people commit crimes and then say, I want to post it on social media?
+[14] 43.8s  (motion hint: bottom(judge))  All right. This is what the court is going to do.
+[15] 46.1s  (motion hint: top(defendant))  No residing with minors or with Cash, K-A-S-H, the spider monkey.
+
+=== 2026-08-23T14:19:07  [bfd92cc4]
+yes pls and make sure you make it how i told you too lAST TIME with all the fixes and adjustments also the same way you corrected the color to natural of the short do that as well to the thumbnail maybe even bump it up a level too
+
+=== 2026-08-23T14:35:07  [bfd92cc4]
+no. thats slop. the words should never be on defendants or judges face or body and it just looks horrible also i need you to crop the video to where its just him and judge boyd and not the 3rd box so cut and then scoot down their boxes to center as if the other one wasnt there
+
+=== 2026-08-27T05:11:34  [bfd92cc4]
+i like 2 but move the captions all the way to the top
+
+=== 2026-08-27T10:38:35  [bfd92cc4]
+okay are all the captions on the shorts?? and then can you make the red arrows better fiiting in each thumbnail? like maybe move it or turn it or make it bigger depending on the thumbnail
+
+=== 2026-08-29T01:51:01  [bfd92cc4]
+btw im looking at these thumbnails i like C on car theif A and B on sanchez and C on offerup because of how jusge boyd is positiononed in them because the other shots of her dont make sense or are bad because shes not looking in some but in sanchez case i picked a and b becase her hand added a little more drama
+
+=== 2026-08-29T01:57:32  [bfd92cc4]
+yeah thats better but io need you to fix the background where its all bright and then it looks blocky
+
+=== 2026-08-29T02:29:01  [bfd92cc4]
+okay but it doesnt look good when you have those hard crops like you cut the defendants whole arm off in one theres have to be surgical cuts  not slop
+
+=== 2026-08-29T02:40:30  [bfd92cc4]
+yes and if you look the font is off and looks way lower quality
+
+=== 2026-08-29T04:03:56  [bfd92cc4]
+okay i need you to master the captions too because i told you i need it when boyd is talking her captions are on her half of the screen and when the defendant is talking thier captuions are on their half. also i notice there might be some silence in the clip but you could aready see what they were gonna say because the captions were there you need to fix there and make sure theres no dead space casuing people to know what its gonna say 3-4 sec before it does
+
+=== 2026-08-29T04:11:01  [bfd92cc4]
+ehh the captions and cuts could be wayyyyyyy better to be compleatly honest please zoom out and fix these gaps with a team if you have to because we need to memorize this and get it right so you could automate these shorts every day so thats the goal dont stop until we get it it too
+
+=== 2026-08-29T06:41:36  [7d771d0e]
+the background is slop i need it to be like the oruigibal quality
+
+=== 2026-08-29T06:41:45  [bfd92cc4]
+did u fix the thumbnails??
+
+=== 2026-08-29T07:00:11  [bfd92cc4]
+u need to fix the thumbnails with the team use ours as refernece just take them to the next level quality and detail wise
+
+=== 2026-08-29T09:42:03  [bfd92cc4]
+yeah i like them but the only 2 things is that sanchez and offerup had different lighting than the first thumbnail and video so they look really brifht and then on offer up specificially it looks weirdf how his lawyer ir right behind judge boyd
+
+=== 2026-08-29T10:04:04  [bfd92cc4]
+in sanchez thumbnail boyd still looks so bright and pale, same thing in offer up and yes the judge shrank and now looks weird is pale as well pls fix this audit with an efficiant team dont over complicate this but it is an important fix because thats slop
+
+=== 2026-08-29T10:26:10  [d19c74bf]
+oh i meant tools i guess idk i feel like when i tell you to edit certain things its just slop like literally theres a limit they put on how much you could edit idk what it is but im saying use unlazy to find out how to actually concore this problem once and for all but idk i just think it needs something better to go off of to have that pro level eye behind it to actually know what to fix espically if its gonna be automated. i rememeber there was this site i think it was called pikzels and it had a nice wrapper and it would auto make the thumbnails, score thumbnails, fix them and tell you what was wrong with them, upscale, outline, and everything else it needed to and it just always made the thumbnails better automatically thats the kinda system we need something intelligent and im saying find tools or idk if its skills or we need to actually make the wrapper but i was using that pikzels thing like a year ago and it wAS WORKING GOOD IM SURE YOU CAN get your hands on something way better
+
+=== 2026-08-29T10:42:27  [bfd92cc4]
+also on offer up boyd cut out is still wayyyyyyyy messed up and slop. im honestly so disapointed that you havent caught that by yourself and on sanches and offer up boyds cut out looks washed out it needs to look good compare to the defendant maybe for reference to make sure boyd isnt way too bright maybe?? also whats up with the work flow below?? why is it paused?? amd then just make sure you fix them all individually and stiop trying to edit 3 different pictures when im pointing out flaws in just 1
+
+=== 2026-08-29T10:46:43  [d19c74bf]
+is there something thats the same concept of pikzels but better?? and idk how stuff really works but do you get stuff from github and use it?? taper it towards what were trying to do? or is it really good like pikzels where you could put in any thumbnail and make it viral looking automatically? please let me know i want you to have our very own wrapper here so we dont have to spend any money and come on youre opus 5 you can defitially beat pikzel upp the effort if needed and get it done
+
+=== 2026-08-29T10:51:14  [d19c74bf]
+okay but what rules are you basing it off of?? because i know i was pointing out alot of things when i wanted you to fix the thumbnails for me but for example if i was using pikzels i really woundt have to explain all that it just knew what to do and stop using the thompson as a anchor because i really dont even think its the best example we have
+
+=== 2026-08-29T11:07:06  [d19c74bf]
+like pikzels literaly had a viral percentage checker without any previous context i just throw in a random pic or any type of thumb nail and it just rates it because it just knows what works for all of youtube and what doesnt. look its really not that hard i feel like youre really just being narrow minded and not listening. youre not reversese engeenering the actual system youre basing it off of such limited informationg thats not what i asked you to do.
+
+=== 2026-08-29T11:45:14  [bfd92cc4]
+yes pls but what do you need left with them? and why do you have to downgrade??
+
+=== 2026-08-29T12:37:23  [d19c74bf]
+okay i think im explaining it a little wrong i rememeber i would put a picture it and it wouldnt just upscale it i think it would compleatly generate it and its just upscaled idk pls find out exactly what it does and impliment it
+
+=== 2026-08-29T14:20:01  [d19c74bf]
+Pikzels uses generative AI super-resolution and specialized facial reconstruction networks to upscale and fix blurry pictures.Instead of traditional methods that merely stretch pixels and worsen blurriness, its technology structurally rebuilds missing details. Because the platform is built for YouTube thumbnails, its upscaling engine handles heavily compressed or low-resolution elements through specific processes:1. Generative AI Super-ResolutionTexture Rebuilding: The AI analyzes blurry spots and predicts missing textures. It injects sharp edges and realistic pixel patterns rather than guessing mathematical averages.Artifact Removal: The model strips away heavy JPEG compression blockiness, color noise, and motion blur before upscaling.2. Deep-Learning "Persona" & Face RepairFacial Reconstruction: When fixing faces, Pikzels utilizes deep learning models optimized for hyper-realistic face replacement. It replaces smeared facial features with clean, structurally sound details.Persona References: If you train a personal model by uploading clear reference photos, the AI references your specific physical structure to accurately reconstruct your face from a blurry image.3. Layout Extraction & Vector-Style TextComponent Splitting: When processing an existing graphic, the system separates layout layers.Text Redrawing: Instead of trying to scale blurry text (which creates halos and artifacts), it isolates graphical elements and redraws text overlays into sharp visual formats based on user prompts.If you are working on a project, let me know:Are you fixing a face, text, or a full scene?How severe is the blur? (Slightly out of focus or completely pixelated?)Do you already have clear reference photos of the subject?
+
+=== 2026-08-29T14:29:06  [d19c74bf]
+okay put glow slightly around atterny, defendant, and arrow as well and the color of boyd when you showed me is way closer to the natural and i like it but in the thumbnail you still had boyd in the bluish color so please swap it out
+
+=== 2026-08-29T14:40:00  [d19c74bf]
+idk why this is so hard for you to understand youre halucinating and you dont seem to stop no matter how many times i tell u pls take a step back realize what youre doing and fix yourself.
+
+=== 2026-08-29T14:40:58  [d19c74bf]
+you put new hs final and its not even the same defendant??? and youre asking whats wrong??? theres the proof youre literally halucinating
+
+=== 2026-08-29T14:45:04  [d19c74bf]
+youre stacking all your guesses on this when im literally teaching you my very best how to make a thumbnail all by yourself and as soon as i mention one thing you start running trying to fix one thing that i havent even confirmed yet can you chill ????
+
+=== 2026-08-29T17:31:27  [91451db0]
+Okay. You might wanna take a couple steps back because it just kinda came out looking a little sloppy overall. Like, the background, it's just not what it should be. And I know I told you to, like, make her smaller, um, so that's probably why the background got all distorted. So instead, next time, if I tell you to make a change like that where it's gonna affect the background, do you have to go back and just redo the background? And last time we were working on using the Comfy IU or something to... for you to, like, use the GPU to, like, regenerate the pictures. I don't know exactly what you were doing, but... oh, I think you were using the hyper h y p i r restore. but I don't think you were just doing just that. I think you were kind of, like, regenerating the pictures, like, not just upscaling them alone. I forgot what it was called, but it was, like, basically, like, you know, when you go tell an AI, like, make this picture look like it was taken in four k, and it's, like, remaking the person to, like, its best ability of what they think it looks like, but really it's, like, a remade AI picture of the person that looks hyper realistic. So I gave you that local stuff to do... like, the powers to do that already. There was, like, some open source things that I gave you to do that.
+
+=== 2026-08-29T17:52:52  [91451db0]
+Yes but something’s still off about it. I need you to remake it knowing what you know now to see if it fixes it. And you need to make the defendant about the same size as Judge Boyd, and you need to make, like... you need to scoot over the defendant to the the left, and they just need to be, like, about equal sizes. And the defendant's gonna be on the left side. Judge Boyd's gonna be on the right side. The background should still be the defendant's background, and you need to just completely redo it. I mean, you know, upscale the background, redo it, get the lighting right in the background, you know, fix the little microphone in front of the defendant because it looks all weird. Make sure the colors are correct, like the ones that I just showed you on my iPhone. Um, redo the captions completely. I just don't like the way it is. I think, um, what you're putting out right now is... has a lot of confusion in it, but I think we are kind of starting to understand a little bit.
+
+=== 2026-08-29T18:08:46  [91451db0]
+Okay. The quality still look... isn't looking like fully there, but what I think I told you, like, in those other... that other example that I really like, I told you that you had to be, like, surgical with the cuts and just surgical with, like, the generations. Like, you know, I'm looking at void right now and the defendant, and it's like they have, like, weird hairs. like, smooth areas where it's not supposed to be smooth. And you just did a really good job feathering on Judge Boyd on this where it says h y p i r tiles plus glow on judge, both men arrow plus her own color. See, like, I don't know what you did to is the defendant's cut out and void's cut out looks so like high quality in this one and even the attorney, but it just looks high quality. And the one you just gave me back, it just overall looks low quality. I'm pretty sure it's because of the background is all weird, and it doesn't have that surgical cut perfect background. And the one that I told you I liked, I also think it's just because the little details, like, the color just better. Like, the background isn't too dark, and I feel like the one where it says your son is struggling, like, the background is just too dark, and then in the middle between them, it doesn't even really make sense. you need to fix that. Use /unlazy
+
+=== 2026-08-29T18:32:16  [91451db0]
+Please go back not just in this chat but the other ones that I said I liked something about the thumbnail and go off of that. Have a team debate and work together and find what works, what doesn’t, and finally get it correct for once because we keep wasting time. I think the team should look over the positives AND negatives to nail down how to make the right stuff and make sure it never produces the wrong stuff
+

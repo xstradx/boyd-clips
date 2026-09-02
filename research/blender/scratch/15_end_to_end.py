@@ -2,7 +2,7 @@
 Verified against Blender 5.0.1."""
 import bpy, os, math, time, glob, shutil
 
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 FONT = r"C:\Users\natha\Projects\boyd-clips\assets\fonts\Anton-Regular.ttf"
 OUT  = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders\e2e"
 if os.path.isdir(OUT): shutil.rmtree(OUT)

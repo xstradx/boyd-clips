@@ -60,10 +60,20 @@ def main() -> int:
         d = b - a
         total += d
         seg = out / f"beat_{i:02d}.mp4"
+        # 30ms fade in/out per segment - see build_longform.py for the measured
+        # reasoning, including the honest note that this is NOT what made the
+        # edits sound choppy (that was cut placement).
+        _fd = 0.03
+        _af = (f"afade=t=in:st=0:d={_fd},"
+               f"afade=t=out:st={max(0.0, float(b) - float(a) - _fd):.3f}:d={_fd}")
         cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                "-ss", f"{a}", "-to", f"{b}", "-i", str(p),
                "-vf", "scale=1920:1080:flags=lanczos,fps=30,format=yuv420p",
+               "-af", _af,
                "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+               # was listed TWICE here, identically - harmless but it meant the
+               # second silently overrode the first, so an edit to one would
+               # have had no effect at all
                "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
                str(seg)]
         r = subprocess.run(cmd, capture_output=True, text=True)
@@ -85,6 +95,28 @@ def main() -> int:
     if r.returncode:
         print(r.stderr[-1200:])
         return r.returncode
+
+    # MASTERING - once over the assembled body, never per beat. Per-segment
+    # normalisation would flatten a quiet aside and a raised voice to the same
+    # level and make it jump at every join. See build_longform.py for the
+    # measurement that prompted this (-21.2 LUFS shipped, 5dB headroom unused).
+    try:
+        import os as _os
+        _sys = __import__("sys")
+        _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+        import master_audio as _ma
+        _tmp = body.with_name(body.stem + "_m.mp4")
+        _b, _a, _ = _ma.master(str(body), str(_tmp))
+        _os.replace(str(_tmp), str(body))
+        print(f"mastered: {_b[0]:.1f} -> {_a[0]:.1f} LUFS ({_a[0]-_b[0]:+.1f} dB), "
+              f"true peak {_a[2]:.1f} dBFS")
+        if not (-15.0 <= _a[0] <= -13.5):
+            print(f"  LOUDNESS GATE FAILED: {_a[0]:.1f} LUFS outside -14 +/- 1")
+            return 1
+    except Exception as _me:                          # noqa: BLE001
+        print(f"MASTERING FAILED: {str(_me)[:200]}")
+        print("  Shipping an unmastered body is a decision, not a default.")
+        return 1
 
     probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                             "format=duration", "-of", "csv=p=0", str(body)],

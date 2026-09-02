@@ -1,0 +1,12 @@
+  views gateScore  verdict defects  title
+   9800      71.4     WEAK       3  Drug Dealer BEGS Judge Boyd To Not Send 
+   4600      72.2   REJECT       6  Teen Stole His Mom's PILLS Then SLAPS He
+   4300      93.8   REJECT       4  Thug In Disbelief After Judge Boyd Sente
+   3000      70.2     WEAK       4  Judge Boyd Sentences Famous San Antonio 
+   2300      89.3     SHIP       3  Judge Boyd EXPOSES Credit Card Fraud Sch
+   1400      89.5     SHIP       3  Judge Boyd SHUTS DOWN Gang Member's Requ
+     72      75.3   REJECT       5  He says his family was murdered. Judge B
+     55      95.1     SHIP       3  Judge Boyd Stops a Plea to Ask About a S
+
+Spearman rho(views, gate score) = -0.571   n=8
+rho near 0 means the score carries no information about how these did.

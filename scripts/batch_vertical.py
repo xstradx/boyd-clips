@@ -116,7 +116,9 @@ def main() -> None:
             out.with_suffix(".map.json").unlink(missing_ok=True)
         t0 = time.time()
         p = subprocess.run(
-            [PY, str(ROOT / "scripts" / "make_short.py"), "--video", vid,
+            # tools/short_chain.py, never scripts/make_short.py (2026-09-02):
+            # the raw render has none of the engine's gates
+            [PY, str(ROOT / "tools" / "short_chain.py"), "--video", vid,
              "--seg", f"{r['t']:.1f}:{r['t'] + r['span_s']:.1f}",
              "--out", str(out)],
             cwd=str(ROOT), capture_output=True, text=True, timeout=7200)

@@ -2,7 +2,7 @@ import bpy, os, sys
 
 OUT = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders"
 FONT = r"C:\Users\natha\Projects\boyd-clips\assets\fonts\Anton-Regular.ttf"
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 MODE = sys.argv[-1]          # 'default' or 'correct'
 
 BG, INK, RED = "15181D", "F2EEE3", "D42B2B"

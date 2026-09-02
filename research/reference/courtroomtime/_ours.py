@@ -10,7 +10,7 @@ ns2 = {"__file__": os.path.join(D, "_measure2.py")}; exec(compile(src2, "_measur
 def full(p):
     r = ns1["measure"](p); r.update(ns2["measure"](p)); return r
 
-files = sorted(glob.glob(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\BANGERS\*.jpg"))
+files = sorted(glob.glob(r"D:\Boyd Clips\BANGERS\*.jpg"))
 ours = []
 for f in files:
     r = full(f); r["file"] = os.path.basename(f); r["grp"] = "ours"; ours.append(r)

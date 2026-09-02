@@ -103,7 +103,13 @@ def main() -> int:
         am = np.zeros((H, W), np.uint8)
         cv2.fillPoly(am, [poly.astype(np.int32)], 255)
         overlap = int(((am > 0) & (people > 24)).sum())
-        n_arrow = int((am > 0).sum())
+        # The DRAWN POLYGON, core shape only - not the glow. Do not compare
+        # this number to verify_Q3_detail.py's: that one counts visible red in
+        # the delivered JPEG including glow and halo, and measured 8.4x larger
+        # on the same file (28,983 vs 3,451 on CARTHIEF_thumbnail_V2, 2026-08-31).
+        # Copying a limit between the two is what broke Q3's arrow gate.
+        n_arrow_polygon = int((am > 0).sum())
+        n_arrow = n_arrow_polygon
         # re-derive the tip and direction from the polygon itself
         tip = poly[0].astype(float)
         tail = poly[3:5].mean(axis=0)
@@ -120,7 +126,8 @@ def main() -> int:
         g3 = overlap == 0 and hit > 0
         ok &= g3
         print(f"[{'PASS' if g3 else 'FAIL'}] 3. arrow: {n_arrow}px "
-              f"({n_arrow / (W * H) * 100:.2f}% of frame, reference 0.41%), "
+              f"({n_arrow / (W * H) * 100:.2f}% of frame, polygon reference "
+              f"0.41% - NOT comparable to Q3's glow-inclusive figure), "
               f"{overlap}px on a person (required 0), ray from the tip enters "
               f"the DEFENDANT's matte {hit}px along (required >0)")
         px = img[int(tip[1] + v[1] * -20 + 0.5), int(tip[0] + v[0] * -20 + 0.5)]

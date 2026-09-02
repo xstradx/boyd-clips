@@ -103,7 +103,11 @@ def main() -> None:
     start, end = span
     print(f"hearing {v}: {start:.0f}-{end:.0f}s  ({(end-start)/60:.1f} min)")
 
-    # 1 - the vertical cut the editor plays, plus the offset it implies
+    # 1 - the vertical cut the editor plays, plus the offset it implies.
+    #     This is the PLAYER file, not a short: the whole hearing, raw, so the
+    #     editor's player-time -> source-time map stays linear. Shorts cut from
+    #     it go through tools/short_chain.py (check_short_entry.py exempts only
+    #     this VERTICAL_ render).
     vf = None if args.force else vertical_for(v)
     if not vf:
         out = OUTDIR / f"VERTICAL_{v}.mp4"

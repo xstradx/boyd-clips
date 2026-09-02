@@ -7,136 +7,125 @@ and a 2022 docket sampled had none at all. Speaker-marker windowing only works
 after July 2025. This phrase appears 3.1 to 5.5 times per docket in every year
 from 2021 to 2026, including the unpunctuated early captions.
 
-A hearing therefore runs from one call to the next, capped at the target
-runtime. Nathan's shape, in his words: a motion to revoke, "judge Boyd calling
-out people for their bs or asking them what actually happened and then the
-defendant talks to the judge", ending a beat after the ruling.
+A hearing runs from one call to the next. Nathan's shape, in his words: a
+motion to revoke, "judge Boyd calling out people for their bs or asking them
+what actually happened and then the defendant talks to the judge", ending a
+beat after the ruling.
+
+Rewritten 2026-09-01 on `tools/hearing_measure.py` after it was measured
+against his own winners (`data/catalog_vs_picker.json`) and found to see none
+of them - the reasons are in that module's docstring. Every regex, gate and
+score now lives there; `tools/check_picker.py --selftest` proves the eleven
+winners come out as candidates and the known-bad controls do not.
 
 Both sides must talk. A monologue is not the product and neither is a defendant
-who only says "yes ma'am".
+who only says "yes ma'am". Because the auto captions cannot tell WHO is
+speaking, that is measured without attribution: her questions at "you" per
+minute, and first-person narrative per 100 words.
+
+    python scripts/find_called_hearings.py            # -> state/called_hearings.json
 """
 
 from __future__ import annotations
 
+import collections
 import glob
 import json
 import os
-import re
 import sqlite3
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import hearing_measure as hm  # noqa: E402
+
 OUT = ROOT / "state" / "called_hearings.json"
+SUMMARY = ROOT / "state" / "called_hearings_summary.json"
+PROBE = ROOT / "state" / "picker_probe.json"     # every hearing seen, gated or not
 
-MIN_S, MAX_S = 360.0, 1200.0
-
-CALL = re.compile(r"court is calling|the court calls|calling the case", re.I)
-MTR = re.compile(r"motion to revoke|revocation|violated condition|adjudicat\w+|"
-                 r"your probation|revoke your", re.I)
-DEFER = re.compile(r"\byour honou?r\b|\b(yes|no),?\s+(ma'?am|sir)\b", re.I)
-CHALL = re.compile(r"\b(why|what|how|who)\b[^.?!]{0,60}\byou\b|"
-                   r"\bdo you (know|think|want|realize|expect)\b|"
-                   r"\bare you (serious|kidding|telling me)\b", re.I)
-TRIAL = re.compile(r"raise your right hand|solemnly swear|jury panel|voir dire|"
-                   r"members of the jury|state calls", re.I)
-BOND = re.compile(r"\bbond\b|\bsurety\b|\bmagistrat\w+\b", re.I)
+KEEP = ("video_id", "date", "t", "span_s", "over_cap", "jury_cut", "score",
+        "q_per_min", "narr_per_100", "punct_frac", "mtr", "sent", "outcome",
+        "defer", "chall", "bond", "words", "open")
 
 
-def main() -> None:
+def main() -> int:
+    cfg = hm.load_cfg()
     db = sqlite3.connect(ROOT / "state" / "pipeline.db")
     db.row_factory = sqlite3.Row
     dates = {r["video_id"]: (r["docket_date"] or "")
              for r in db.execute("select video_id, docket_date from dockets")}
 
-    out, scanned = [], 0
+    out, scanned, seen, probe = [], 0, 0, []
+    fails: collections.Counter = collections.Counter()
     for tp in sorted(glob.glob(str(ROOT / "work" / "*" / "*.transcript.json"))):
         vid = os.path.basename(os.path.dirname(tp))
         try:
-            d = json.load(open(tp, encoding="utf-8"))
-        except Exception:
+            rows = hm.scan(vid, cfg, path=tp)
+        except Exception as e:                       # noqa: BLE001
+            print(f"  skip {vid}: {e}")
             continue
-        ws = d.get("words") or []
-        if not ws:
+        if not rows:
             continue
         scanned += 1
-        words = [x.get("w", "") for x in ws]
-        times = [x.get("t", 0.0) for x in ws]
-        txt = " ".join(words)
-
-        # map character offset -> word index once
-        starts, pos = [], 0
-        for w in words:
-            starts.append(pos)
-            pos += len(w) + 1
-
-        marks = []
-        for m in CALL.finditer(txt):
-            lo, hi = 0, len(starts) - 1
-            while lo < hi:
-                mid = (lo + hi) // 2
-                if starts[mid] < m.start():
-                    lo = mid + 1
-                else:
-                    hi = mid
-            marks.append(lo)
-        if not marks:
-            continue
-
-        for a, b in zip(marks, marks[1:] + [len(words)]):
-            t0, t1 = times[a], times[min(b, len(times) - 1)]
-            if t1 - t0 > MAX_S:                     # cap an over-long run
-                cut = a
-                while cut < len(times) and times[cut] - t0 <= MAX_S:
-                    cut += 1
-                b, t1 = cut, times[min(cut, len(times) - 1)]
-            span = t1 - t0
-            if not (MIN_S <= span <= MAX_S):
+        for r in rows:
+            seen += 1
+            probe.append({"vid": vid, "date": dates.get(vid, ""), "t": r["t"],
+                          "span": r["span_s"], "q_per_min": r["q_per_min"],
+                          "narr_per_100": r["narr_per_100"], "mtr": r["mtr"],
+                          "sent": r["sent"], "punct": r["punct_frac"],
+                          "words": r["words"], "fails": r["fails"]})
+            if r["fails"]:
+                fails[",".join(r["fails"])] += 1
                 continue
-            seg = " ".join(words[a:b])
-            if TRIAL.search(seg) or not MTR.search(seg):
-                continue
-
-            sents = re.split(r"(?<=[.?!])\s+", seg)
-            theirs = [s for s in sents if DEFER.search(s)]
-            if len(theirs) < 3:
-                continue
-            their_words = sum(len(s.split()) for s in theirs)
-            total = max(1, len(seg.split()))
-            if their_words < 80:
-                continue
-
-            chall = len(CHALL.findall(seg))
-            bond = len(BOND.findall(seg))
-            share = their_words / total
-            sc = 0.0
-            sc += min(30, share * 140)            # they genuinely answer
-            sc += min(28, chall * 3.5)            # she calls it out / asks
-            sc += min(14, len(theirs) * 1.2)
-            sc += 12 if 420 <= span <= 900 else 0
-            sc -= min(20, bond * 4.0)
-            out.append({"video_id": vid, "date": dates.get(vid, ""),
-                        "t": round(t0, 1), "span_s": round(span, 1),
-                        "score": round(sc, 1), "challenges": chall,
-                        "their_share": round(share, 3),
-                        "open": re.sub(r"\s+", " ", seg[:220])})
+            row = {k: r[k] for k in KEEP if k in r}
+            row["date"] = dates.get(vid, "")
+            out.append(row)
         if scanned % 300 == 0:
-            print(f"  scanned {scanned}, hearings {len(out)}", flush=True)
+            print(f"  scanned {scanned}, candidates {len(out)}", flush=True)
 
     out.sort(key=lambda r: -r["score"])
-    OUT.write_text(json.dumps(out[:400], indent=2), encoding="utf-8")
-    import collections
+    keep_top = int(cfg.get("keep_top", 0)) or len(out)
+    dropped = max(0, len(out) - keep_top)
+    OUT.write_text(json.dumps(out[:keep_top], indent=2), encoding="utf-8")
+
+    by_year = dict(sorted(collections.Counter(r["date"][:4] for r in out if r["date"]).items()))
+    summary = {
+        "transcripts_scanned": scanned,
+        "hearings_seen": seen,
+        "candidates": len(out),
+        "written": min(len(out), keep_top),
+        "dropped_by_keep_top": dropped,
+        "over_cap": sum(1 for r in out if r["over_cap"]),
+        "jury_cut": sum(1 for r in out if r["jury_cut"]),
+        "by_year": by_year,
+        "excluded_by_reason": dict(fails.most_common()),
+        "gates": {"min_s": cfg["min_s"], "max_s": cfg["max_s"],
+                  "q_per_min_min": cfg["q_per_min_min"],
+                  "narr_per_100_min": cfg["narr_per_100_min"],
+                  "overlong_s": cfg.get("overlong_s")},
+    }
+    SUMMARY.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    PROBE.write_text(json.dumps(probe), encoding="utf-8")
+
     print(f"\ntranscripts scanned : {scanned}")
-    print(f"hearings found      : {len(out)}")
-    print("by year             :",
-          dict(sorted(collections.Counter(r["date"][:4] for r in out if r["date"]).items())))
-    print(f"-> {OUT}\n")
+    print(f"hearings seen       : {seen}")
+    print(f"candidates          : {len(out)}  (over cap {summary['over_cap']}, "
+          f"jury-cut {summary['jury_cut']})")
+    if dropped:
+        print(f"DROPPED by keep_top : {dropped}  (config/picker.json keep_top={keep_top})")
+    print("by year             :", by_year)
+    print("excluded            :", summary["excluded_by_reason"])
+    print(f"-> {OUT}\n-> {SUMMARY}\n")
     for r in out[:10]:
         t = int(r["t"])
         print(f"[{r['score']:5.1f}] {r['date']}  {r['span_s']/60:4.1f} min  "
-              f"they talk {r['their_share']*100:4.1f}%  challenges {r['challenges']:2d}")
+              f"q/min {r['q_per_min']:4.2f}  narr {r['narr_per_100']:4.2f}"
+              f"{'  OVER CAP' if r['over_cap'] else ''}")
         print(f"        youtu.be/{r['video_id']}?t={max(0, t - 6)}")
         print(f"        {r['open'][:140]}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

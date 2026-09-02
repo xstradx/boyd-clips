@@ -4,7 +4,7 @@ Nathan: "I meant editing the short cuts".
 
 The catch is that a short is not a slice of the hearing - silence was removed
 when it was built, so 14 seconds are missing and a mark at 0:20 in the short is
-not 0:20 in the source. make_short now writes a .map.json beside each short
+not 0:20 in the source. short_chain (and make_short) write a .map.json beside each short
 recording where every kept piece came from; this page loads it and converts
 marks back through it.
 
@@ -141,7 +141,10 @@ function build(){
     for (var j=0;j<rs.length;j++)
       flags.push("--seg " + rs[j][0].toFixed(1) + ":" + rs[j][1].toFixed(1));
   }
-  return "python scripts/make_short.py --video " + VIDEO + " " + flags.join(" ")
+  // tools/short_chain.py, never scripts/make_short.py: the raw render skips
+  // word alignment, tightening, the engine's gates and the floor stamp
+  // (2026-09-02, "Okay then make it have it pls"). check_short_entry.py proves it.
+  return "python tools/short_chain.py --video " + VIDEO + " " + flags.join(" ")
        + " --out \\"" + OUT + "\\"";
 }
 function copyCmd(){
@@ -174,7 +177,7 @@ def main() -> None:
     short = OUTDIR / args.short
     mp = short.with_suffix(".map.json")
     if not mp.exists():
-        print("no map beside " + short.name + " - rebuild it with make_short.py first")
+        print("no map beside " + short.name + " - rebuild it with tools/short_chain.py first")
         return
     data = json.loads(mp.read_text(encoding="utf-8"))
     html = (PAGE.replace("__NAME__", short.name)

@@ -13,7 +13,7 @@ Start it with Studio.bat on the Desktop, or:
     python scripts/studio_server.py
 
 Nothing here writes outside READY-TO-REVIEW, and /render only ever invokes
-make_short.py with parsed floats - never a shell string.
+short_chain.py with parsed floats - never a shell string.
 """
 
 from __future__ import annotations
@@ -39,7 +39,11 @@ LOCK = threading.Lock()
 
 
 def run_render(job_id: str, video: str, segs: list, out: str, captions: bool) -> None:
-    cmd = [sys.executable, str(ROOT / "scripts" / "make_short.py"),
+    # tools/short_chain.py, never scripts/make_short.py (2026-09-02): the raw
+    # render skips alignment, tightening, every engine gate and the floor
+    # stamp. Captions are the engine's and always on; the page's checkbox is
+    # accepted and ignored (the chain says so on its first line).
+    cmd = [sys.executable, str(ROOT / "tools" / "short_chain.py"),
            "--video", video, "--out", out]
     for a, b in segs:
         cmd += ["--seg", "%.2f:%.2f" % (a, b)]

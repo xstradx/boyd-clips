@@ -50,8 +50,9 @@ output:
     # minute long-form went through a 1200s cap. Under the floor the case is
     # skipped; over the cap it is trimmed on a piece boundary, cutting
     # mid-piece rather than dropping the last piece — dropping the last piece
-    # is what loses the ruling.
-    min_duration_s: 120
+    # is what loses the ruling. (A dead `min_duration_s: 120` sat here until
+    # 2026-09-01; PyYAML kept the later 360 silently. tools/hearing_measure.py
+    # now refuses duplicate keys.)
     # 3480s = 58 min.
     #
     # RE-MEASURED 2026-08-18 against the FULL catalogues of all 7 channels

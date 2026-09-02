@@ -281,8 +281,11 @@ function build(){
   for (var k=0;k<picks.length;k++)
     f.push("--seg " + picks[k].a.toFixed(1) + ":" + picks[k].b.toFixed(1));
   var q = String.fromCharCode(34);
-  return "python scripts/make_short.py --video " + VIDEO + " " + f.join(" ")
-       + " --no-captions --out " + q + OUT + q;
+  // tools/short_chain.py, never scripts/make_short.py (2026-09-02): the raw
+  // render has none of the engine's gates; captions are the engine's, always
+  // on, so the old --no-captions is gone. check_short_entry.py proves it.
+  return "python tools/short_chain.py --video " + VIDEO + " " + f.join(" ")
+       + " --out " + q + OUT + q;
 }
 function copyCmd(){
   var c = document.getElementById("cmd");

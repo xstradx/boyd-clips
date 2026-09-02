@@ -6,7 +6,7 @@
 # Then compare rendered alpha to SOURCE alpha per-pixel.
 import bpy, os, sys, numpy as np, hashlib
 
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 OUT  = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders\critic"
 os.makedirs(OUT, exist_ok=True)
 

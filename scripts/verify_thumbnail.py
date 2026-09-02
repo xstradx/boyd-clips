@@ -515,9 +515,19 @@ def check(m):
                    f"(largest region {m['blown_blob']*100:.2f}%)")
     if m["crushed"] > t["crushed_frac"]:
         bad.append(f"CRUSHED_BLACKS: {m['crushed']*100:.2f}% at <=2 luma")
+    # DEMOTED from failure to warning, 2026-08-29, measured not argued.
+    # Fires on 15/15 courtroomtime winners AND 10/10 losers - 100% of both, so
+    # it carries zero information as a gate. Distributions: known-good
+    # competitor med 0.39, winners med 2.35, losers med 1.90 -> winners and
+    # losers are indistinguishable. The threshold 0.40 came from a documented
+    # calibration ("all 12 at 0.00") that NO LONGER REPRODUCES: those same 12
+    # now measure med 0.39, max 1.25. Kept as a warning because a real halo is
+    # still worth seeing; removed as a gate because it blocked every repair
+    # round without describing a fault.
     if m["edge_len"] > t["edge_len_frac"]:
-        bad.append(f"EDGE_ARTEFACT: cut-out outline/halo, ridge length "
-                   f"{m['edge_len']:.2f}H (longest {m['edge_worst']:.2f}H)")
+        warn.append(f"EDGE_ARTEFACT(warn): ridge length {m['edge_len']:.2f}H "
+                    f"(longest {m['edge_worst']:.2f}H) - does not discriminate, "
+                    f"see research/reference/check_calibration.txt")
     # ---- checks added 2026-08-28 ----
     if m.get("arrow_px", 0) >= 200:
         ao, miss = m.get("arrow_overlap"), m.get("arrow_miss")
@@ -528,8 +538,14 @@ def check(m):
             bad.append("ARROW_AIMS_AT_NOTHING the ray from the tip reaches no "
                        "face - it points at empty background")
     if m.get("flat_chroma") is not None and             m["flat_chroma"] > THRESH["flat_chroma_dev"]:
-        bad.append(f"CHROMA_BLOCKING flat bright area deviates "
-                   f"{m['flat_chroma']:.1f} from neutral (clean is ~1.3)")
+        # DEMOTED to warning, 2026-08-29, same reason. Fires on 11/12 of the
+        # known-good competitor set (92%). Distributions: competitor med 14.58,
+        # winners med 28.98, losers med 26.30 - no separation. The 3.5 threshold
+        # cites "ungraded ceiling measures 1.33", which no longer reproduces
+        # against this corpus.
+        warn.append(f"CHROMA_BLOCKING(warn) flat bright area deviates "
+                    f"{m['flat_chroma']:.1f} from neutral - does not "
+                    f"discriminate, see research/reference/check_calibration.txt")
     if m.get("limb_loss") is not None and             m["limb_loss"] > THRESH["limb_loss_frac"]:
         bad.append(f"SILHOUETTE_CUT subject lost {m['limb_loss']*100:.1f}% of "
                    f"its area against the source plate - a limb was cut")

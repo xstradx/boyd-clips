@@ -3,7 +3,7 @@ from PIL import Image
 from collections import Counter
 import os, math
 
-D = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand"
+D = r"D:\Boyd Clips\boyd-brand"
 STATED = {"bg": (0x15, 0x18, 0x1D), "ink": (0xF2, 0xEE, 0xE3), "red": (0xD4, 0x2B, 0x2B)}
 
 def hexs(c):

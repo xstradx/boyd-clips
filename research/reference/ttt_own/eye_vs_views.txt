@@ -1,0 +1,14 @@
+  views    eye  anchor  title
+   9800   91.4     YES  Drug Dealer BEGS Judge Boyd To Not Sen
+   4600   79.4          Teen Stole His Mom's PILLS Then SLAPS 
+   4300   80.6          Thug In Disbelief After Judge Boyd Sen
+   3000   85.0          Judge Boyd Sentences Famous San Antoni
+   2300   83.8          Judge Boyd EXPOSES Credit Card Fraud S
+   1400   82.5          Judge Boyd SHUTS DOWN Gang Member's Re
+     72   80.0          He says his family was murdered. Judge
+     55   58.8     YES  Judge Boyd Stops a Plea to Ask About a
+
+Spearman rho(views, EYE score), all 8      = 0.5
+Spearman rho(views, EYE score), 6 UNSEEN   = -0.19999999999999996
+(the two anchors are named in the rubric, so the unseen-6 number is the honest one)
+for comparison, the OLD gate score scored rho = -0.571 on the same 8

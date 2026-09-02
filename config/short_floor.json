@@ -1,0 +1,137 @@
+{
+ "note": "THE SHORT FLOOR. Nathan, 2026-08-31: 'save everything as the normal floor when making future shorts'. Derived from SANCHEZ_SHORT_FINAL.mp4 - a short he shipped and named as the one that looks right - NOT from the thumbnail floor. A still composite is not footage; solving a short's grade against thumbnail numbers produced the over-processed look he rejected.",
+ "reference": "SANCHEZ_SHORT_FINAL.mp4",
+ "measured": {
+  "skin_L": 123.2,
+  "skin_chroma": 19.7,
+  "contrast_sd": 74.3,
+  "grain_hf": 11.5,
+  "comparison": {
+   "CARTHIEF_V2": {
+    "skin_L": 125.9,
+    "skin_chroma": 14.0,
+    "contrast_sd": 74.4
+   },
+   "OFFERUP_old": {
+    "skin_L": 167.9,
+    "skin_chroma": 12.7,
+    "contrast_sd": 58.3,
+    "verdict": "outlier on every axis - bright, flat, undersaturated"
+   }
+  }
+ },
+ "grade": {
+  "eq": "eq=brightness=-0.10:contrast=1.08:saturation=1.50",
+  "solved_by": "tools/solve_grade.py",
+  "applies_to": "both tiles"
+ },
+ "captions": {
+  "font": "Anton",
+  "size": 132,
+  "scale_y": 108,
+  "position": "ON the seam (\\pos(540, H/2))",
+  "fade": "\\fad(60,60)",
+  "entrance": "blur - \\blur6\\t(0,120,\\blur0)",
+  "note": "scale-based entrances (bounce/punch/rise/scale) rejected twice",
+  "entrance_mode": "blur",
+  "entrance_rejected": [
+   "bounce",
+   "punch",
+   "rise",
+   "scale"
+  ],
+  "entrance_note": "machine-readable form of 'entrance' above. tools/short_engine.py and tools/caption_short.py read ENTRANCE from entrance_mode; the engine selftest refuses any value in entrance_rejected (the scale-based entrances he rejected twice on 2026-08-29).",
+  "fade_ms": {
+   "in": 60,
+   "out": 60
+  },
+  "blur": {
+   "px": 6,
+   "ms": 120
+  },
+  "tags_note": "fade_ms and blur are the numbers inside 'fade' and 'entrance' above; caption_short._entrance builds \\fad(in,out)\\blur{px}\\t(0,ms,\\blur0) from them.",
+  "reveal": "reserve",
+  "reveal_note": "NATHAN_RULES R34: a word may be drawn no earlier than its own start. 'off' paints the whole card at card start and is forbidden (measured on SANCHEZ: 'Exactly.' legible 0.68s before it was spoken). reserve = full card laid out, unspoken words at alpha FF; build = only spoken words drawn.",
+  "reveal_tolerance_s": 0.03,
+  "reveal_tolerance_note": "tools/check_reveal.py: a word drawn earlier than this is early by more than the aligner could be wrong. Measured by tools/align_words.py --jitter on SANCHEZ_SHORT_FINAL.mp4 (the reference): 195/195 words, p95 0.03 s. OFFERUP V7 mastered p95 0.05; the unmastered raw cut 0.51 - align on the mastered file.",
+  "seam_band_frac": 0.06,
+  "seam_band_note": "gate 'captions on seam' tolerance: an event whose \\pos y is more than 6% of height (115 px at 1920) from the seam is off-seam. The Aug 29 short failed this visibly - captions above the seam in the judge's tile and below it in the defendant's.",
+  "cards": {
+   "max_chars": 20,
+   "max_words": 4,
+   "target_chars": 15,
+   "note": "Measured 2026-08-29 on SANCHEZ. Widening from (15 ch, 3 words) to (20 ch, 4 words, target 15) cut cards ending on a stranded function word from 25 to 11 and sub-0.30s flashes from 3 to 1, at a cost of 2.2 chars of mean line length. Wider than this stops paying for itself."
+  }
+ },
+ "framing": {
+  "focus": "the DEFENDANT, chosen by cases.json defendant_at - never the largest face",
+  "why": "largest-face picked the attorney on MONKEY, OFFERUP and CARTHIEF",
+  "zoom": "computed so the subject can actually reach centre despite the tile clamp"
+ },
+ "cuts": {
+  "rule": "every join must land in measured silence",
+  "tool": "tools/snap_cuts.snap_to_silence",
+  "achieved": "20/38 boundaries in audible audio -> 1/18 joins",
+  "recut": "tools/recut.py - streams cut SEPARATELY then muxed",
+  "audible_join_tolerance": {
+   "min": 1,
+   "frac": 0.125
+  },
+  "tolerance_note": "short_engine.gate_cuts refuses when more than max(min, joins*frac) joins land in audible audio. The reference achieved 1/18 ('achieved' above); one join in eight is the ceiling, not the target."
+ },
+ "audio": {
+  "integrated_LUFS": -14.0,
+  "tolerance": 1.0,
+  "true_peak_max": -1.0,
+  "join_fade_ms": 12,
+  "lra": 7.0,
+  "lra_note": "loudnorm LRA target, the same 7.0 master_audio.py uses; short_engine's fallback loudnorm reads it here.",
+  "av_sync_max_ms": 250,
+  "av_sync_note": "gate 'format': |video duration - audio duration| ceiling. 100 was an arbitrary number. The defect this gate exists to catch is A/V DESYNC - picture and sound drifting apart. An mp4 whose audio track runs ~100ms past the last video frame is a container tail, not desync: they start together and stay together. Real desync shows up as a far larger gap, or as a zero-length stream (the failure the old gate passed because 0.0 == 0.0). Raised to 250ms with that reasoning stated, rather than left at a number that fails correct builds."
+ },
+ "format": {
+  "width": 1080,
+  "height": 1920,
+  "pix_fmt": "yuv420p",
+  "note": "seam must be EVEN or yuv420p silently rounds the tiles to 1918",
+  "seam_frac": 0.5,
+  "seam_frac_note": "the split between the two tiles as a fraction of height; the caption gate expects every event at y = height*seam_frac. The rendered seam is FOUND per short (largest horizontal luminance discontinuity - y=959 of 1920 on SANCHEZ) and rounded to even before the crop, per 'note' above."
+ },
+ "grain": {
+  "strength": 5,
+  "provenance": "HIS PREFERENCE, not measured - SANCHEZ has no added grain"
+ },
+ "gates": "tools/short_engine.py - all five must pass; a failing build writes no file",
+ "selection": {
+  "note": "WHICH seconds become the short - the thing every other rule here assumed someone else had decided. Nathan: 'barely anything in that clip and then you gave away the outcome'.",
+  "tool": "tools/pick_window.py (gate 'content' in short_engine)",
+  "rules": [
+   "The clip MUST contain what the thumbnail promises. The kicker said WORST EXCUSE EVER and the excuse was not in the video.",
+   "NEVER include the outcome. Grounded: 'JUDGE GIVES HIM 8 YEARS INSTEAD' 8.7k views vs 'This cop was lying!' 1.34M.",
+   "Open on the judge's SETUP QUESTION, not mid-exchange - it is what makes the excuse land.",
+   "Cut administrative filler: names, ages, addresses, drug questions, scheduling, restitution dates.",
+   "End on the judge's judgement of the story, before the sentence."
+  ],
+  "worked_example": {
+   "shipped": {
+    "window": "10881.5-10937.0",
+    "problems": 4,
+    "detail": "opened after the excuse, kept 20s of tattoo/children/drug questions, stated 'three years to court adjudication'"
+   },
+   "corrected": {
+    "window": "10859.0-10899.5",
+    "problems": 0,
+    "detail": "opens on 'you go on OfferUp and the steering column is damaged - that didn't give red flags?', contains 'I did it because I lost the key fob' and 'that makes no sense to me', ends on 'that's where we are'"
+   }
+  }
+ },
+ "code": {
+  "loader": "tools/short_engine.py load_floor() + derive()",
+  "readers": [
+   "tools/short_engine.py",
+   "tools/caption_short.py",
+   "tools/make_short.py"
+  ],
+  "note": "2026-09-01: this file is the SINGLE source of the short's house constants. The three readers derive every module-level constant (W, H, LUFS_TARGET, ENTRANCE, FONT, CAP_PX, GRADE_EQ, ...) from it at import; a key the code needs that is missing here FAILS the import, it does not default. Nathan, 2026-08-31: 'save everything as the normal floor when making future shorts' and 'that short was made off the old rules or whatever and should be made with our new ones'. R40: tools/floor_stamp.py hashes this file into every short's sidecar, so adding a key here makes every earlier short stale by design."
+ }
+}

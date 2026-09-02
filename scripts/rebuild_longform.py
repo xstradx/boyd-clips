@@ -50,7 +50,7 @@ DEFAULT_CASES = ["JgvW7oCQxuI:6698", "mvGmUbuS0sU:1358", "4zkUTUavW4I:116"]
 # one — 1.4s, a straight fade-up to the mark. sting_v2.mp4 (2.6s) builds the
 # letters with the star travelling and is the flashy variant; sting_gavel.mp4
 # reveals letter by letter. Compared frame by frame before choosing.
-INTRO = Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\sting.mp4")
+INTRO = Path(r"D:\Boyd Clips\boyd-brand\sting.mp4")
 
 DEAD_AIR_S = 4.0     # CONTENT_SPEC §2
 KEEP_S = 0.35        # left at each end of a removed run so joins read as edits

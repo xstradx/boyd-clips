@@ -147,7 +147,23 @@ def main() -> int:
         sizes = nd.sum(np.ones_like(am), lb2, range(1, n2 + 1))
         am = lb2 == (int(np.argmax(sizes)) + 1)
         ys, xs = np.where(am)
-        n_arrow = int(am.sum())
+        # NAME WHAT THIS ACTUALLY IS. This is every RED PIXEL VISIBLE IN THE
+        # DELIVERED FILE - the arrow body PLUS its glow and halo and the
+        # antialiasing around both. verify_Q4_light.py measures a different
+        # quantity under the same word: it loads the drawn POLYGON from
+        # <tag>_arrowpoly.npy, which is the core shape only.
+        #
+        # Measured on CARTHIEF_thumbnail_V2.jpg, 2026-08-31:
+        #     Q3 visible red (core+glow) 28,983px = 3.14% of frame
+        #     Q4 polygon      (core)      3,451px = 0.37% of frame
+        # An 8.4x difference between two checkers that both print "arrow".
+        #
+        # THAT is the bug that killed this gate: its old limit, "shipped
+        # Thompson 3,822px = 0.41%", was copied from Q4's POLYGON number and
+        # then applied to this GLOW-INCLUSIVE one. It could never pass. It cried
+        # wolf on every build and was quietly dropped from the pipeline.
+        n_arrow_visible_red = int(am.sum())
+        n_arrow = n_arrow_visible_red
         overlap = int((am & people).sum())
         # tip and direction from the polygon itself: PCA long axis, tip = the
         # extreme point on the side nearest the defendant
@@ -170,13 +186,45 @@ def main() -> int:
                 who = "the DEFENDANT" if hit else "someone else"
                 break
         body = bgr[int(tip[1] - v[1] * 22), int(tip[0] - v[0] * 22)]
-        gate(3, overlap == 0 and hit,
-             f"arrow {n_arrow:,}px = {100 * n_arrow / (W * H):.2f}% of frame "
-             f"(shipped Thompson 3,822px = 0.41%); {overlap}px on ANY person "
-             f"(required 0); ray from the tip ({tip[0]:.0f},{tip[1]:.0f}) "
-             f"direction ({v[0]:+.2f},{v[1]:+.2f}) first strikes "
-             f"{who} after {dist}px; body colour "
-             f"#{body[2]:02X}{body[1]:02X}{body[0]:02X} (spec #FD0101)")
+
+        # THE ARROW SPEC IS READ FROM THE COMPOSITOR, NOT RESTATED HERE.
+        #
+        # This gate used to hardcode "shipped Thompson 3,822px = 0.41%" and
+        # require ZERO arrow pixels on a person. Nathan repositioned the arrow
+        # himself on 2026-08-29 - thumb.py:42 records it verbatim, "He moved it
+        # bigger, left and lower" - and ARROW_W_FRAC went to 0.255. From that
+        # day this gate failed EVERY thumbnail the pipeline produced, including
+        # ones he approved and shipped. So it stopped being run.
+        #
+        # That is how a checker dies: it goes stale, it cries wolf, and someone
+        # quietly stops calling it. Discovered 2026-08-31 when an audit found it
+        # was referenced by zero other files.
+        #
+        # The fix is structural. The size now comes from thumb.py's own
+        # constant, so a future repositioning updates the gate automatically. And
+        # overlap-on-a-person is no longer a failure: an arrow that POINTS at
+        # someone necessarily touches them once it is this size. What is still
+        # checked is the thing that actually matters and cannot drift - does the
+        # ray from the tip actually strike the defendant.
+        try:
+            sys.path.insert(0, str(ROOT / "tools"))
+            from thumb import ARROW_W_FRAC as _AWF
+        except Exception:                                     # noqa: BLE001
+            _AWF = 0.255
+        want_px = _AWF * W
+        # area, not width: a 2:1 arrow at width w covers roughly w*w/2
+        want_frac = (want_px * want_px * 0.5) / (W * H)
+        got_frac = n_arrow / (W * H)
+        size_ok = 0.35 * want_frac <= got_frac <= 2.2 * want_frac
+        gate(3, size_ok and hit,
+             f"arrow {n_arrow:,}px = {100 * got_frac:.2f}% of frame "
+             f"(thumb.py ARROW_W_FRAC={_AWF} implies ~{100 * want_frac:.2f}%, "
+             f"band {100 * 0.35 * want_frac:.2f}-{100 * 2.2 * want_frac:.2f}%); "
+             f"{overlap}px on a person (reported, NOT gated - an arrow this "
+             f"size must touch what it points at); ray from the tip "
+             f"({tip[0]:.0f},{tip[1]:.0f}) direction ({v[0]:+.2f},{v[1]:+.2f}) "
+             f"first strikes {who} after {dist}px; body colour "
+             f"#{body[2]:02X}{body[1]:02X}{body[0]:02X}")
 
     # ---- 4. flat-area chroma deviation ----------------------------------
     dev, npx, absd = chroma_flat_dev(bgr)

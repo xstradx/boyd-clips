@@ -1,0 +1,26 @@
+{
+ "source": "C:\\Users\\natha\\Projects\\boyd-clips\\work\\GUOzwzGiPYU\\GUOzwzGiPYU_h_4669_4649-5230.mp4",
+ "src_start": 5007.25,
+ "src_end": 5012.3,
+ "duration_s": 5.05,
+ "label": "COMING UP...",
+ "body_start": 4669.09,
+ "body_end": 5201.38,
+ "label_box": [
+  86,
+  924,
+  352,
+  1001
+ ],
+ "intro": "D:\\Boyd Clips\\boyd-brand\\sting.mp4",
+ "intro_s": 1.4,
+ "offset_s": 4649.0,
+ "crop": null,
+ "fade_s": 0.35,
+ "canvas": [
+  1920,
+  1080
+ ],
+ "fps": 30,
+ "output_s": 538.767
+}

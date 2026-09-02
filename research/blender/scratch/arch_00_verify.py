@@ -5,7 +5,7 @@ import bpy, os, sys, math, time
 
 OUT = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders\arch"
 os.makedirs(OUT, exist_ok=True)
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 FONT = r"C:\Users\natha\Projects\boyd-clips\assets\fonts\Anton-Regular.ttf"
 
 def hdr(s): print("\n########## %s ##########" % s)

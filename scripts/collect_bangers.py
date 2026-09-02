@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEW = ROOT / "out" / "review"
-DEST = Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\BANGERS")
+DEST = Path(r"D:\Boyd Clips\BANGERS")
 
 # case_key -> filename stem in the Desktop folder
 PICKS = {

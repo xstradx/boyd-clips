@@ -44,7 +44,7 @@ print("   default colorspace :", img.colorspace_settings.name)
 
 print()
 print("=== what alpha_mode does a freshly LOADED png get? ===")
-lg = bpy.data.images.load(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png")
+lg = bpy.data.images.load(r"D:\Boyd Clips\boyd-brand\logo_transparent.png")
 print("   loaded logo alpha_mode :", lg.alpha_mode)
 print("   loaded logo colorspace :", lg.colorspace_settings.name)
 print("   size                   :", tuple(lg.size), " channels:", lg.channels, " is_float:", lg.is_float)

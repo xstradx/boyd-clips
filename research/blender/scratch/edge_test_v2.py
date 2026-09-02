@@ -9,7 +9,7 @@ import os
 
 OUT  = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders"
 FONT = r"C:\Users\natha\Projects\boyd-clips\assets\fonts\BebasNeue-Regular.ttf"
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 
 W, H = 2560, 1440
 BG, INK, RED = (0x15,0x18,0x1D), (0xF2,0xEE,0xE3), (0xD0,0x2D,0x2E)

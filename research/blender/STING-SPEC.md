@@ -446,7 +446,7 @@ See §1 and §7.
 
 ## 12. BLOCKER — the mark must be redrawn as vector first
 
-`C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png` cannot be used for motion as
+`D:\Boyd Clips\boyd-brand\logo_transparent.png` cannot be used for motion as
 it stands. Independently re-verified on this machine (`scratch\arch_03_shearrender.py`):
 
 ```

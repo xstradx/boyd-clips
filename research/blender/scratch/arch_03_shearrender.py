@@ -4,7 +4,7 @@ import bpy, os, math
 
 OUT = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders\arch"
 os.makedirs(OUT, exist_ok=True)
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene

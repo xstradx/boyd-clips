@@ -1,0 +1,131 @@
+{
+  "_why": "Gates for scripts/find_called_hearings.py, read through tools/hearing_measure.py. Measured 2026-09-01 on 6039 called segments >= 360 s (state/picker_probe.json) against Nathan's eleven winners in data/catalog_vs_picker.json. Speaker attribution is NOT possible on 69% of the archive (auto captions), so every gate here is attribution-free.",
+  "q_per_min_min": 1.0,
+  "narr_per_100_min": 0.2,
+  "_evidence": {
+    "q_per_min_percentiles": {
+      "p10": 0.65,
+      "p30": 1.35,
+      "p50": 2.1,
+      "p70": 2.85,
+      "p90": 3.91
+    },
+    "narr_per_100_percentiles": {
+      "p10": 0.12,
+      "p30": 0.27,
+      "p50": 0.41,
+      "p70": 0.59,
+      "p90": 0.91
+    },
+    "winners_q_per_min": {
+      "MONKEY": 4.06,
+      "SANCHEZ": 1.71,
+      "CARTHIEF": 3.67,
+      "CROSS": 1.42,
+      "IZZY93": 2.45,
+      "CREDIT": 3.35,
+      "WARREN": 3.63,
+      "CABABAYERO": 2.56,
+      "SELENAS": 1.7,
+      "OFFERUP": 4.73,
+      "STALKER": 2.35
+    },
+    "winners_narr_per_100": {
+      "MONKEY": 0.64,
+      "SANCHEZ": 0.86,
+      "CARTHIEF": 0.5,
+      "CROSS": 0.99,
+      "IZZY93": 1.38,
+      "CREDIT": 0.54,
+      "WARREN": 1.11,
+      "CABABAYERO": 0.88,
+      "SELENAS": 0.37,
+      "OFFERUP": 0.75,
+      "STALKER": 0.27
+    },
+    "thin_margins_said_out_loud": "Measured on the WHOLE hearing (call to next call): CROSS q/min 1.07 clears 1.0 by 0.07; STALKER narr/100 0.24 clears 0.2 by 0.04. A winner that lands under either gate is a floor move, not a tuning."
+  },
+  "controls": {
+    "positive": [
+      {
+        "case": "IZZY93",
+        "video_id": "JTvmXlUgm7o",
+        "t": 3075.9
+      },
+      {
+        "case": "CROSS",
+        "video_id": "GP0apLeja_k",
+        "t": 2498.6,
+        "expect_over_cap": true,
+        "expect_span_min": 2300
+      },
+      {
+        "case": "SELENAS",
+        "video_id": "kwUCdkIyCfE",
+        "t": 7639.8
+      },
+      {
+        "case": "CREDIT",
+        "video_id": "JTvmXlUgm7o",
+        "t": 6719.6
+      },
+      {
+        "case": "WARREN",
+        "video_id": "JgvW7oCQxuI",
+        "t": 4073.8
+      },
+      {
+        "case": "CABABAYERO",
+        "video_id": "XiWwYFPhPn0",
+        "t": 7678.5,
+        "expect_over_cap": true
+      },
+      {
+        "case": "STALKER",
+        "video_id": "qaIwPERIac8",
+        "t": 5960.0,
+        "note": "its call is 'Port is calling' - invisible to the old regex",
+        "expect_over_cap": true
+      },
+      {
+        "case": "SANCHEZ",
+        "video_id": "3FMy2Kvu3UA",
+        "t": 3703.4
+      },
+      {
+        "case": "CARTHIEF",
+        "video_id": "EwwnbiAQtFk",
+        "t": 3574.1
+      },
+      {
+        "case": "OFFERUP",
+        "video_id": "l19Ijva3Rsk",
+        "t": 10570.4
+      },
+      {
+        "case": "MONKEY",
+        "video_id": "2XkPnvstmRQ",
+        "t": 5915.9
+      }
+    ],
+    "negative": [
+      {
+        "case": "counsel-monologue",
+        "video_id": "SPSHGzlOe8c",
+        "t": 4546.7,
+        "expect_fail": "q_per_min",
+        "note": "PSI plea argued by counsel; she never questions him (q/min 0.0, 1716 words)"
+      },
+      {
+        "case": "plea-then-jury",
+        "video_id": "pP80_kPJjBA",
+        "t": 2786.7,
+        "expect_jury_cut": true,
+        "note": "'let's bring the jury in' at the tail - the hearing is cut there, not excluded"
+      }
+    ],
+    "t_tolerance_s": 20
+  },
+  "overlong_s": 3600,
+  "_overlong_why": "a stretch with no call phrase for an hour is a missed boundary (or a trial), not one hearing; excluded and said so"
+}

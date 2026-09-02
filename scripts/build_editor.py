@@ -9,7 +9,7 @@ No server. The page sits beside the mp4 in READY-TO-REVIEW and loads it with a
 relative src, so it survives being closed, reopened and rebooted - unlike the
 served pages, which kept being killed.
 
-Player time is relative to the long-form file; make_short.py wants absolute
+Player time is relative to the long-form file; short_chain.py wants absolute
 source seconds, so the page adds the hearing's start offset for you.
 """
 
@@ -127,7 +127,9 @@ function build(){
   var parts = [];
   for (var i=0;i<segs.length;i++)
     parts.push("--seg " + (BASE+segs[i].a).toFixed(1) + ":" + (BASE+segs[i].b).toFixed(1));
-  return "python scripts/make_short.py --video " + VIDEO + " " + parts.join(" ")
+  // tools/short_chain.py, never scripts/make_short.py (2026-09-02): the raw
+  // render has none of the engine's gates. check_short_entry.py proves it.
+  return "python tools/short_chain.py --video " + VIDEO + " " + parts.join(" ")
        + " --out \\"" + OUT + "\\"";
 }
 function copyCmd(){

@@ -1182,7 +1182,7 @@ def _concat_filter(
 # unbranded with only a log line to say so. Candidates rather than one path,
 # newest location first, so a move costs a warning instead of the mark.
 _INTRO_CANDIDATES = [
-    Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\sting_v2.mp4"),
+    Path(r"D:\Boyd Clips\boyd-brand\sting_v2.mp4"),
     Path(r"C:\Users\natha\OneDrive\Desktop\boyd-brand\sting_v2.mp4"),
     Path(__file__).resolve().parents[2] / "assets" / "brand" / "sting_v2.mp4",
 ]
@@ -1208,7 +1208,7 @@ def resolve_intro(configured: str | None = None) -> Path | None:
 
 
 _WATERMARK_CANDIDATES = [
-    Path(r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\watermarks_v2\wm_brand_halo_40.png"),
+    Path(r"D:\Boyd Clips\boyd-brand\watermarks_v2\wm_brand_halo_40.png"),
     Path(r"C:\Users\natha\OneDrive\Desktop\boyd-brand\watermarks_v2\wm_brand_halo_40.png"),
     Path(__file__).resolve().parents[2] / "assets" / "brand" / "wm_brand_halo_40.png",
 ]
@@ -1293,6 +1293,63 @@ def _watermark_chain(
     return ["-i", str(path.resolve())], ";".join(parts)
 
 
+# Cold open (R49). Nathan, 2026-09-02: "add a 5 second or so clip of the hook
+# or drama later in the vid in the beginning of long form and put 'Coming
+# up...' or something". The clip is BODY footage (same crop, scale, mark) cut
+# from later in the same source, labelled, faded to black, and concatenated in
+# front of the sting: cold open -> sting -> body. The label is the shorts'
+# caption face (Anton, white, black outline) so it reads as the channel, not as
+# a stock lower-third.
+COLDOPEN_LABEL = "COMING UP..."
+COLDOPEN_LABEL_FONT = Path(__file__).resolve().parents[2] / "assets" / "fonts" / "Anton-Regular.ttf"
+COLDOPEN_FADE_S = 0.35          # video + audio fade to black at the cold open's end
+COLDOPEN_MIN_S, COLDOPEN_MAX_S = 3.0, 9.0   # "5 second or so"
+# "later in the vid": the hook must come from at least this far into the body,
+# or it is the opening shown twice, not a tease.
+COLDOPEN_MIN_AHEAD_S = 30.0
+
+
+def _ff_escape(text: str) -> str:
+    """drawtext text= value: ffmpeg's filter parser eats : \\ ' and %."""
+    return (text.replace("\\", "\\\\").replace(":", "\\:")
+                .replace("'", "\\'").replace("%", "\\%"))
+
+
+def _ff_path(path: Path) -> str:
+    """fontfile= value on Windows: the drive colon has to be escaped."""
+    return str(path).replace("\\", "/").replace(":", "\\:")
+
+
+def coldopen_label_filter(w: int, h: int, label: str = COLDOPEN_LABEL,
+                          font: Path = COLDOPEN_LABEL_FONT) -> str:
+    """drawtext for the cold-open label: bottom-left, safe margins, sized to the
+    canvas (the shorts' caption look). Raises if the font is missing - a cold
+    open without its label is the defect, not a degraded render."""
+    if not Path(font).is_file():
+        raise FileNotFoundError(f"cold-open label font not found: {font}")
+    size = int(round(h * 0.065))            # 70 px at 1080p
+    border = max(2, int(round(size * 0.10)))
+    margin_x = int(round(w * 0.045))
+    margin_y = int(round(h * 0.08))
+    return (f"drawtext=fontfile='{_ff_path(Path(font))}':text='{_ff_escape(label)}'"
+            f":fontsize={size}:fontcolor=white:borderw={border}:bordercolor=black"
+            f":x={margin_x}:y=h-th-{margin_y}")
+
+
+def coldopen_label_box(w: int, h: int) -> tuple[int, int, int, int]:
+    """(x0, y0, x1, y1) of the region the label occupies - what the checker
+    measures. Derived from the same numbers as the filter above."""
+    size = int(round(h * 0.065))
+    margin_x = int(round(w * 0.045))
+    margin_y = int(round(h * 0.08))
+    # Anton at `size` px: cap height ~0.72*size, "COMING UP..." ~3.6*size wide
+    return (margin_x, h - margin_y - size, margin_x + int(3.8 * size), h - margin_y + border_pad(size))
+
+
+def border_pad(size: int) -> int:
+    return max(2, int(round(size * 0.10)))
+
+
 def render_longform(
     source: Path,
     offset_s: float,
@@ -1303,6 +1360,8 @@ def render_longform(
     intro: Path | None = None,
     watermark_y: int | None = None,
     watermark_right_x: int | None = None,
+    coldopen: tuple[float, float] | None = None,
+    coldopen_label: str = COLDOPEN_LABEL,
 ) -> float:
     """The case, trimmed, optionally behind a branded intro.
 
@@ -1310,6 +1369,11 @@ def render_longform(
     rather than by a second encode, so the court footage is compressed once.
     The watermark is applied to the BODY only — the intro is already branding
     and stacking the mark on top of it reads as a mistake.
+
+    `coldopen` = (start_s, end_s) in SOURCE-absolute seconds (same frame of
+    reference as `segments`): that span is rendered first - body treatment,
+    the `coldopen_label` drawn bottom-left, a fade to black - then the intro,
+    then the body. R49. Requires `intro`.
 
     `watermark_y` anchors the mark inside the picture instead of inside the
     canvas. Measured on this docket: the court's own frame carries a black band
@@ -1319,6 +1383,23 @@ def render_longform(
     w, h = cfg.get("resolution", [1920, 1080])
     trims, concat, vlabel = _concat_filter(segments, offset_s)
     pre = f"{crop}," if crop else ""
+
+    if coldopen is not None:
+        c0, c1 = float(coldopen[0]), float(coldopen[1])
+        if intro is None:
+            raise ValueError("cold open needs the intro sting behind it")
+        if not (COLDOPEN_MIN_S <= c1 - c0 <= COLDOPEN_MAX_S):
+            raise ValueError(f"cold open {c1 - c0:.2f}s is outside "
+                             f"{COLDOPEN_MIN_S:.0f}-{COLDOPEN_MAX_S:.0f}s")
+        body0 = min(sg.start_s for sg in segments)
+        body1 = max(sg.end_s for sg in segments)
+        if not (body0 <= c0 and c1 <= body1):
+            raise ValueError(f"cold open {c0:.2f}-{c1:.2f} is not inside the "
+                             f"body {body0:.2f}-{body1:.2f}")
+        if c0 - body0 < COLDOPEN_MIN_AHEAD_S:
+            raise ValueError(f"cold open starts {c0 - body0:.1f}s into the body; "
+                             f"it must come from later than {COLDOPEN_MIN_AHEAD_S:.0f}s "
+                             f"(\"the hook or drama later in the vid\")")
 
     inputs: list[str] = ["-i", str(source)]
     intro_idx = None
@@ -1366,7 +1447,42 @@ def render_longform(
                 f"d={probe_duration(Path(intro)):.3f},{norm}[ia]"
             )
         parts.append(f"[ac]{norm}[ab]")
-        parts.append("[iv][ia][vbody][ab]concat=n=2:v=1:a=1[vout][aout]")
+        if coldopen is None:
+            parts.append("[iv][ia][vbody][ab]concat=n=2:v=1:a=1[vout][aout]")
+        else:
+            # The cold open is the body's own treatment (crop, scale, mark)
+            # on a second trim of the same input, plus the label and a fade
+            # to black so the cut into the sting is not a hard splice.
+            a0, a1 = max(0.0, c0 - offset_s), c1 - offset_s
+            cdur = a1 - a0
+            fade_st = max(0.0, cdur - COLDOPEN_FADE_S)
+            if wm_index is not None:
+                # the mark input is consumed once by wm_filter; split it
+                parts[3] = wm_filter.replace(f"[{wm_index}:v]", "[wmsplit0]", 1)
+                parts.insert(3, f"[{wm_index}:v]split=2[wmsplit0][wmsplit1]")
+                # every intermediate label ([wm], [wm0], [vwm_0]) is renamed
+                # or the two chains collide on the same pad name
+                cwm = (wm_filter.replace("[wm", "[cm").replace("[vbase]", "[cbase]")
+                       .replace("[vwm", "[cwm").replace(f"[{wm_index}:v]", "[wmsplit1]", 1))
+            else:
+                cwm = "[cbase]null[cwm]"
+            parts.append(
+                f"[0:v]trim=start={a0:.3f}:end={a1:.3f},setpts=PTS-STARTPTS,"
+                f"{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
+                f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,fps={fps}[cbase]"
+            )
+            parts.append(cwm)
+            parts.append(
+                f"[cwm]{coldopen_label_filter(w, h, coldopen_label)},"
+                f"fade=t=out:st={fade_st:.3f}:d={COLDOPEN_FADE_S:.3f},"
+                f"format=yuv420p,setsar=1[cv]"
+            )
+            parts.append(
+                f"[0:a]atrim=start={a0:.3f}:end={a1:.3f},asetpts=PTS-STARTPTS,"
+                f"afade=t=in:st=0:d=0.015,"
+                f"afade=t=out:st={fade_st:.3f}:d={COLDOPEN_FADE_S:.3f},{norm}[ca]"
+            )
+            parts.append("[cv][ca][iv][ia][vbody][ab]concat=n=3:v=1:a=1[vout][aout]")
         amap = "[aout]"
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1379,7 +1495,24 @@ def render_longform(
         "-movflags", "+faststart",
         str(out_path),
     ])
-    return probe_duration(out_path)
+    dur = probe_duration(out_path)
+    if coldopen is not None:
+        # What the checker (tools/check_coldopen.py) measures the file against.
+        side = {
+            "source": str(Path(source).resolve()),
+            "src_start": round(c0, 3), "src_end": round(c1, 3),
+            "duration_s": round(c1 - c0, 3), "label": coldopen_label,
+            "body_start": round(min(sg.start_s for sg in segments), 3),
+            "body_end": round(max(sg.end_s for sg in segments), 3),
+            "label_box": list(coldopen_label_box(w, h)),
+            "intro": str(intro), "intro_s": round(probe_duration(Path(intro)), 3),
+            "offset_s": offset_s, "crop": crop,
+            "fade_s": COLDOPEN_FADE_S, "canvas": [w, h], "fps": fps,
+            "output_s": round(dur, 3),
+        }
+        out_path.with_name(out_path.name + ".coldopen.json").write_text(
+            json.dumps(side, indent=1), encoding="utf-8")
+    return dur
 
 
 def _has_audio(path: Path) -> bool:

@@ -46,6 +46,8 @@ log = logging.getLogger("boydclips.thumbnail")
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER = ROOT / "scripts" / "make_thumbnail_v2.py"
+# The construction Nathan approved 2026-08-29 ("q3 thumbnail is fire").
+Q3_BUILDER = ROOT / "scripts" / "thumb_Q3_detail.py"
 FALLBACK_BUILDER = ROOT / "scripts" / "make_thumbnail.py"
 
 # rembg's DEFAULT model is BRIA RMBG-2.0, licensed CC BY-NC 4.0 -
@@ -227,6 +229,46 @@ def build(
             )
 
         left_crop, right_crop = tiles
+
+        # ---- the construction Nathan approved, 2026-08-29: "q3 thumbnail is
+        # fire". Until now this module hardcoded make_thumbnail_v2 while the
+        # comment above the call claimed it produced "the construction Nathan
+        # approved", so the unattended pipeline shipped something he had not
+        # picked. That is the mechanical cause of the thumbnails reading as
+        # slop: what shipped was never what he chose.
+        #
+        # The crops need no hand-tuning. detect_tile_crops returns ffmpeg crop
+        # strings and thumb_Q3_detail takes the same w:h:x:y geometry, so the
+        # only difference is the "crop=" prefix. Measured on CARTHIEF: the
+        # detected pair is ('crop=612:338:18:190', 'crop=620:338:644:190'),
+        # byte-identical to the judge_crop/plate_crop hand-written in
+        # config/cases.json. Per-case tuning was never actually necessary.
+        if cfg.get("q3", True):
+            judge_c, plate_c = (
+                (right_crop, left_crop) if subject_side == "right"
+                else (left_crop, right_crop)
+            )
+            strip = lambda c: c.split("=", 1)[1] if c.startswith("crop=") else c
+            cmd = [sys.executable, str(Q3_BUILDER),
+                   "--video", str(source),
+                   "--judge-t", f"{float(hook_s):.2f}",
+                   "--judge-crop", strip(judge_c),
+                   "--plate-t", f"{float(cfg.get('plate_s', hook_s)):.2f}",
+                   "--plate-crop", strip(plate_c),
+                   "--white", white_part, "--yellow", yellow_part,
+                   "--out", str(out)]
+            for flag, key in (("--cap", "cap"), ("--sat-gain", "sat_gain"),
+                              ("--target-luma", "target_luma"),
+                              ("--face-margin", "face_margin")):
+                if key in cfg:
+                    cmd += [flag, str(cfg[key])]
+            log.info("  thumbnail: Q3 construction (%s)", Q3_BUILDER.name)
+            _run_builder(cmd, out)
+            # Q3 grades the picture in memory BEFORE drawing type, so the
+            # file-in-place grade() below must not run over it - that is the
+            # exact bug render.py documents for video captions.
+            return out
+
         subject_crop, plate_crop = (
             (right_crop, left_crop) if subject_side == "right"
             else (left_crop, right_crop)
@@ -376,7 +418,22 @@ def grade_image(img: "Image.Image", cfg: dict[str, Any] | None = None) -> "Image
         ys = _np.clip(xs + (ys - xs) * strength, 0.0, 1.0)
         ramp = _np.interp(_np.linspace(0.0, 1.0, 256), xs, ys)
         lut = _np.clip(ramp * 255.0 + 0.5, 0, 255).astype("uint8")
-        img = img.point(list(lut) * 3)
+        if cfg.get("curve_luma_only", False):
+            # LUMA ONLY. MEASURED 2026-08-29: run per-channel, this curve is
+            # concave -- slope 1.176 over the bottom quarter and 0.648 over the
+            # top -- so it EXPANDS chroma in the shadows and COMPRESSES it in
+            # the highlights. On the carthief build that is the whole of the
+            # measured "skin goes grey as it brightens" defect: turning the
+            # curve off moved the defendant's core-skin chroma-vs-luma slope
+            # from -17.13 to +1.06 per 100Y and his key:fill from 1.42 to 2.11,
+            # and the judge's from -4.92 to -1.39. Applying the identical LUT to
+            # Y in YCbCr keeps the tone shape Nathan asked for on 2026-08-23
+            # without the chroma side-effect, because Cb/Cr are untouched.
+            y, cb, cr = img.convert("YCbCr").split()
+            y = y.point(list(lut))
+            img = Image.merge("YCbCr", (y, cb, cr)).convert("RGB")
+        else:
+            img = img.point(list(lut) * 3)
 
     img = ImageEnhance.Contrast(img).enhance(float(cfg.get("contrast", 1.06)))
 

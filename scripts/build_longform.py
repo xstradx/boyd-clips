@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import os
 import sys
 from pathlib import Path
 
@@ -121,9 +122,28 @@ def main() -> int:
         d = b - a
         total += d
         seg = out / f"scene_{idx:02d}.mp4"
+        # 30ms audio fade in and out on EVERY segment.
+        #
+        # Honest note on why, because I got this wrong first: I told Nathan the
+        # missing fade was why his edits sound choppy. Then I measured it -
+        # concatenated two segments cut at the loudest points in a real hearing,
+        # with and without fades - and the join discontinuity was 670 against a
+        # 99.9th-percentile speech transient of 2151, i.e. 0.31x. There is no
+        # audible click, because each segment is AAC-encoded separately and the
+        # decoder's overlap-add smooths the boundary. The real cause of choppy
+        # was cut PLACEMENT (see the cut gate in make_short.py).
+        #
+        # It goes in anyway: it is standard practice, it costs nothing, and it
+        # protects the case this pipeline does not currently hit - a segment
+        # boundary that lands on a sustained loud vowel, or any future path that
+        # concatenates PCM rather than separately-encoded AAC.
+        fade = 0.03
+        af = (f"afade=t=in:st=0:d={fade},"
+              f"afade=t=out:st={max(0.0, (b - a) - fade):.3f}:d={fade}")
         cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                "-ss", f"{a:.2f}", "-to", f"{b:.2f}", "-i", str(src / f),
                "-vf", "scale=1920:1080:flags=lanczos,fps=30,format=yuv420p",
+               "-af", af,
                "-c:v", "libx264", "-preset", "medium", "-crf", "20",
                "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
                str(seg)]
@@ -141,6 +161,34 @@ def main() -> int:
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                     "-f", "concat", "-safe", "0", "-i", str(lst),
                     "-c", "copy", "-movflags", "+faststart", str(body)], check=True)
+
+    # ------------------------------------------------------------- MASTERING
+    # ONCE over the assembled programme, never per segment. Normalising each
+    # scene independently would push every scene to the same loudness and so
+    # make the level JUMP at each join - a quiet aside and a raised voice would
+    # come out equally loud, which destroys exactly the dynamics that make a
+    # hearing worth watching.
+    #
+    # Measured 2026-08-31: shipped long-form sat at -21.2 LUFS with true peak
+    # -5.1 dBFS, about 7dB under the level platforms normalise toward and with
+    # 5dB of headroom unused. scripts/assemble_final.py already had this exact
+    # two-pass loudnorm and was called by nothing.
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+        import master_audio as _ma
+        _tmp = body.with_name(body.stem + "_m.mp4")
+        _b, _a, _ = _ma.master(str(body), str(_tmp))
+        os.replace(str(_tmp), str(body))
+        print(f"\nmastered: {_b[0]:.1f} -> {_a[0]:.1f} LUFS ({_a[0]-_b[0]:+.1f} dB), "
+              f"true peak {_a[2]:.1f} dBFS")
+        if not (-15.0 <= _a[0] <= -13.5):
+            print(f"  LOUDNESS GATE FAILED: {_a[0]:.1f} LUFS outside -14 +/- 1")
+            return 1
+    except Exception as _me:                          # noqa: BLE001
+        # Loud failure. Silence is how assemble_final.py went unused for months.
+        print(f"\nMASTERING FAILED: {str(_me)[:200]}")
+        print("  Shipping an unmastered long-form is a decision, not a default.")
+        return 1
 
     probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                             "-of", "csv=p=0", str(body)], capture_output=True, text=True)

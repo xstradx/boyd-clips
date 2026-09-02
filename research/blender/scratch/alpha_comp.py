@@ -1,7 +1,7 @@
 import bpy, os
 
 OUT = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders"
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 
 
 def s2l(c):

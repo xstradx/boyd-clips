@@ -1,5 +1,5 @@
-﻿Set-Location "C:\Users\natha\Projects\boyd-clips"
-$dest = "C:\Users\natha\OneDrive\Desktop\Boyd Clips\BANGERS"
+Set-Location "C:\Users\natha\Projects\boyd-clips"
+$dest = "D:\Boyd Clips\BANGERS"
 $picks = @(
  @("RzjGikNbHMA:8485","01_McCaskill_smell_like_marijuana"),
  @("MiNisjOh61c:2309","02_JoeGarcia_2yrs"),

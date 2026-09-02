@@ -1,0 +1,1586 @@
+{
+ "CARTHIEF": {
+  "video": "work/EwwnbiAQtFk/EwwnbiAQtFk_h_3574_3554-4697.mp4",
+  "transcript": "work/EwwnbiAQtFk/EwwnbiAQtFk.transcript.json",
+  "offset": 3554,
+  "case_from": 3574,
+  "case_to": 4628,
+  "judge_t": 3944,
+  "judge_crop": "612:338:18:190",
+  "plate_t": 4578,
+  "plate_crop": "620:338:644:190",
+  "white": "Playing Grand",
+  "yellow": "Theft Auto?",
+  "short": "READY-TO-POST/CARTHIEF_SHORT.mp4",
+  "short_src_start": 3931.8,
+  "plate_from": 3900,
+  "plate_to": 4000,
+  "plate_face_at": 0.57,
+  "expression_window": [
+   20,
+   600
+  ],
+  "expression_side": "right",
+  "defendant_at": 0.78,
+  "defendant": "Jesus Lopez",
+  "cause": "2023 CR8930",
+  "posted_by": {
+   "searched": "2026-09-01",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Jesus Lopez",
+   "cause": "2023 CR8930",
+   "hooks": [
+    "playing",
+    "grand",
+    "theft",
+    "auto"
+   ],
+   "queries": [
+    "\"Jesus Lopez\" judge boyd",
+    "\"Jesus Lopez\" 187th",
+    "2023 CR8930",
+    "lopez boyd court",
+    "Playing Grand Theft Auto? judge boyd"
+   ],
+   "raw_entries": 54,
+   "own_hits": 3,
+   "source_hits": 11,
+   "results": [
+    {
+     "match": "name",
+     "channel": "AmericanJusticeFiles",
+     "channel_id": "UCPTKs2IWDUdDl_pgbb6YBYQ",
+     "channel_url": "https://www.youtube.com/channel/UCPTKs2IWDUdDl_pgbb6YBYQ",
+     "handle": "@AmericanJusticeFiles",
+     "title": "Judge Destroys Arrogant Woman's Attitude with One Line!",
+     "id": "09HBWeRvH24",
+     "url": "https://www.youtube.com/watch?v=09HBWeRvH24",
+     "view_count": 24334,
+     "duration_s": 1393,
+     "upload_date": "2026-07-24",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Boyd's Bench",
+     "channel_id": "UCAwJ5TfKqjDMYxEQxPR0whw",
+     "channel_url": "https://www.youtube.com/channel/UCAwJ5TfKqjDMYxEQxPR0whw",
+     "handle": "@BoydsBench-m1l",
+     "title": "Arrogant Mom Begs For 5th Chance — Judge Says “NO” & Slaps Max Sentence",
+     "id": "gZb4MbX2s-c",
+     "url": "https://www.youtube.com/watch?v=gZb4MbX2s-c",
+     "view_count": 4297,
+     "duration_s": 896,
+     "upload_date": "2026-08-06",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Boyd’s Court",
+     "channel_id": "UCOuYyBcSvjCL0qSlWL8gffA",
+     "channel_url": "https://www.youtube.com/channel/UCOuYyBcSvjCL0qSlWL8gffA",
+     "handle": "@BoydsCourt",
+     "title": "Judge Grills Teen on Stolen Car Joyride after He ADMITS to Boosting $20,000 Car",
+     "id": "wasG287RKRA",
+     "url": "https://www.youtube.com/watch?v=wasG287RKRA",
+     "view_count": 2138,
+     "duration_s": 1081,
+     "upload_date": "2026-01-28",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Teen Faces 10 Years in Stolen Car Chase — Judge Boyd BLOWS UP",
+     "id": "VO3MDOKWCPI",
+     "url": "https://www.youtube.com/watch?v=VO3MDOKWCPI",
+     "view_count": 2083,
+     "duration_s": 1259,
+     "upload_date": "2026-02-02",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Justice Unsealed",
+     "channel_id": "UC15ykz7GAItaAcRXRybP60Q",
+     "channel_url": "https://www.youtube.com/channel/UC15ykz7GAItaAcRXRybP60Q",
+     "handle": "@JusticeUnsealed-i7f",
+     "title": "Judge Boyd SHUTS DOWN 18 Year Old Who Boosted a Car and Fled at 100 MPH — Faces 10 Years",
+     "id": "lxtxDWdwbfc",
+     "url": "https://www.youtube.com/watch?v=lxtxDWdwbfc",
+     "view_count": 1,
+     "duration_s": 1273,
+     "upload_date": "2026-03-21",
+     "date_source": "exact",
+     "hits": [
+      0,
+      4
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd sentences Ruth Lopez #judgeboyd #childneglect #ratinfested #feces ",
+     "id": "13-5PDLi3dg",
+     "url": "https://www.youtube.com/watch?v=13-5PDLi3dg",
+     "view_count": 836,
+     "duration_s": 663,
+     "upload_date": "2026-05-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Judge Stephanie Boyd DESTROYS Defendant for Attacking Elderly Grandmother — 5 Years Probation!",
+     "id": "B68ZCwsRS4c",
+     "url": "https://www.youtube.com/watch?v=B68ZCwsRS4c",
+     "view_count": 560,
+     "duration_s": 1201,
+     "upload_date": "2026-02-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Clash",
+     "channel_id": "UCIUI7j-FHA1Y3I139LdWEgw",
+     "channel_url": "https://www.youtube.com/channel/UCIUI7j-FHA1Y3I139LdWEgw",
+     "handle": "@CourtClash-y5f",
+     "title": "“20-Year Max on Table… Judge Boyd Sentences Tommy Lopez Jr to 2 Years But NO MERCY on Weapons Ban!”",
+     "id": "SUflU29akh0",
+     "url": "https://www.youtube.com/watch?v=SUflU29akh0",
+     "view_count": 11,
+     "duration_s": 654,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Justice Served",
+     "channel_id": "UChCNihgcE_TS2bZEVbdyghA",
+     "channel_url": "https://www.youtube.com/channel/UChCNihgcE_TS2bZEVbdyghA",
+     "handle": "@JusticeServed-js",
+     "title": "Judge Boyd DESTROYS Samantha Lee Lopez's Excuses After Shocking Violence Confession!",
+     "id": "PgdKfcJfTlM",
+     "url": "https://www.youtube.com/watch?v=PgdKfcJfTlM",
+     "view_count": 4,
+     "duration_s": 1511,
+     "upload_date": "2026-08-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Trial & Truth",
+     "channel_id": "UC0uRHwA4HR-zqE-HE-dUY6w",
+     "channel_url": "https://www.youtube.com/channel/UC0uRHwA4HR-zqE-HE-dUY6w",
+     "handle": "@TrialandTruthYT",
+     "title": "Judge Boyd Exposes Church Theft Lies: Jeremy Lopez Caught in Court!  #judgeboyd",
+     "id": "YhtLF-brAXM",
+     "url": "https://www.youtube.com/watch?v=YhtLF-brAXM",
+     "view_count": 2,
+     "duration_s": 655,
+     "upload_date": "2025-09-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 5,
+   "competitors": [
+    "AmericanJusticeFiles",
+    "Boyd's Bench",
+    "Boyd’s Court",
+    "Court Of Justice",
+    "Justice Unsealed"
+   ],
+   "unconfirmed_surname_only": [
+    "Just Scrapping Purr-fect Justice @just-scrapping",
+    "Court Clash",
+    "Justice Served",
+    "Trial & Truth"
+   ],
+   "niche_channels": {
+    "KENS 5: Your San Antonio News Source": 18998,
+    "Time Served Court Watch": 15390,
+    "Shadow of Justice": 5417,
+    "Daily Court Stream": 3730,
+    "Justice Served": 1181,
+    "Trial Tales": 679,
+    "Justice Under Oath": 446,
+    "Judge Boyd’s Bench": 333,
+    "Court Day": 225,
+    "Echo Court": 42,
+    "Judge Court Order": 2,
+    "Sage Verdict": 1
+   },
+   "verdict": "5 channel(s): AmericanJusticeFiles, Boyd's Bench, Boyd’s Court, Court Of Justice, Justice Unsealed"
+  }
+ },
+ "SANCHEZ": {
+  "video": "work/3FMy2Kvu3UA/3FMy2Kvu3UA_h_3703_3683-4448.mp4",
+  "transcript": "work/3FMy2Kvu3UA/3FMy2Kvu3UA.transcript.json",
+  "offset": 3683,
+  "case_from": 3703,
+  "case_to": 4148,
+  "judge_t": 4021,
+  "judge_crop": "468:348:726:6",
+  "plate_t": 3983,
+  "white": "You're why your son",
+  "yellow": "is struggling",
+  "short": "READY-TO-POST/SANCHEZ_SHORT.mp4",
+  "short_src_start": 4019.0,
+  "plate_from": 3990,
+  "plate_to": 4090,
+  "expression_window": [
+   60,
+   700
+  ],
+  "defendant_at": 0.215,
+  "defendant": "Victoria Sanchez",
+  "cause": "2020 CR2715",
+  "posted_by": {
+   "searched": "2026-09-01",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Victoria Sanchez",
+   "cause": "2020 CR2715",
+   "hooks": [
+    "son",
+    "struggling"
+   ],
+   "queries": [
+    "\"Victoria Sanchez\" judge boyd",
+    "\"Victoria Sanchez\" 187th",
+    "2020 CR2715",
+    "sanchez boyd court",
+    "You're why your son is struggling judge boyd"
+   ],
+   "raw_entries": 48,
+   "own_hits": 3,
+   "source_hits": 2,
+   "results": [
+    {
+     "match": "name",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd discusses the complexities of balancing mercy and accountability within the court system",
+     "id": "pzEUtytirMw",
+     "url": "https://www.youtube.com/watch?v=pzEUtytirMw",
+     "view_count": 1112,
+     "duration_s": 3448,
+     "upload_date": "2025-07-18",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Courtroom Justice TV",
+     "channel_id": "UCeebTJ2BdacvP1DjD4aV5vg",
+     "channel_url": "https://www.youtube.com/channel/UCeebTJ2BdacvP1DjD4aV5vg",
+     "handle": "@CourtroomFleischerTV",
+     "title": "Probation REVOKED! Texas Judge Sentences Woman to 3 Years in Prison for Failing Drug Treatment",
+     "id": "lvNHzpJThq8",
+     "url": "https://www.youtube.com/watch?v=lvNHzpJThq8",
+     "view_count": 302,
+     "duration_s": 429,
+     "upload_date": "2025-07-22",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Teen Thinks Judge Boyd is a Fool — Then Instantly REGRETS It",
+     "id": "8ckIYOasNVs",
+     "url": "https://www.youtube.com/watch?v=8ckIYOasNVs",
+     "view_count": 293931,
+     "duration_s": 1177,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Judge Boyd REJECTED Plea Deal — “These Aren’t Mistakes, They’re Choices”",
+     "id": "fOulIodXfOc",
+     "url": "https://www.youtube.com/watch?v=fOulIodXfOc",
+     "view_count": 4936,
+     "duration_s": 1088,
+     "upload_date": "2026-04-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Teen Shows Attitude To Judge Boyd — She Ended It With a Sentence That Shocked Everyone",
+     "id": "3OSrGLthm3A",
+     "url": "https://www.youtube.com/watch?v=3OSrGLthm3A",
+     "view_count": 1452,
+     "duration_s": 1468,
+     "upload_date": "2026-06-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Legal verdict",
+     "channel_id": "UC9-qwrvrvjAd4GNTnCuGxyA",
+     "channel_url": "https://www.youtube.com/channel/UC9-qwrvrvjAd4GNTnCuGxyA",
+     "handle": "@Legalverdict-w7h",
+     "title": "MONSTER Teen Ruined a Child’s Life — Judge Boyd Goes NUCLEAR",
+     "id": "Uxpt1PXlByE",
+     "url": "https://www.youtube.com/watch?v=Uxpt1PXlByE",
+     "view_count": 402,
+     "duration_s": 686,
+     "upload_date": "2026-08-23",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd Sentences Elena Moreno Sanchez for stealing from grieving famous ",
+     "id": "t0D5zdB55jg",
+     "url": "https://www.youtube.com/watch?v=t0D5zdB55jg",
+     "view_count": 231,
+     "duration_s": 3141,
+     "upload_date": "2026-05-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Honorable Boyd",
+     "channel_id": "UCPc7YfEN-liAMTOaEXOyExw",
+     "channel_url": "https://www.youtube.com/channel/UCPc7YfEN-liAMTOaEXOyExw",
+     "handle": "@HonorableBoyd",
+     "title": "Facing 20 Years, She Risked It All by Exposing Her Secret to Judge Boyd",
+     "id": "ZwVz4DDC5eg",
+     "url": "https://www.youtube.com/watch?v=ZwVz4DDC5eg",
+     "view_count": 30,
+     "duration_s": 767,
+     "upload_date": "2026-08-19",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Judge’s Final Word",
+     "channel_id": "UCJVDDc8pa7NSPO5VhmvQlFQ",
+     "channel_url": "https://www.youtube.com/channel/UCJVDDc8pa7NSPO5VhmvQlFQ",
+     "handle": "@JudgesFinalWord",
+     "title": "Teen Thought This Hearing Was a Joke... Until Judge Boyd Spoke",
+     "id": "rwt6F1Sy1XI",
+     "url": "https://www.youtube.com/watch?v=rwt6F1Sy1XI",
+     "view_count": 21,
+     "duration_s": 1036,
+     "upload_date": "2026-08-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "JusticeNexusTV",
+     "channel_id": "UCAcSq9wiU-6lyyPpP2qEhXQ",
+     "channel_url": "https://www.youtube.com/channel/UCAcSq9wiU-6lyyPpP2qEhXQ",
+     "handle": "@JusticeNexusTV",
+     "title": "Judge Boyd Gives Her a Second Chance… Then the Test Comes Back POSITIVE",
+     "id": "UL2hEIsEceg",
+     "url": "https://www.youtube.com/watch?v=UL2hEIsEceg",
+     "view_count": 12,
+     "duration_s": 1036,
+     "upload_date": "2026-08-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Judgment Room",
+     "channel_id": "UCGTSfLZD5Px-uBcB9hf0fcA",
+     "channel_url": "https://www.youtube.com/channel/UCGTSfLZD5Px-uBcB9hf0fcA",
+     "handle": "@Judgment-Room",
+     "title": "Cocky Teen Refuses to Follow Court Orders & Asks for Leniency — Judge Boyd Pushes Back",
+     "id": "0vvzeQbg3dA",
+     "url": "https://www.youtube.com/watch?v=0vvzeQbg3dA",
+     "view_count": 2,
+     "duration_s": 1301,
+     "upload_date": "2026-08-29",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 2,
+   "competitors": [
+    "Just Scrapping Purr-fect Justice @just-scrapping",
+    "Courtroom Justice TV"
+   ],
+   "unconfirmed_surname_only": [
+    "Court Of Justice",
+    "Legal verdict",
+    "Honorable Boyd",
+    "Judge’s Final Word",
+    "JusticeNexusTV",
+    "Judgment Room"
+   ],
+   "niche_channels": {
+    "Judging Judges": 66053,
+    "KENS 5: Your San Antonio News Source": 18998,
+    "KSAT 12": 7734,
+    "Trial Tales": 283,
+    "The Courtroom Files": 242,
+    "Case Digest": 227,
+    "Justice Served": 68,
+    "Verdict Room": 67,
+    "Justice Time": 61,
+    "courtcatch": 55,
+    "The Gavel Report": 31,
+    "Judge Boyd Courtroom": 26
+   },
+   "verdict": "2 channel(s): Just Scrapping Purr-fect Justice @just-scrapping, Courtroom Justice TV"
+  }
+ },
+ "OFFERUP": {
+  "video": "work/l19Ijva3Rsk/l19Ijva3Rsk_h_10570_10550-11137.mp4",
+  "transcript": "work/l19Ijva3Rsk/l19Ijva3Rsk.transcript.json",
+  "offset": 10550,
+  "case_from": 10570,
+  "case_to": 11117,
+  "judge_t": 10999,
+  "judge_crop": "340:380:840:170",
+  "plate_t": 10884,
+  "plate_crop": "300:320:80:180",
+  "white": "Do you want",
+  "yellow": "a jury trial?",
+  "short": "READY-TO-POST/OFFERUP_SHORT.mp4",
+  "short_src_start": 10881.5,
+  "plate_t_note": "chosen by scripts/pick_plate.py over 55 frames of this hearing at step 10s: src 11110.0 and 11100.0 both measure 0.0% of the right side occupied by anyone other than the defendant, against 55% at the old 10884.0 where the attorney stood exactly where Judge Boyd has to be composited. Runners-up 11060.0 (0.4%), 11050.0 (2.0%), 11090.0 (2.6%).",
+  "plate_from": 10850,
+  "plate_to": 10950,
+  "bg_crop": "600:250:16:255",
+  "note": "Isidro Garcia, 2025 CR-002343. Hearing runs 10582-11209 (next call is State v. Anthony Wayne). CORRECTED 2026-08-30: plate_t was 11110, which is PAST the end of his hearing - that frame showed a different, female defendant. Wrong person in the thumbnail is the Gate D class of error. plate_t is now 10884, inside his exchange, verified visually (orange jumpsuit, attorney to his right). Crops recomputed by autocrop at a 42% face-to-crop target; the old plate_crop also framed his attorney. judge_t moved 10884->10930: the hair band at 10884 measured 552.9 vs lower elsewhere - her hair matted into a flat black mass and failed Gate A at flat_g_p90 0.4725. Frames ranked by Laplacian detail in the band above her face. CORRECTION 2026-08-30: autocrop at 42% shrank the crop to 152x161 and the composited subject then covered too little canvas, so blurred background dominated and Gate A failed at 0.4024. CARTHIEF composes correctly with its face at 23% of a 620x338 crop. Wide crops are right; the MONKEY fix was detecting faces on the RAW crop, not tightening the crop.",
+  "plate_face_at": 0.5,
+  "jud_c": [
+   955,
+   400
+  ],
+  "def_c": [
+   280,
+   400
+  ],
+  "bg_blur": 0.35,
+  "judge_expression": "serious (auto-selected by tools/expression.py, expr=0.1727)",
+  "expression_window": [
+   200,
+   560
+  ],
+  "expression_side": "right",
+  "solve_face_h": true,
+  "judge_head_dy": -24,
+  "defendant_at": 0.19,
+  "defendant": "Isidro Garcia",
+  "cause": "2025 CR-002343",
+  "posted_by": {
+   "searched": "2026-09-01",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Isidro Garcia",
+   "cause": "2025 CR-002343",
+   "hooks": [
+    "jury",
+    "trial"
+   ],
+   "queries": [
+    "\"Isidro Garcia\" judge boyd",
+    "\"Isidro Garcia\" 187th",
+    "2025 CR-002343",
+    "garcia boyd court",
+    "Do you want a jury trial? judge boyd"
+   ],
+   "raw_entries": 45,
+   "own_hits": 3,
+   "source_hits": 5,
+   "results": [
+    {
+     "match": "name",
+     "channel": "Trial Tales",
+     "channel_id": "UCupr8osK5xx6WbpFaQMEf3Q",
+     "channel_url": "https://www.youtube.com/channel/UCupr8osK5xx6WbpFaQMEf3Q",
+     "handle": "@officialtrialtales",
+     "title": "The Moment Judge Boyd Asked If 18 Months Was Worth What He Stole",
+     "id": "VQ9DYFA9AVw",
+     "url": "https://www.youtube.com/watch?v=VQ9DYFA9AVw",
+     "view_count": 585,
+     "duration_s": 3419,
+     "upload_date": "2026-03-12",
+     "date_source": "exact",
+     "hits": [
+      0,
+      3
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Just Scrapping Purrfect Justice @just_scrapping",
+     "channel_id": "UCy1tuOmPvzJXoNckfnmUCvg",
+     "channel_url": "https://www.youtube.com/channel/UCy1tuOmPvzJXoNckfnmUCvg",
+     "handle": "@BexarCountyJudge",
+     "title": "Judge Boyd sentences Isidro Garcia and Eric Adam Talamantas shares his opinions on Judge Franco",
+     "id": "x7qaWLfn8kw",
+     "url": "https://www.youtube.com/watch?v=x7qaWLfn8kw",
+     "view_count": 2,
+     "duration_s": 477,
+     "upload_date": "2026-03-25",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Of Justice",
+     "channel_id": "UCDXzqbmQZ5daphFQHNyQzKA",
+     "channel_url": "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA",
+     "handle": "@CourtOfJustice-z1q",
+     "title": "Judge Boyd Revokes Probation and Sentences Her to Prison Instantly — No Mercy",
+     "id": "aHk2DbaplrQ",
+     "url": "https://www.youtube.com/watch?v=aHk2DbaplrQ",
+     "view_count": 9926,
+     "duration_s": 1282,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Trial Tales",
+     "channel_id": "UCupr8osK5xx6WbpFaQMEf3Q",
+     "channel_url": "https://www.youtube.com/channel/UCupr8osK5xx6WbpFaQMEf3Q",
+     "handle": "@officialtrialtales",
+     "title": "He Admitted Hurting Someone He Claimed To Love | Judge Boyd Wanted Answers",
+     "id": "L2zMWIZygCA",
+     "url": "https://www.youtube.com/watch?v=L2zMWIZygCA",
+     "view_count": 9141,
+     "duration_s": 4183,
+     "upload_date": "2026-07-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Trial Tales",
+     "channel_id": "UCupr8osK5xx6WbpFaQMEf3Q",
+     "channel_url": "https://www.youtube.com/channel/UCupr8osK5xx6WbpFaQMEf3Q",
+     "handle": "@officialtrialtales",
+     "title": "Her Story Fell Apart Over a Purple Purse — Judge Boyd EXPOSED her in court",
+     "id": "POKQA5Pctm4",
+     "url": "https://www.youtube.com/watch?v=POKQA5Pctm4",
+     "view_count": 2263,
+     "duration_s": 1705,
+     "upload_date": "2026-08-31",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Stories",
+     "channel_id": "UCGdySRfu7TDuG--kHG10GDw",
+     "channel_url": "https://www.youtube.com/channel/UCGdySRfu7TDuG--kHG10GDw",
+     "handle": "@CourtStories-s9u",
+     "title": "Judge Boyd Showed No Mercy- Pete Garcia Gets 8 Years Jail for Child Crime| #courtstories",
+     "id": "XSuRjujcFjs",
+     "url": "https://www.youtube.com/watch?v=XSuRjujcFjs",
+     "view_count": 182,
+     "duration_s": 1066,
+     "upload_date": "2025-12-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "The True Verdict",
+     "channel_id": "UCiDxjo6B1ThzYDGt2KsbPpQ",
+     "channel_url": "https://www.youtube.com/channel/UCiDxjo6B1ThzYDGt2KsbPpQ",
+     "handle": "@TheTrueVerdict",
+     "title": "Community Supervision Failed — Judge Boyd Orders Prison Time",
+     "id": "-ixx4bM6cp4",
+     "url": "https://www.youtube.com/watch?v=-ixx4bM6cp4",
+     "view_count": 180,
+     "duration_s": 909,
+     "upload_date": "2026-07-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Case Closed Daily",
+     "channel_id": "UCmDI3hKqNa6UHKlE1GVZqug",
+     "channel_url": "https://www.youtube.com/channel/UCmDI3hKqNa6UHKlE1GVZqug",
+     "handle": "@CaseClosedDaily-s3",
+     "title": "He Touched a Child 10 Times & Begged for Probation — Judge Boyd Says NO",
+     "id": "EBtQcrMZ0qU",
+     "url": "https://www.youtube.com/watch?v=EBtQcrMZ0qU",
+     "view_count": 104,
+     "duration_s": 914,
+     "upload_date": "2026-08-12",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Daily",
+     "channel_id": "UCImktgR_cxIqTcQjpM4G_Pw",
+     "channel_url": "https://www.youtube.com/channel/UCImktgR_cxIqTcQjpM4G_Pw",
+     "handle": "@CourtDaily",
+     "title": "$25 THEFT Lands Her 124 Days! Judge Boyd's Ruling on Habitual Shoplifting!",
+     "id": "5RMXE1zqYJs",
+     "url": "https://www.youtube.com/watch?v=5RMXE1zqYJs",
+     "view_count": 48,
+     "duration_s": 432,
+     "upload_date": "2025-11-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Evidence",
+     "channel_id": "UCKwG4D7LZ5W2K6asVyqp0ZA",
+     "channel_url": "https://www.youtube.com/channel/UCKwG4D7LZ5W2K6asVyqp0ZA",
+     "handle": "@CourtEvidenceOfficial",
+     "title": "Someone Is Gone Forever Because of Him — Judge Boyd Destroyed Him With 35 Years in Prison",
+     "id": "9oWc4Q-B-N8",
+     "url": "https://www.youtube.com/watch?v=9oWc4Q-B-N8",
+     "view_count": 27,
+     "duration_s": 710,
+     "upload_date": "2026-08-31",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Verdict Frontier",
+     "channel_id": "UCQXJHbHOoK2zwyUP-sjjeBQ",
+     "channel_url": "https://www.youtube.com/channel/UCQXJHbHOoK2zwyUP-sjjeBQ",
+     "handle": "@VerdictFrontier",
+     "title": "Judge Boyd Denies Probation & Hands Down the Full 8-Year Sentence",
+     "id": "r5mH1IyeilM",
+     "url": "https://www.youtube.com/watch?v=r5mH1IyeilM",
+     "view_count": 23,
+     "duration_s": 1445,
+     "upload_date": "2026-07-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Real Justice Verdict",
+     "channel_id": "UCP9uZDpG9MFUF-3PxdTIYVw",
+     "channel_url": "https://www.youtube.com/channel/UCP9uZDpG9MFUF-3PxdTIYVw",
+     "handle": "@StorybySaifi",
+     "title": "He Thought His Past Was Buried Forever — Then Judge Boyd Sentenced Him to 8 Years",
+     "id": "5W-M1Rve60A",
+     "url": "https://www.youtube.com/watch?v=5W-M1Rve60A",
+     "view_count": 20,
+     "duration_s": 1049,
+     "upload_date": "2026-07-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Gavel Docket USA",
+     "channel_id": "UCrPjiv1b3CGPRc2xudzseWA",
+     "channel_url": "https://www.youtube.com/channel/UCrPjiv1b3CGPRc2xudzseWA",
+     "handle": "@GavelDocketUSA",
+     "title": "Judge Boyd Slams Garcia: $121K Restitution or Curfew!",
+     "id": "RAdYTHnRdZ0",
+     "url": "https://www.youtube.com/watch?v=RAdYTHnRdZ0",
+     "view_count": 8,
+     "duration_s": 605,
+     "upload_date": "2025-10-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "CourtRoom Verdict Files",
+     "channel_id": "UCX8OrRMeWb-d7rn_WJq-G6Q",
+     "channel_url": "https://www.youtube.com/channel/UCX8OrRMeWb-d7rn_WJq-G6Q",
+     "handle": "@CourtRoomVerdictFiles",
+     "title": "Judge Boyd Rejects Plea & Doubled Prison Sentence ",
+     "id": "fCMnZ6vU3HE",
+     "url": "https://www.youtube.com/watch?v=fCMnZ6vU3HE",
+     "view_count": 0,
+     "duration_s": 852,
+     "upload_date": "2026-09-01",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 2,
+   "competitors": [
+    "Trial Tales",
+    "Just Scrapping Purrfect Justice @just_scrapping"
+   ],
+   "unconfirmed_surname_only": [
+    "Court Of Justice",
+    "Court Stories",
+    "The True Verdict",
+    "Case Closed Daily",
+    "Court Daily",
+    "Court Evidence",
+    "Verdict Frontier",
+    "Real Justice Verdict",
+    "Gavel Docket USA",
+    "CourtRoom Verdict Files"
+   ],
+   "niche_channels": {
+    "Court Trials TV Network": 1061419,
+    "Audit the Court": 492349,
+    "People in Court": 178915,
+    "Courtroom Reality Network": 58578,
+    "Trial Syndicate": 8043,
+    "Recovery Addict": 6459,
+    "Court Day": 5753,
+    "Court With Krissy": 3309,
+    "Justice Session": 1800,
+    "The Courtroom Report": 74,
+    "Cop Court": 69,
+    "Daily Court Watch": 53
+   },
+   "verdict": "2 channel(s): Trial Tales, Just Scrapping Purrfect Justice @just_scrapping"
+  }
+ },
+ "MONKEY": {
+  "video": "work/2XkPnvstmRQ/2XkPnvstmRQ_h_5915_5895-7108.mp4",
+  "offset": 5895,
+  "judge_t": 6311,
+  "judge_crop": "340:330:880:15",
+  "plate_t": 6195,
+  "plate_crop": "300:330:30:15",
+  "white": "Where's the",
+  "yellow": "spider monkey?",
+  "note": "Joseph Grant, 2024 CR011920. SOURCE CORRECTED 2026-08-30: was MONKEY_LONGFORM.mp4, which is OUR OWN render - a letterboxed composite already upscaled and re-encoded. Whole-frame sharpness 190.3 against 714.9 for the original stream clip, and the defendant crop measured 45.4 against 729.5. HYPIR cannot restore what a second-generation encode threw away. The original 2XkPnvstmRQ clip is 1280x720 - LOWER resolution than our 1080p render and 3.8x sharper. Three-tile layout: Grant top-left with counsel, Boyd top-right, witness bottom.",
+  "bg_crop": "620:330:11:15",
+  "plate_face_at": 0.5,
+  "defendant_src": "monkey_cut.png",
+  "def_c": [
+   410,
+   405
+  ],
+  "jud_c": [
+   950,
+   400
+  ],
+  "arrow_xy": [
+   560,
+   455
+  ],
+  "expression_window": [
+   60,
+   900
+  ],
+  "expression_side": "right",
+  "kicker": "YOUR OWNER HATES YOU",
+  "kicker_split": "YOUR OWNER ",
+  "kicker_colors": [
+   [
+    255,
+    255,
+    255
+   ],
+   [
+    253,
+    1,
+    1
+   ]
+  ],
+  "defendant_scale": 1.45,
+  "defendant_at": 0.11,
+  "defendant": "Joseph Grant",
+  "cause": "2024 CR011920",
+  "posted_by": {
+   "searched": "2026-09-01",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Joseph Grant",
+   "cause": "2024 CR011920",
+   "hooks": [
+    "spider",
+    "monkey"
+   ],
+   "queries": [
+    "\"Joseph Grant\" judge boyd",
+    "\"Joseph Grant\" 187th",
+    "2024 CR011920",
+    "grant boyd court",
+    "Where's the spider monkey? judge boyd"
+   ],
+   "raw_entries": 56,
+   "own_hits": 1,
+   "source_hits": 1,
+   "results": [
+    {
+     "match": "name",
+     "channel": "Judge Boyd’s Bench",
+     "channel_id": "UCt_FDKEqEc7TVYa4EpV5-0A",
+     "channel_url": "https://www.youtube.com/channel/UCt_FDKEqEc7TVYa4EpV5-0A",
+     "handle": "@Judgeboydbench",
+     "title": "Judge Boyd’s Wake-Up Call for Joseph Grant",
+     "id": "hNTVQtW5vyA",
+     "url": "https://www.youtube.com/watch?v=hNTVQtW5vyA",
+     "view_count": 322,
+     "duration_s": 1180,
+     "upload_date": "2025-08-16",
+     "date_source": "exact",
+     "hits": [
+      0,
+      4
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Judge Boyd’s Bench",
+     "channel_id": "UCt_FDKEqEc7TVYa4EpV5-0A",
+     "channel_url": "https://www.youtube.com/channel/UCt_FDKEqEc7TVYa4EpV5-0A",
+     "handle": "@Judgeboydbench",
+     "title": "Judge Boyd Schools Joseph Grant Over Monkey, Money & Mistakes",
+     "id": "GazDwmJElTE",
+     "url": "https://www.youtube.com/watch?v=GazDwmJElTE",
+     "view_count": 214,
+     "duration_s": 721,
+     "upload_date": "2025-09-07",
+     "date_source": "exact",
+     "hits": [
+      0,
+      3,
+      4
+     ]
+    },
+    {
+     "match": "hook",
+     "channel": "courtcatch",
+     "channel_id": "UCwhCc-TRBD1HR1ny0sK-yIQ",
+     "channel_url": "https://www.youtube.com/channel/UCwhCc-TRBD1HR1ny0sK-yIQ",
+     "handle": "@courtcatch-c6q",
+     "title": "Courtroom Chaos: Judge Boyd, a Felony Plea, and the Spider Monkey Surprise",
+     "id": "TXzrtgkpvVc",
+     "url": "https://www.youtube.com/watch?v=TXzrtgkpvVc",
+     "view_count": 4,
+     "duration_s": 855,
+     "upload_date": "2025-09-14",
+     "date_source": "exact",
+     "hits": [
+      4
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Gavel Dominion",
+     "channel_id": "UCC8y_EHuVEUlgWDkSlUgfLw",
+     "channel_url": "https://www.youtube.com/channel/UCC8y_EHuVEUlgWDkSlUgfLw",
+     "handle": "@GavelDominion5",
+     "title": "He Attacked a Female and Left Her Wounded — Judge Boyd DECLINED to Grant Clemency",
+     "id": "Zh-psNGg95w",
+     "url": "https://www.youtube.com/watch?v=Zh-psNGg95w",
+     "view_count": 11,
+     "duration_s": 3663,
+     "upload_date": "2026-08-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "The 19th Verdict",
+     "channel_id": "UCRpT7hAW7y7yvDAa512f7uw",
+     "channel_url": "https://www.youtube.com/channel/UCRpT7hAW7y7yvDAa512f7uw",
+     "handle": "@The19thVerdict",
+     "title": "Coach Pleads for Star Athlete — Will Judge Boyd Grant Probation or Prison?",
+     "id": "s17QA7qiLOw",
+     "url": "https://www.youtube.com/watch?v=s17QA7qiLOw",
+     "view_count": 8,
+     "duration_s": 1167,
+     "upload_date": "2026-04-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 2,
+   "competitors": [
+    "Judge Boyd’s Bench",
+    "courtcatch"
+   ],
+   "unconfirmed_surname_only": [
+    "Gavel Dominion",
+    "The 19th Verdict"
+   ],
+   "niche_channels": {
+    "Time Served Court Watch": 7953,
+    "Dark Truth Uncovered": 3226,
+    "Trial Tales": 2877,
+    "Law&Crime Network": 1412,
+    "Case Digest": 227,
+    "Courtroom Reality Network": 205,
+    "The Gavel Report": 91,
+    "CourtCast12": 58,
+    "Judge's Verdict": 40,
+    "Court Trials Today": 38,
+    "Court&Law": 3,
+    "Court Nexus": 1
+   },
+   "verdict": "2 channel(s): Judge Boyd’s Bench, courtcatch"
+  }
+ },
+ "THOMPSON": {
+  "video": "work/JgvW7oCQxuI/JgvW7oCQxuI_6698_6674-8866.mp4",
+  "offset": 6674,
+  "judge_t": 6935,
+  "plate_t": 6935,
+  "white": "Your children",
+  "yellow": "were killed?",
+  "note": "Louis Thompson, the 'family was murdered' hearing (gMdQwkaFGMw, 657.7s). Nathan calls this one 'Thomas'. Our 1080p render is the source. Picture band rows 269-1020, vertical seam x~960 (left tile Thompson+attorney, right tile Boyd). Frames chosen by scan over the whole video: Thompson t=141 (face h 179, det 0.91), Boyd t=636 (face h 239, sharp 357, facing camera). Crops computed from the DETECTED face at a 42% face-to-crop target. SOURCE CORRECTED 2026-08-31: was 1_LONGFORM_Thompson.mp4, OUR OWN render. Measured: that 1920x1080 file has varLap sharpness 168.1 while the ORIGINAL 1280x720 stream clip JgvW7oCQxuI_6698_6674-8866.mp4 measures 646.4 - 3.8x sharper at lower resolution, because the render is second generation. HYPIR was hallucinating the defendant's skull out of detail that had already been thrown away. Same defect and same fix as MONKEY.",
+  "expression_window": [
+   146,
+   426
+  ],
+  "defendant_at": 0.12,
+  "expression_side": "right",
+  "defendant": "Louis Thompson",
+  "cause": "2022 CR0273",
+  "posted_by": {
+   "searched": "2026-09-01",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Louis Thompson",
+   "cause": "2022 CR0273",
+   "hooks": [
+    "children",
+    "killed"
+   ],
+   "queries": [
+    "\"Louis Thompson\" judge boyd",
+    "\"Louis Thompson\" 187th",
+    "2022 CR0273",
+    "thompson boyd court",
+    "Your children were killed? judge boyd"
+   ],
+   "raw_entries": 50,
+   "own_hits": 0,
+   "source_hits": 0,
+   "results": [
+    {
+     "match": "name",
+     "channel": "Audit in Courtroom",
+     "channel_id": "UCRnOV6_gJCNnMg-hwZ75Xgw",
+     "channel_url": "https://www.youtube.com/channel/UCRnOV6_gJCNnMg-hwZ75Xgw",
+     "handle": "@Auditincourtroom",
+     "title": "He Lied In Court That His Whole Family Died — Judge Sentenced Him To Prison Instantly",
+     "id": "wdwjW3BzKTU",
+     "url": "https://www.youtube.com/watch?v=wdwjW3BzKTU",
+     "view_count": 2041,
+     "duration_s": 685,
+     "upload_date": "2026-06-09",
+     "date_source": "exact",
+     "hits": [
+      0
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Courtroom Secrets",
+     "channel_id": "UCuQB6V5F3pn6C-5s6HgvLNg",
+     "channel_url": "https://www.youtube.com/channel/UCuQB6V5F3pn6C-5s6HgvLNg",
+     "handle": "@CourtroomSecrets-b7r",
+     "title": "​He Thought This Excuse Would Save Him... He Was Wrong!",
+     "id": "S0UCVZ5nTx0",
+     "url": "https://www.youtube.com/watch?v=S0UCVZ5nTx0",
+     "view_count": 140,
+     "duration_s": 375,
+     "upload_date": "2026-08-22",
+     "date_source": "exact",
+     "hits": [
+      0,
+      1
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Court Talks",
+     "channel_id": "UCOUMJII13t5SCBB5UWLOIOA",
+     "channel_url": "https://www.youtube.com/channel/UCOUMJII13t5SCBB5UWLOIOA",
+     "handle": "@courtroomtalkstoday",
+     "title": "Judge Boyd Saves Louis Thompson from 20 Years in Prison",
+     "id": "YTR-Mhc8pIc",
+     "url": "https://www.youtube.com/watch?v=YTR-Mhc8pIc",
+     "view_count": 28,
+     "duration_s": 1347,
+     "upload_date": "2025-10-12",
+     "date_source": "exact",
+     "hits": [
+      0,
+      2
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Case by Case",
+     "channel_id": "UCcQJXke1urP8DeOzVPbE0-g",
+     "channel_url": "https://www.youtube.com/channel/UCcQJXke1urP8DeOzVPbE0-g",
+     "handle": "@ashiqhussainveo",
+     "title": "Judge Boyd CRUSHES Excuses in Missed Reports Hearing",
+     "id": "kefNBs3stEQ",
+     "url": "https://www.youtube.com/watch?v=kefNBs3stEQ",
+     "view_count": 18,
+     "duration_s": 957,
+     "upload_date": "2025-10-01",
+     "date_source": "exact",
+     "hits": [
+      2
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Judgment Justice JJ",
+     "channel_id": "UCyJ2QTy3BLNUsN7_2RRaCog",
+     "channel_url": "https://www.youtube.com/channel/UCyJ2QTy3BLNUsN7_2RRaCog",
+     "handle": "@judgmentjustice",
+     "title": "Judge Boyd DESTROYS Defendant After Missed Reports: Faces 20 YEARS in Prison!",
+     "id": "Ww4QdlUevUQ",
+     "url": "https://www.youtube.com/watch?v=Ww4QdlUevUQ",
+     "view_count": 12,
+     "duration_s": 1560,
+     "upload_date": "2025-09-29",
+     "date_source": "exact",
+     "hits": [
+      2,
+      3
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Judge's Verdict",
+     "channel_id": "UCVXeqnkWQg67EuH49Grjwrg",
+     "channel_url": "https://www.youtube.com/channel/UCVXeqnkWQg67EuH49Grjwrg",
+     "handle": "@JudgesVerdict-n5p",
+     "title": "​JUDGE BOYD CATCHES HIM RED-HANDED",
+     "id": "-TKnjs8mRPw",
+     "url": "https://www.youtube.com/watch?v=-TKnjs8mRPw",
+     "view_count": 1,
+     "duration_s": 401,
+     "upload_date": "2026-08-22",
+     "date_source": "exact",
+     "hits": [
+      0,
+      1
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "TAAN TV - The African American Network",
+     "channel_id": "UCdM8QPbtuB-pZEaorVrG7OQ",
+     "channel_url": "https://www.youtube.com/channel/UCdM8QPbtuB-pZEaorVrG7OQ",
+     "handle": "@taantv",
+     "title": "Judge Boyd chats w/Laura Thompson about her Bout for Re-Election",
+     "id": "51tc7so68og",
+     "url": "https://www.youtube.com/watch?v=51tc7so68og",
+     "view_count": 11312,
+     "duration_s": 519,
+     "upload_date": "2026-01-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd sentences Deamber Kraus & Kenneth Thompson plus Francisco F’s around & finds out & Ethan",
+     "id": "0haFn-_9kF8",
+     "url": "https://www.youtube.com/watch?v=0haFn-_9kF8",
+     "view_count": 120,
+     "duration_s": 908,
+     "upload_date": "2026-04-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purrfect Justice @just_scrapping",
+     "channel_id": "UCy1tuOmPvzJXoNckfnmUCvg",
+     "channel_url": "https://www.youtube.com/channel/UCy1tuOmPvzJXoNckfnmUCvg",
+     "handle": "@BexarCountyJudge",
+     "title": "Judge Boyd sentences Keith Thompson “Your Honor, my client is a little short on good judgment.” ",
+     "id": "g4opq7A-X28",
+     "url": "https://www.youtube.com/watch?v=g4opq7A-X28",
+     "view_count": 8,
+     "duration_s": 479,
+     "upload_date": "2026-06-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 6,
+   "competitors": [
+    "Audit in Courtroom",
+    "Courtroom Secrets",
+    "Court Talks",
+    "Case by Case",
+    "Judgment Justice JJ",
+    "Judge's Verdict"
+   ],
+   "unconfirmed_surname_only": [
+    "TAAN TV - The African American Network",
+    "Just Scrapping Purr-fect Justice @just-scrapping",
+    "Just Scrapping Purrfect Justice @just_scrapping"
+   ],
+   "niche_channels": {
+    "Audit the Court": 492349,
+    "Court Of Justice": 16500,
+    "Daily Court Watch": 12333,
+    "Trial Syndicate": 8043,
+    "Justice On Peak": 878,
+    "Real Law Court": 816,
+    "The Courtroom Files": 450,
+    "Case Digest": 164,
+    "Judge Boyd’s Bench": 20,
+    "Elite Justice Network": 11,
+    "Wild West": 4,
+    "Echo Court": 3
+   },
+   "verdict": "6 channel(s): Audit in Courtroom, Courtroom Secrets, Court Talks, Case by Case, Judgment Justice JJ, Judge's Verdict"
+  }
+ },
+ "TORRES": {
+  "video": "work/GUOzwzGiPYU/GUOzwzGiPYU_h_4669_4649-5230.mp4",
+  "transcript": "work/GUOzwzGiPYU/GUOzwzGiPYU.transcript.json",
+  "offset": 4649,
+  "case_from": 4669.6,
+  "case_to": 5201,
+  "plate_t": 4905,
+  "white": "Nobody's giving you",
+  "yellow": "your license back",
+  "short": "READY-TO-POST/TORRES_SHORT.mp4",
+  "short_src_start": 4891.17,
+  "defendant_at": 0.2,
+  "defendant": "Sandra Torres",
+  "defendant_full": "Sandra Laura Torres",
+  "cause": "2024 CR-0100023C",
+  "cause_note": "UNVERIFIED spelling - transcribed as '2024 CR01 00023C'; portal not checked",
+  "expression_side": "right",
+  "solve_face_h": true,
+  "bg_blur": 0.35,
+  "note": "MTR, possession PG1 4-200g, deferred 6 yrs (2024-11-19); violation = not reporting Mar-Apr 2026; probation recommended continuing her. Call at 4669.6 ('the court is calling'), ruling 5088.1-5130 ('three years'), case_to 5201 = next call gap. Layout: defendant LEFT tile x~0.20, her lawyer ~0.75, judge RIGHT (torres_grid.jpg). plate_t 4905 = 'nobody's going to give you your nursing license back with a drug conviction' (4904.7). Short segs: 4893.6-4908.15, 4910.15-4913.9, 4917.3-4926.55, 4955.38-4972.7, 5027.5-5039.7, 5093.3-5100.35 (ends on 'Please, please' - outcome withheld per short_floor.selection).",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "tools/case_search.py + yt-dlp 2026.07.04",
+   "defendant": "Sandra Torres",
+   "cause": "2024 CR-0100023C",
+   "hooks": [
+    "nobody",
+    "giving",
+    "license",
+    "back"
+   ],
+   "queries": [
+    "\"Sandra Torres\" judge boyd",
+    "\"Sandra Torres\" 187th",
+    "2024 CR-0100023C",
+    "torres boyd court",
+    "Nobody's giving you your license back judge boyd"
+   ],
+   "raw_entries": 47,
+   "own_hits": 0,
+   "source_hits": 1,
+   "results": [
+    {
+     "match": "name",
+     "channel": "Trial Tales",
+     "channel_id": "UCupr8osK5xx6WbpFaQMEf3Q",
+     "channel_url": "https://www.youtube.com/channel/UCupr8osK5xx6WbpFaQMEf3Q",
+     "handle": "@officialtrialtales",
+     "title": "She Tried to Get Her Nursing License Back on Probation — Judge Boyd Said Absolutely Not",
+     "id": "C5PodK2BoWI",
+     "url": "https://www.youtube.com/watch?v=C5PodK2BoWI",
+     "view_count": 7037,
+     "duration_s": 2472,
+     "upload_date": "2026-08-21",
+     "date_source": "exact",
+     "hits": [
+      0,
+      1,
+      3,
+      4
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "NEW Judge Boyd Sandra Lara Torres back to back motions to revoke 07/16/2026 Sentenced!!!",
+     "id": "qNI2VBxDOhM",
+     "url": "https://www.youtube.com/watch?v=qNI2VBxDOhM",
+     "view_count": 256,
+     "duration_s": 1212,
+     "upload_date": "2026-07-18",
+     "date_source": "exact",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "name",
+     "channel": "CourtClips",
+     "channel_id": "UCs_deXuPT686hwenCCVlPaA",
+     "channel_url": "https://www.youtube.com/channel/UCs_deXuPT686hwenCCVlPaA",
+     "handle": "@CourtClips11",
+     "title": "Judge Boyd Rejects Plea & Doubles Her Prison Sentence!",
+     "id": "Luw-GuejV3w",
+     "url": "https://www.youtube.com/watch?v=Luw-GuejV3w",
+     "view_count": 255,
+     "duration_s": 1355,
+     "upload_date": "2026-08-24",
+     "date_source": "exact",
+     "hits": [
+      0,
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd sentences Mother of 8, Rosalyn Hortencia Torres",
+     "id": "lGzn9C2MEmY",
+     "url": "https://www.youtube.com/watch?v=lGzn9C2MEmY",
+     "view_count": 407,
+     "duration_s": 699,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Just Scrapping Purr-fect Justice @just-scrapping",
+     "channel_id": "UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "channel_url": "https://www.youtube.com/channel/UCZhgM-EQ1aqAhpd2kpUpVKw",
+     "handle": "@Just-Scrapping",
+     "title": "Judge Boyd sentences Lupe Torres & Deandre Sheppard gets lessons in Probation Compliance 😂 #toolate ",
+     "id": "wtS2rpT-mJU",
+     "url": "https://www.youtube.com/watch?v=wtS2rpT-mJU",
+     "view_count": 281,
+     "duration_s": 832,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Judges justice",
+     "channel_id": "UCJJEGjXZnOHRwFF_pA_74Iw",
+     "channel_url": "https://www.youtube.com/channel/UCJJEGjXZnOHRwFF_pA_74Iw",
+     "handle": "@Judgesjustice-u3f",
+     "title": "\"You're Not Walking Out Today\" — Judge Boyd SENDS Meth Mom Straight To Prison",
+     "id": "UjYI0jXZgDU",
+     "url": "https://www.youtube.com/watch?v=UjYI0jXZgDU",
+     "view_count": 91,
+     "duration_s": 1353,
+     "upload_date": "2026-08-24",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Court Day",
+     "channel_id": "UC4ILapgYynKq9wmEGFq8tLA",
+     "channel_url": "https://www.youtube.com/channel/UC4ILapgYynKq9wmEGFq8tLA",
+     "handle": "@CourtDay-r3y",
+     "title": "She Used Meth BEFORE Court — Judge Boyd's Reaction is BRUTAL | 6 Years in Prison",
+     "id": "lpJM_JzMIec",
+     "url": "https://www.youtube.com/watch?v=lpJM_JzMIec",
+     "view_count": 75,
+     "duration_s": 1425,
+     "upload_date": "2026-08-26",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Verdict Room",
+     "channel_id": "UCKZ_WADec6sV2wBjGPaPnIQ",
+     "channel_url": "https://www.youtube.com/channel/UCKZ_WADec6sV2wBjGPaPnIQ",
+     "handle": "@VerdictRoom-m8w",
+     "title": "Judge Boyd SHUTS DOWN \"It's All Personal\" — Mom Had 27 Grams in a Paris Hilton Bag Thumbnail",
+     "id": "Pjw6pth-j9w",
+     "url": "https://www.youtube.com/watch?v=Pjw6pth-j9w",
+     "view_count": 14,
+     "duration_s": 1351,
+     "upload_date": "2026-08-28",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    },
+    {
+     "match": "surname",
+     "channel": "Jury Trials",
+     "channel_id": "UCERAH7WfVLjB446nkc337lw",
+     "channel_url": "https://www.youtube.com/channel/UCERAH7WfVLjB446nkc337lw",
+     "handle": "@JuryTrials",
+     "title": "Judge Stephanie Boyd Loses Patience-Lets Defendant Choose His Own Fate",
+     "id": "ZQEMfxr_Mmc",
+     "url": "https://www.youtube.com/watch?v=ZQEMfxr_Mmc",
+     "view_count": 6,
+     "duration_s": 927,
+     "upload_date": "2026-03-02",
+     "date_source": "approx",
+     "hits": [
+      3
+     ]
+    }
+   ],
+   "competitor_count": 3,
+   "competitors": [
+    "Trial Tales",
+    "Just Scrapping Purr-fect Justice @just-scrapping",
+    "CourtClips"
+   ],
+   "unconfirmed_surname_only": [
+    "Judges justice",
+    "Court Day",
+    "Verdict Room",
+    "Jury Trials"
+   ],
+   "niche_channels": {
+    "Trial Tales": 38744,
+    "AmericanJusticeFiles": 15000,
+    "Justice Served": 9594,
+    "Daily Court Watch": 733,
+    "Gavel of Wisdom": 505,
+    "Courtroom Reality Network": 193,
+    "TrialPulse Media": 116,
+    "Echo Court": 22,
+    "The Judge boyd": 2,
+    "Bridget Torres": 0
+   },
+   "verdict": "3 channel(s): Trial Tales, Just Scrapping Purr-fect Justice @just-scrapping, CourtClips"
+  },
+  "short_segments_src": [
+   [
+    4891.17,
+    4908.41
+   ],
+   [
+    4952.88,
+    4972.79
+   ],
+   [
+    5007.25,
+    5012.3
+   ],
+   [
+    5027.66,
+    5038.8
+   ],
+   [
+    5093.7,
+    5100.52
+   ]
+  ],
+  "short_note": "2026-09-02 final: 5 source segments (see short_segments_src), outcome withheld; raw 60.17s -> tighten (silence-aware edges, tail 1.47) 57.41s -> short_engine SHORT_OK 57.43s, -14.2 LUFS / -1.9 dBTP, 3 joins all in silence, judge top 0.626/0.277. File: D:/Boyd Clips/READY-TO-POST/TORRES_SHORT.mp4 (+ .floor.json)"
+ },
+ "PERKINS": {
+  "defendant": "Charlie Ray Perkins",
+  "cause": "2026 CR4753",
+  "source": "QzcSk3BNYqI",
+  "call_t": 3484,
+  "hearing_date": "2026-08-03",
+  "status": "shortlisted 2026-09-02 (R50 digest) - not built",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "yt-dlp ytsearch10 \"<full name>\" judge boyd",
+   "defendant": "Charlie Ray Perkins",
+   "rivals": [
+    {
+     "channel": "Court Beacon TV",
+     "id": "GjyFi7XTAGY",
+     "grade": "FULL",
+     "views": 3
+    }
+   ],
+   "rival_count": 1
+  }
+ },
+ "GARCIA_J": {
+  "defendant": "Javier Garcia",
+  "cause": "2026 CR4388",
+  "source": "XCNZrVkpzNo",
+  "call_t": 8355,
+  "hearing_date": "2026-08-31",
+  "status": "shortlisted 2026-09-02 (R50 digest) - not built",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "yt-dlp ytsearch10 \"<full name>\" judge boyd",
+   "defendant": "Javier Garcia",
+   "rivals": [],
+   "rival_count": 0
+  }
+ },
+ "LOPEZGONZALEZ": {
+  "defendant": "David Lopez Gonzalez",
+  "cause": null,
+  "source": "WCYnoo6WZ_c",
+  "call_t": 8219,
+  "hearing_date": "2026-07-09",
+  "status": "shortlisted 2026-09-02 (R50 digest) - not built",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "yt-dlp ytsearch10 \"<full name>\" judge boyd",
+   "defendant": "David Lopez Gonzalez",
+   "rivals": [],
+   "rival_count": 0
+  }
+ },
+ "CLAYTON": {
+  "defendant": "Julius Clayton",
+  "cause": "2020 CR3926",
+  "source": "TZsrm_Kwx2s",
+  "call_t": 11061,
+  "hearing_date": "2026-09-01",
+  "status": "shortlisted 2026-09-02 (R50 digest) - not built",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "yt-dlp ytsearch10 \"<full name>\" judge boyd",
+   "defendant": "Julius Clayton",
+   "rivals": [],
+   "rival_count": 0
+  }
+ },
+ "PACE": {
+  "defendant": "Jameson Pace",
+  "cause": null,
+  "source": "Ybf6tkzq0b8",
+  "call_t": 4669,
+  "hearing_date": "2026-08-11",
+  "status": "shortlisted 2026-09-02 (R50 digest) - not built",
+  "posted_by": {
+   "searched": "2026-09-02",
+   "tool": "yt-dlp ytsearch10 \"<full name>\" judge boyd",
+   "defendant": "Jameson Pace",
+   "rivals": [],
+   "rival_count": 0
+  }
+ }
+}

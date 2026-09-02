@@ -1,0 +1,30 @@
+[
+ {
+  "file": "C:\\Users\\natha\\Projects\\boyd-clips\\assets\\harvest\\backgrounds\\MONKEY\\bg_MONKEY_0.png",
+  "t": 0,
+  "coverage": 0.0,
+  "faces": 0,
+  "detail": 0.2
+ },
+ {
+  "file": "C:\\Users\\natha\\Projects\\boyd-clips\\assets\\harvest\\backgrounds\\MONKEY\\bg_MONKEY_384.png",
+  "t": 384,
+  "coverage": 0.3592,
+  "faces": 2,
+  "detail": 132.8
+ },
+ {
+  "file": "C:\\Users\\natha\\Projects\\boyd-clips\\assets\\harvest\\backgrounds\\MONKEY\\bg_MONKEY_420.png",
+  "t": 420,
+  "coverage": 0.3761,
+  "faces": 2,
+  "detail": 158.0
+ },
+ {
+  "file": "C:\\Users\\natha\\Projects\\boyd-clips\\assets\\harvest\\backgrounds\\MONKEY\\bg_MONKEY_174.png",
+  "t": 174,
+  "coverage": 0.3838,
+  "faces": 2,
+  "detail": 150.0
+ }
+]

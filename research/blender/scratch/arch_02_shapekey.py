@@ -1,7 +1,7 @@
 # arch_02_shapekey.py -- shape-key shear on an image plane, correct axis this time.
 import bpy, os, math
 
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
 

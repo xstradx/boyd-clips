@@ -5,7 +5,7 @@ from PIL import Image
 from collections import Counter
 import math
 
-P = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+P = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 im = Image.open(P).convert("RGBA")
 W, H = im.size
 px = im.load()

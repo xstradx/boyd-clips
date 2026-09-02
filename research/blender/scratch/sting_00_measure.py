@@ -11,7 +11,7 @@ import os, subprocess, sys
 import numpy as np
 
 FFMPEG = r"C:\ffmpeg\ffmpeg.exe"
-LOGO   = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO   = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 SCRATCH = r"C:\Users\natha\AppData\Local\Temp\claude\C--Users-natha\13b079a6-7fa2-406d-a5ce-b8f3295a6b37\scratchpad"
 os.makedirs(SCRATCH, exist_ok=True)
 RAW = os.path.join(SCRATCH, "logo_rgba.raw")

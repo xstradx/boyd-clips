@@ -1,6 +1,6 @@
 import bpy, os, math, sys, traceback
 
-LOGO = r"C:\Users\natha\OneDrive\Desktop\Boyd Clips\boyd-brand\logo_transparent.png"
+LOGO = r"D:\Boyd Clips\boyd-brand\logo_transparent.png"
 FONT = r"C:\Users\natha\Projects\boyd-clips\assets\fonts\Anton-Regular.ttf"
 OUT  = r"C:\Users\natha\Projects\boyd-clips\research\blender\renders"
 

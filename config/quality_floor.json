@@ -1,0 +1,210 @@
+{
+ "note": "THE FLOOR. Nathan, 2026-08-31: 'these are the floor and minimum quality we should put out'. These are the MEASURED values of the five he accepted - not a target to hit, a level to never drop below. A build that measures worse than these on any axis is a regression, whatever the gates say.",
+ "approved": [
+  "OFFERUP",
+  "CARTHIEF",
+  "SANCHEZ",
+  "MONKEY",
+  "THOMPSON"
+ ],
+ "files": {
+  "OFFERUP": "thumbwork/OFFERUP/OFFERUP_NEW.jpg",
+  "CARTHIEF": "thumbwork/CARTHIEF/CARTHIEF_FINAL.jpg",
+  "SANCHEZ": "thumbwork/SANCHEZ/SANCHEZ_FINAL.jpg",
+  "MONKEY": "thumbwork/MONKEY/MONKEY_FINAL.jpg",
+  "THOMPSON": "thumbwork/THOMPSON/THOMPSON_FINAL.jpg"
+ },
+ "files_note": "The exact file he accepted, relative to D:/Boyd Clips. OFFERUP is _NEW (the one on ESSF8lSkNN4), the others are _FINAL. tools/check_floor_gates.py runs verify_build over every one of these; a gate that rejects one is mis-tuned unless it is declared below.",
+ "gate_disagreements": {
+  "note": "Gates that reject a floor build, declared so tools/check_floor_gates.py can tell a known disagreement from a new one. Each waits on Nathan: either the gate is right and the build is rebuilt (then the file above changes) or the floor is right and the threshold moves (then this entry is removed). An undeclared failure breaks selftest_all.",
+  "MONKEY": {
+   "F": "2026-09-01 verify_build: defendant drift 7.4 / judge drift 3.8, imbalance 3.6 - identical to OFFERUP_v19, the build he rejected for Boyd looking 'weird and un natural'. The same number is in the accepted set and the rejected set; F cannot decide MONKEY. His call.",
+   "J": "2026-09-01 verify_build: 17.8% of the MONKEY's face pixels above L*210 (limit 12.0) - the defendant-side substitute, not the judge (her face measures 1.3%; _face_stats orders faces by height, judge first, and the second number is the monkey; re-attributed 2026-09-01 after the first entry said judge). The monkey artwork's pale pink face is what J reads as blown; it re-measures 12.6-12.9 on the R29 rebuilds. Whether a near-white substitute face is a defect is his call; if the floor is right J moves to 18.",
+   "K": "2026-09-01 verify_build: judge matte severed at x=1239, a 203px pixel-straight edge. Every MONKEY output on disk carries it. This one is a real defect (R29) - rebuild MONKEY with a re-cut judge before anything ships on OGj_eLUXjrk."
+  }
+ },
+ "per_case": {
+  "OFFERUP": {
+   "subject_L": 126.1,
+   "background_L": 107.2,
+   "separation_dL": 18.9,
+   "skin_chroma": [
+    20.9,
+    20.5
+   ],
+   "face_blowout_pct": [
+    2.2,
+    1.2
+   ],
+   "grain_hf": 1.72,
+   "contrast_sd": 78.2
+  },
+  "CARTHIEF": {
+   "subject_L": 91.2,
+   "background_L": 137.8,
+   "separation_dL": -46.6,
+   "skin_chroma": [
+    19.1,
+    23.4
+   ],
+   "face_blowout_pct": [
+    1.6,
+    0.1
+   ],
+   "grain_hf": 0.87,
+   "contrast_sd": 79.2
+  },
+  "SANCHEZ": {
+   "subject_L": 86.3,
+   "background_L": 144.1,
+   "separation_dL": -57.8,
+   "skin_chroma": [
+    20.1,
+    23.2
+   ],
+   "face_blowout_pct": [
+    6.7,
+    1.5
+   ],
+   "grain_hf": 1.54,
+   "contrast_sd": 81.7
+  },
+  "MONKEY": {
+   "subject_L": 106.7,
+   "background_L": 124.3,
+   "separation_dL": -17.6,
+   "skin_chroma": [
+    19.7,
+    19.9
+   ],
+   "face_blowout_pct": [
+    1.3,
+    17.8
+   ],
+   "grain_hf": 1.61,
+   "contrast_sd": 82.8
+  },
+  "THOMPSON": {
+   "subject_L": 94.2,
+   "background_L": 149.1,
+   "separation_dL": -54.9,
+   "skin_chroma": [
+    24.5,
+    20.8
+   ],
+   "face_blowout_pct": [
+    6.1,
+    1.0
+   ],
+   "grain_hf": 1.63,
+   "contrast_sd": 80.0
+  }
+ },
+ "envelope": {
+  "separation_dL": {
+   "min": -57.8,
+   "median": -46.6,
+   "max": 18.9
+  },
+  "grain_hf": {
+   "min": 0.87,
+   "median": 1.61,
+   "max": 1.72
+  },
+  "contrast_sd": {
+   "min": 78.2,
+   "median": 80.0,
+   "max": 82.8
+  },
+  "subject_L": {
+   "min": 86.3,
+   "median": 94.2,
+   "max": 126.1
+  },
+  "background_L": {
+   "min": 107.2,
+   "median": 137.8,
+   "max": 149.1
+  },
+  "skin_chroma": {
+   "min": 19.1,
+   "median": 20.6,
+   "max": 24.5
+  },
+  "face_blowout_pct": {
+   "min": 0.1,
+   "median": 1.6,
+   "max": 17.8
+  }
+ },
+ "measurement_note": "per_case / envelope re-measured by tools/floor_measure.py (measured_by names the date, the definitions, the mask each case got and the build log each was checked against). Replaces the 2026-08-31 one-off pass, whose script was never on disk and whose numbers are not reproducible from any file in thumbwork: its skin_chroma / face_blowout were not verify_build's (OFFERUP 17.6/15.9 vs 20.9/20.5 from gate I on the same JPEG), and no simple definition lands on its contrast_sd 75-77 or grain_hf 23-25. skin_chroma and face_blowout_pct are now verify_build._face_stats itself, so gate I (ceiling 25.5) and gate J (12.0) are tuned to these same functions - the floor and the gates agree by construction; tools/check_floor_gates.py checks the gates against the same files. subject_L / background_L / separation_dL / grain_hf are thumb.py's SEPARATION SOLVE measurement: mean L* of <file>.photo.jpg (the pre-graphics canvas thumb.py writes beside every build) over alpha > 0.5 / alpha < 0.15 with no other exclusion - on OFFERUP, whose _build_log.json is its own, this reproduces the logged solve (126.5 / 107.9) to 0.4 / 0.7. The 2026-09-01 first version of this tool measured the finished JPEG with verify_build._ink_mask excluded, which also removed jumpsuit and face highlights (17-40 % of the subject) and read THOMPSON's subject at 68.0; refuted the same day, see the tool's docstring. The placed alpha is used only where it sits on the named file's photo (OFFERUP); the other four work dirs hold the _NEW builds' alphas, so their _FINAL photos are re-matted with tools/matting.py (see mask_source). Four of the five accepted builds have the plate BRIGHTER than the subjects (separation_dL negative); thumb.py SEPARATION_DL = +18.6 describes OFFERUP only. Rewriting this file moves the thumbnail floor hash (tools/floor_stamp.py).",
+ "measured_by": {
+  "tool": "tools/floor_measure.py",
+  "date": "2026-09-01",
+  "definitions": {
+   "subject_L": "mean Lab L* (OpenCV 0-255) of <named file>.photo.jpg - the pre-graphics canvas thumb.py writes beside every build and the image its SEPARATION SOLVE measures - where subject alpha > 0.5, no other exclusion (the solve's own mask); reproduces the logged separation_solve.subject_L within 0.6 on every build that has a log",
+   "background_L": "mean Lab L* of the same .photo.jpg where subject alpha < 0.15 (the solve's own plate mask); within 1.4 of the logged separation_solve.target on every build that has a log",
+   "separation_dL": "subject_L - background_L (positive = subjects brighter than the plate; thumb.py SEPARATION_DL aims for +18.6, four of the five accepted builds measure negative)",
+   "skin_chroma": "[judge, defendant] verify_build._face_stats chroma on the named JPEG: mean sqrt(a*^2+b*^2) over YCrCb skin pixels of each of the two largest YuNet faces; judge = face centre x >= W/2 (gate F's rule); on MONKEY the defendant-side face is the spider monkey",
+   "face_blowout_pct": "[judge, defendant] verify_build._face_stats blowout on the named JPEG: percent of face-box pixels with L* > 210",
+   "grain_hf": "mean |L* - GaussianBlur(L*, sigma=1.0)| over the background mask (alpha < 0.15) of the .photo.jpg, L* units, unscaled; the photo carries the grain and no graphics, so type and arrow edges do not count",
+   "contrast_sd": "standard deviation of L* over the whole named JPEG, ink included (the deliverable)",
+   "alpha_align": "mean Sobel |grad L*| of the .photo.jpg in a 7px band around the alpha > 0.5 boundary / mean outside it; >= 2.6 means the mask sits on that photo's own edges (matching builds 3.5-4.7, other builds 1.2-1.9, a 40px shift 0.9-1.5)",
+   "mask_source": "placed_alpha = verify_build._placed_alphas(work) (the build's own mattes, used when alpha_align.placed >= 2.6); rematte(photo) = tools/matting.py over the .photo.jpg with thumb_pipeline's ALPHA_FLOOR/CEIL stretch, used when the work dir's alphas belong to another build",
+   "solve_log": "the work dir's _build_log.json separation_solve {subject_L, target}, only when that log was written by the same build as the named file (mtime within 5 s); null = the log belongs to a later build. Where present, measured subject_L / background_L must land within 1.0 / 2.0 of it (selftest)"
+  },
+  "mask_source": {
+   "OFFERUP": "placed_alpha",
+   "CARTHIEF": "rematte(photo)",
+   "SANCHEZ": "rematte(photo)",
+   "MONKEY": "rematte(photo)",
+   "THOMPSON": "rematte(photo)"
+  },
+  "alpha_align": {
+   "OFFERUP": {
+    "placed": 4.67,
+    "used": 4.67
+   },
+   "CARTHIEF": {
+    "placed": 1.65,
+    "used": 4.15
+   },
+   "SANCHEZ": {
+    "placed": 1.18,
+    "used": 3.66
+   },
+   "MONKEY": {
+    "placed": 1.85,
+    "used": 4.1
+   },
+   "THOMPSON": {
+    "placed": 1.39,
+    "used": 4.38
+   }
+  },
+  "solve_log": {
+   "OFFERUP": {
+    "subject_L": 126.5,
+    "target": 107.9
+   },
+   "CARTHIEF": null,
+   "SANCHEZ": null,
+   "MONKEY": null,
+   "THOMPSON": null
+  },
+  "file_sha256": {
+   "OFFERUP": "d8449fe8224b",
+   "CARTHIEF": "d01bcad42a95",
+   "SANCHEZ": "07624d8796c9",
+   "MONKEY": "5af69a40b6a5",
+   "THOMPSON": "49de8e625111"
+  },
+  "photo_sha256": {
+   "OFFERUP": "fc57af7c19d4",
+   "CARTHIEF": "a779aa2f0211",
+   "SANCHEZ": "1970a33f0f1c",
+   "MONKEY": "5253d4528aea",
+   "THOMPSON": "7ea93d61077e"
+  }
+ }
+}
