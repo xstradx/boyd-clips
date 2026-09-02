@@ -118,9 +118,16 @@ is on disk, not in a context window):
   posting it (`tools/case_search.py`) before building; (3) both are off the
   Texas Trial Tracker / Boyd brand - a format decision, his call. Offer him
   the readings, do not build unasked.
-  Also (same minute): *"Even that lady who killed her kids who's on trial"* -
-  name NOT given, not guessed. Resolve it with him first, then the same three
-  checks (court level / camera access / who is posting).
+  Also: *"Even that lady who killed her kids who's on trial"* / *"She's in
+  trial rn it's huge"* = LINDSAY CLANCY (MA, three children), measured by
+  yt-dlp ytsearch 2026-09-02: at verdict watch / jury deliberating day 23-25;
+  full-day streams on Court TV (Day 1 877k views), FOX 9 (274-307k), East
+  Idaho News (494k), NBC Connecticut, CBS Boston, Surviving The Survivor.
+  Camera access is NOT the problem here - saturation is: every day is already
+  posted by 6+ channels at 100k-900k. The only angle left is the verdict
+  moment cut to a short the same hour, plus Boyd-style "one line" shorts
+  from testimony (Patrick Clancy Day 1 = the family-confrontation category
+  that his catalog says wins). A day-1-to-day-25 long-form is dead on arrival.
 - **Next:** picker audit close-out (`tools/check_picker.py --selftest`, R50
   is now taken by the digest - number the close-out R51);
   frame-picker audit; task-observer skill (learn from this whole chat); tags /
