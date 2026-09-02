@@ -77,3 +77,26 @@ The rejected five are preserved as the known-bad control in
 2. GARCIA_J — no arrow while the other four have one.
 3. All five — one shared plate (`9e01114e2875`); each case takes its own
    background from its own hearing.
+
+## Attempt log (2026-09-02, his `/task-observer /unlazy` redo)
+
+| build | change | result |
+|---|---|---|
+| v2 | fresh judge attempt + regen off | unchanged - the fresh cut never ran (library re-decided it) |
+| v3 | `judge_source: video` (real fresh cut) | judge tone better, defendant unchanged |
+| v4 | defendant frame 5150 (0.1% blown vs 11.7%) | scalp fixed, real hair returns |
+| simple | `BOYD_SIMPLE=1` - no rim, no skin balance, no chroma lift, no skin L | halo, magenta fringe and plastic rim all GONE |
+| redo | best frames both + fresh HYPIR + BOYD_SIMPLE | defendant photographic; JUDGE POSE WRONG (hand over mouth) - I picked her by pixels and dropped expression |
+
+Retracted during this work, both told to him: (1) "the people are not being
+upscaled / crops too small" - HYPIR 4x runs on every crop and the accepted
+builds started from SMALLER faces (CARTHIEF 111px, SANCHEZ 116px vs PACE
+128px, PERKINS 134px, GARCIA_J 138px); (2) "skin a* is a clean separator" -
+measured on 4 faces, overlaps across 10.
+
+Open, in order:
+1. Frame picker scores expression OR pixels, never both. It must score
+   expression AND face size AND blow-out AND sharpness, and say what it traded.
+2. The frame still reads high-key next to the accepted five (no true blacks).
+3. `selftest_all` 34/35 - `thumb_pipeline` R44 suite broke when PACE moved to
+   `judge_source: video`. Fix before anything ships.
