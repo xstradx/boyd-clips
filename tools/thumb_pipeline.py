@@ -789,7 +789,7 @@ def judge_from_library(case, c, work, judge_source=None, headline=None, search=N
 
 
 # ------------------------------------------------------------------- main --
-def prep(case, work, kicker=None, judge_source=None):
+def prep(case, work, kicker=None, judge_source=None, regen=False):
     os.makedirs(work, exist_ok=True)
     c = cases()[case]
     video = os.path.join(ROOT, c["video"])
@@ -971,11 +971,23 @@ def prep(case, work, kicker=None, judge_source=None):
     # "Qwen NOT AUTOMATED YET" since 2026-08-29 - this is that gap. Falls back
     # to the HYPIR frame, out loud, when the weights are absent or the identity
     # check rejects the result.
-    import regenerate as _R
-    for _w in (("defendant",) if lib else ("judge", "defendant")):
-        _h = os.path.join(work, f"{_w}_hypir.png")
-        if os.path.exists(_h):
-            _R.regenerate(_h, _h)
+    # 2026-09-02: MEASURED AND TURNED OFF BY DEFAULT. The loader bug is fixed
+    # (bitsandbytes 4-bit + device_map="balanced" raised "Cannot copy out of
+    # meta tensor"; device_map="cuda" loads), so the step finally RAN - and its
+    # output is worse than the HYPIR frame it replaces: speckled noise over the
+    # whole crop and a different face
+    # (D:/Boyd Clips/thumbwork/PACE/_regen_compare.jpg, his verdict: "left is
+    # good it's something else you're doing after"). 15 minutes of model load
+    # per build for a rejected result. Opt in with --regen when the weights or
+    # the settings change; never silently.
+    if regen:
+        import regenerate as _R
+        for _w in (("defendant",) if lib else ("judge", "defendant")):
+            _h = os.path.join(work, f"{_w}_hypir.png")
+            if os.path.exists(_h):
+                _R.regenerate(_h, _h)
+    else:
+        print("  regenerate: OFF (measured worse than HYPIR 2026-09-02; --regen to force)")
 
     print("[4/5] mattes (alpha only)"
           + (f"  (judge skipped - {_lname} is already matted)" if lib else ""))
@@ -1848,6 +1860,11 @@ if __name__ == "__main__":
                          "re-cutting her: 'best' ranks the usable cutouts on the "
                          "brief's expression profile, a CASE name takes that "
                          "case's approved cutout. Overrides cases.json judge_source.")
+    ap.add_argument("--regen", action="store_true",
+                    help="run the Qwen regenerate pass after HYPIR. OFF by default "
+                         "since 2026-09-02: measured worse than the HYPIR frame "
+                         "(speckled noise, face drift) and costs ~15 min of model "
+                         "load per build.")
     ap.add_argument("--prep-only", action="store_true")
     ap.add_argument("--type-style", metavar="STYLE",
                     help="type treatment for title + kicker (tools/thumb_type.py "
@@ -1857,7 +1874,7 @@ if __name__ == "__main__":
     jsrc = None
     if a.judge_from_library:
         jsrc = "library" if a.judge_from_library.lower() == "best" else f"library:{a.judge_from_library}"
-    prep(a.case, a.work, kicker=a.kicker, judge_source=jsrc)
+    prep(a.case, a.work, kicker=a.kicker, judge_source=jsrc, regen=a.regen)
     if a.prep_only:
         sys.exit(0)
     # THE GATES MUST ACTUALLY BLOCK. build() has always returned the verdict and

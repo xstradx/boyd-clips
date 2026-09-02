@@ -46,7 +46,11 @@ The rejected five are preserved as the known-bad control in
   CHECK: `python tools/check_thumb_grade.py CLAYTON "D:/Boyd Clips/READY-TO-POST/CLAYTON/CLAYTON_thumb.jpg" --peers PERKINS GARCIA_J LOPEZGONZALEZ PACE`
   EXPECT: `THUMB_GRADE_OK`
   EVIDENCE: pending
-- [ ] G6: PACE likewise.
+- [ ] G6: PACE likewise.  <!-- v2 rebuild 2026-09-02 14:5x: THUMB_GRADE_FAIL 5
+  (contrast_sd 74.50 < 78.20; four metrics unmeasurable - mask UNALIGNED).
+  Fresh judge cut + regen off did NOT change the picture; measured new defect:
+  the matte eats the hair - defendant hair band mean alpha 61/255, only 23.3%
+  of hair pixels opaque, which is the bald-dome hairline he pointed at. -->
   CHECK: `python tools/check_thumb_grade.py PACE "D:/Boyd Clips/READY-TO-POST/PACE/PACE_thumb.jpg" --peers PERKINS GARCIA_J LOPEZGONZALEZ CLAYTON`
   EXPECT: `THUMB_GRADE_OK`
   EVIDENCE: pending
