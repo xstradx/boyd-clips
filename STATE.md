@@ -133,7 +133,11 @@ is on disk, not in a context window):
   frame-picker audit; task-observer skill (learn from this whole chat); tags /
   retro-tagging offer on the two live videos; Qwen regeneration failure.
 - **In progress (2026-09-02, "make all of them ... in a batch"):** Workflow
-  `wf_c0d45047-544` - five build agents in parallel (PERKINS, GARCIA_J,
+  `wf_88192c09-822` on OPUS 5 (the first run `wf_c0d45047-544` died in 17 s:
+  all five agents hit the Fable 5 limit, resets Sep 5 8pm CDT - subagents
+  inherit the session model, so a Fable session fans out into Fable agents;
+  pass `model: 'opus'` in the workflow script to escape it. NOTHING was
+  written by that run) - five build agents in parallel (PERKINS, GARCIA_J,
   LOPEZGONZALEZ, CLAYTON, PACE), each: source clip -> short_chain -> cold-open
   long-form + master -> thumb_pipeline -> COPY-PASTE -> STATUS.md under
   `D:/Boyd Clips/READY-TO-POST/<KEY>/`, then a verify agent per case re-runs
@@ -141,7 +145,7 @@ is on disk, not in a context window):
   each folder's STATUS.md says what finished; resume with
   `Workflow({scriptPath: ~/.claude/projects/C--Users-natha-Projects-boyd-clips/
   91451db0-.../workflows/scripts/boyd-batch-five-wf_c0d45047-544.js,
-  resumeFromRunId: "wf_c0d45047-544"})` or rebuild the missing pieces by hand
+  resumeFromRunId: "wf_88192c09-822"})` or rebuild the missing pieces by hand
   from the TORRES commands below. Then: read all five thumbnails at 100%, and
   ask him before posting (publishing = hard stop).
 - **Blocked:** posting - his yes per video (build order: clip via
