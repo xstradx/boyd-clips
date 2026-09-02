@@ -1212,6 +1212,40 @@ CHECK: `tools/vs_accepted.py --selftest` - no sheet is refused, a sheet older
 than the thumbnail is refused (VS_ACCEPTED_SELFTEST_OK). Not automated, said
 out loud every time: the comparison itself is mine, by eye, at 100%.
 
+### R53 - nothing crushes a face's highlights after the restore
+
+2026-09-02, after he said it five different ways (*"smooth and pale and just
+not natural"*, *"looks like slop"*, *"2 different qualities in 1 thumbnail"*,
+*"that's not fixed at all I don't think you're understanding"*): the airbrush
+was `SUBJ_SHOULDER = 178.0` with `SUBJ_SHOULDER_K = 0.30`, a highlight clamp
+applied to the SUBJECT layers only. Every subject pixel over L178 was crushed
+to `178 + 0.30*(L-178)`, so a face whose specular lives at 190-230 came out as
+uniform paste - while the background, which the clamp never touches, kept its
+real photographic detail. That is the two-qualities defect, made by us.
+
+Measured on PACE, same build, clamp the only difference: face highlight p99
+210/213 -> 253/255, and the 1:1 crops go from flat paste to a lit side, a
+shadow side, forehead specular and beard depth.
+
+Proved NOT to be the cause, so nobody re-tests them:
+- source resolution: the accepted builds started from FEWER real face pixels
+  (CARTHIEF judge 103px, defendant 62px) than the rejected ones (PACE 129/66).
+- the restore: HYPIR output at 1:1 has MORE skin micro-texture in the rejected
+  builds (8.92 / 6.80) than the accepted ones (5.31 / 4.52). The pores survive
+  the restore and die in the composite.
+- the matte, the rim glow, the borrowed plate, the recycled library judge: all
+  measured, all ruled out or fixed separately.
+
+RULE: a highlight shoulder, dodge/burn or any tone compression that lands on
+the subject layers and not on the plate is refused. `BOYD_SIMPLE=1` is the
+path that ships until the compositor's defaults are re-derived; gate C already
+catches a face that is genuinely blown, so the clamp is not load-bearing.
+
+CHECK: `tools/check_thumb_grade.py` (R51 envelope) plus the face highlight
+p99 recorded in the build log; the 1:1 A/B that proved it is
+`D:/Boyd Clips/thumbwork/PACE/_shoulder_ab.jpg`. Not automated, said out loud:
+the comparison itself (R52).
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured

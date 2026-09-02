@@ -273,6 +273,15 @@ if SIMPLE:
     # No shared destinations, no lifts, no rim. Dead-bands so wide the skin
     # stages can never fire, and the pull to a shared saturation is zero.
     RIM_MODE = 'none'
+    # The highlight shoulder is the airbrush. Every subject pixel over L178
+    # is crushed to 178 + 0.30*(L-178), so a face whose specular lives at
+    # 190-230 comes out flat paste - measured 2026-09-02 against the restored
+    # crop, which still had real pores and beard detail at 1:1 while the
+    # composite face was waxy. Off in SIMPLE; gate C still catches a face
+    # that is genuinely blown.
+    SUBJ_SHOULDER = 255.0
+    SUBJ_SHOULDER_K = 1.0
+    DB_BURN = 0.0
     SKIN_SAT_PULL = 0.0
     SKIN_CHROMA_BAND = 999.0
     SKIN_L_BAND = 999.0
