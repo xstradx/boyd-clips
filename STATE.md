@@ -118,6 +118,9 @@ is on disk, not in a context window):
   posting it (`tools/case_search.py`) before building; (3) both are off the
   Texas Trial Tracker / Boyd brand - a format decision, his call. Offer him
   the readings, do not build unasked.
+  Also (same minute): *"Even that lady who killed her kids who's on trial"* -
+  name NOT given, not guessed. Resolve it with him first, then the same three
+  checks (court level / camera access / who is posting).
 - **Next:** picker audit close-out (`tools/check_picker.py --selftest`, R50
   is now taken by the digest - number the close-out R51);
   frame-picker audit; task-observer skill (learn from this whole chat); tags /
