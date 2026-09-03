@@ -93,7 +93,7 @@ LUMA_W = np.array([0.299, 0.587, 0.114], np.float32)
 # 1383 against 1011 on the version he preferred, which is noise inflating the
 # metric while the face itself got flatter. 3.0 still survives JPEG (a sigma-1.5
 # grain does not) without frosting skin.
-GRAIN = 1.8    # light pass on the PHOTO, before type
+GRAIN = float(os.environ.get('BOYD_GRAIN', 1.8))    # light pass on the PHOTO, before type
 FINAL_GRAIN = 3.4  # the real layer, over the whole finished frame
 # BG_DARKEN retired 2026-08-31. Measured redundant: at BG_TARGET=70, moving
 # darken 0.08 -> 0.20 took the composite background 69 -> 64, identical in kind
@@ -123,6 +123,10 @@ RIM_PX = 2           # crisp white outline, then a soft glow OUTSIDE it.
 # only geometry, matte, and the plate darkening that gives separation - the
 # people keep their own pixels. Compare the two on the vs_accepted sheet.
 SIMPLE = os.environ.get('BOYD_SIMPLE', '') == '1'
+# R57 defaults. Overridden inside the SIMPLE block below; declared here so
+# every reference resolves whether or not SIMPLE is set.
+SKIN_CHROMA_LIFT_OFF = False
+SUBJ_TONE_LOCKED = False
 
 def _envf(name, default):
     """Sweepable constant. The defaults below are DERIVED from the five he
@@ -214,6 +218,46 @@ SKIN_L_BAND = 5.0
 # Style-2 corpus median subject-minus-background separation, from the 68
 # thumbnail calibration (IQR +11.5 to +29.9 in L*).
 SEPARATION_DL = 18.6
+# ---- R57: the PLATE is bounded by his accepted corpus, not by SEPARATION_DL --
+# 2026-09-03: "correct the color ... the faces all washed and white where its
+# hard to really see their face". Measured, accepted five vs the batch build:
+#
+#              subject_L  background_L    dL
+#   OFFERUP        126.1        107.2   +18.9
+#   CARTHIEF        91.2        137.8   -46.6
+#   SANCHEZ         86.3        144.1   -57.8
+#   MONKEY         106.7        124.3   -17.6
+#   THOMPSON        94.2        149.1   -54.9
+#   PERKINS        106.3         89.2   +17.1   <- ours
+#
+# FOUR of the five he accepted put the background BRIGHTER than the people.
+# The solve below chases SEPARATION_DL = +18.6 from an outside 68-thumbnail
+# corpus, and its own comment calls a brighter background "the 'subjects don't
+# pop' defect" - i.e. the code names his accepted look as a defect and grades
+# it out. That is R52's lesson repeating: an invented external metric beating
+# the corpus he actually approved.
+#
+# Consequence, and it is exactly his words: the plate lands dark (89 vs 107-149),
+# the people end up the brightest thing in frame, and every face reads washed
+# and white. It also drags contrast_sd under the accepted band (73.0 vs 78-83).
+#
+# So SEPARATION_DL stays the AIM, but the plate it produces is clamped into the
+# accepted background_L envelope. Read from the floor file, so it moves when the
+# floor moves and is never a hand-tuned number (same construction as R51).
+def _bg_L_band():
+    import json as _json
+    _p = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                      "config", "quality_floor.json")
+    try:
+        _pc = _json.load(open(_p, encoding="utf-8"))["per_case"]
+        _v = [c["background_L"] for c in _pc.values() if c.get("background_L") is not None]
+        if len(_v) >= 3:
+            return float(min(_v)), float(max(_v))
+    except Exception:
+        pass
+    return 107.2, 149.1
+BG_L_MIN, BG_L_MAX = _bg_L_band()
+BG_L_MIN = _envf('BOYD_BG_L_MIN', BG_L_MIN)
 DB_DODGE = 0.26   # centre lift
 DB_BURN = 0.22    # perimeter deepen
 # A DODGE MAY NOT CLIP A FACE. The lift is a MULTIPLY (canvas * (1 + amt)), so
@@ -290,7 +334,8 @@ FACE_L_TARGET = _envf('BOYD_FACE_L', 120.0)
 # percent of face pixels over L*210, limit 12). His accepted five score
 # 0.1-6.7% on it (MONKEY 17.8 is the known outlier that fails its own gate),
 # so the lift is capped at 6% - inside the corpus and half the gate's limit.
-BLOWN_CAP = _envf('BOYD_BLOWN_CAP', 0.06)                   # HS_REMAKE 121, WORKING 118 (median L*)
+BLOWN_CAP = _envf('BOYD_BLOWN_CAP', 0.06)
+HL_CHROMA_RATIO = _envf('BOYD_HL_RATIO', 1.25)   # accepted 1.20-1.46, reference 1.13, ours 0.52-0.74                   # HS_REMAKE 121, WORKING 118 (median L*)
 SUBJECT_S_TARGET = 86.0                 # the plate's own skin/scrubs saturation
 LOOK = dict(luma=113.5, sd=73.8, definition=0.28)
 if SIMPLE:
@@ -315,8 +360,19 @@ if SIMPLE:
     SKIN_SAT_PULL = 0.0
     SKIN_CHROMA_BAND = 999.0
     SKIN_L_BAND = 999.0
+    # R57, 2026-09-03. The line below CLAIMED "chroma lift, skin L all
+    # disabled" and neither was. Measured on the BOYD_SIMPLE=1 build he
+    # rejected that day: `face_L_balance` still ran at pull 0.60, dragging
+    # Boyd's face from L 108.0 toward the 135.5 midpoint she shares with the
+    # defendant, and `skin_chroma_lift` still ran at +2.1, putting both faces
+    # (26.8 / 28.5) past the top of his accepted band. A switch whose printed
+    # message is not true is worse than no switch: every "surgery off" build
+    # since was judged as if the surgery were off.
+    FACE_L_PULL = 0.0
+    SKIN_CHROMA_LIFT_OFF = True
+    SUBJ_TONE_LOCKED = True
     print('  thumb: BOYD_SIMPLE=1 - subject colour surgery OFF '
-          '(rim, skin balance, chroma lift, skin L all disabled)')
+          '(rim, skin balance, chroma lift, face L balance, LOOK on subjects)')
 # LOOK measured off Nathan's own regrade of the 2026-08-29 build: he took luma
 # 119.9->109.7, contrast 59.5->69.3, definition +24%. Applied ONCE, at the end,
 # as a look - not as a stage repairing another stage.
@@ -1635,6 +1691,22 @@ class Thumb:
         # the grain was speckling the glyphs. That is the "processed / heavy / not
         # HD" type and a good part of the jagged arrow. Photo gets finished; vector
         # goes on top of a finished photo, clean.
+        # R57. Nathan, 2026-09-03: *"there's something that you did to judge
+        # Boyd's face and the guy to have that bright white effect"*. This is
+        # it. The loop below multiplies the WHOLE CANVAS - people included -
+        # until the frame's mean grey hits LOOK["luma"]. Our plate is dark, so
+        # the multiply is always a LIFT, and it lands on faces that arrived
+        # correct. Measured on the build he rejected: 12.2% of the defendant's
+        # face and 35.8% of Boyd's lifted more than +8 L* against the crop that
+        # left the colour fix, peaking at +78 and +85. R55 only pulled a face
+        # back once it CLIPPED, so a face could be washed pale all the way to
+        # the blow-out cap and still pass every gate - which is exactly what
+        # "they still looked washed" is.
+        #
+        # The subject's tone now has ONE authority, the R56-corrected crop, and
+        # the global look belongs to the plate. Snapshot the people, run the
+        # look, put them back.
+        _pre_look = canvas.copy() if SUBJ_TONE_LOCKED else None
         blur = cv2.GaussianBlur(canvas, (0, 0), 1.5)
         canvas = canvas + (canvas - blur) * LOOK["definition"]
         for _ in range(20):
@@ -1648,6 +1720,18 @@ class Thumb:
             u = np.clip(canvas, 0, 255).astype(np.uint8)
             canvas *= (LOOK["luma"] / max(cv2.cvtColor(u, cv2.COLOR_RGB2GRAY).mean(), 1e-3)) ** 0.55
         canvas = sat_scale(canvas, SAT_TRIM)
+        if _pre_look is not None:
+            _sal = getattr(self, "_subject_alpha", None)
+            if _sal is not None:
+                _w = np.clip(_sal, 0, 1)[..., None].astype(np.float32)
+                _lifted = float(((cv2.cvtColor(np.clip(canvas, 0, 255).astype(np.uint8),
+                                               cv2.COLOR_RGB2GRAY).astype(np.float32)
+                                  - cv2.cvtColor(np.clip(_pre_look, 0, 255).astype(np.uint8),
+                                                 cv2.COLOR_RGB2GRAY).astype(np.float32))
+                                 * 100.0 / 255.0)[_sal > 0.5].mean())
+                canvas = canvas * (1.0 - _w) + _pre_look * _w
+                self.log["look_subject_locked"] = dict(
+                    px=int((_sal > 0.5).sum()), mean_lift_reverted=round(_lifted, 2))
         g2 = cv2.cvtColor(np.clip(canvas, 0, 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
         self.log["look"] = dict(luma=round(float(g2.mean()), 1), sd=round(float(g2.std()), 1))
 
@@ -1813,6 +1897,57 @@ class Thumb:
                     self.log.setdefault("skin_final", {})[_key] = dict(
                         L=round(_sl, 1), chroma=round(_ch, 1), chroma_goal=round(_goal_ch, 1))
 
+        # ---- R56 SKIN RICHNESS: highlights keep their colour ---------------
+        # 2026-09-02, from the reference he sent (a thumbnail designer's
+        # before/after, @ayoubdssn): "this is really what I've been trying to
+        # say about how I wanted the faces from the beginning". Measured off
+        # that image - face brightness barely moves (138.0 -> 136.7), skin
+        # chroma goes 18.0 -> 27.8, HIGHLIGHT chroma goes 14.4 -> 31.3 and
+        # local contrast 6.24 -> 10.28. The professional move is not exposure,
+        # it is colour IN the light and texture.
+        #
+        # The signature, as a RATIO (highlight chroma / base chroma), which is
+        # why seven absolute metrics missed it:
+        #   his accepted five   1.20 - 1.46
+        #   the reference       1.13 (0.80 before the edit)
+        #   our builds          0.52 - 0.74   <- highlights lose HALF their
+        #                                        colour, which reads as a heavy
+        #                                        white highlight on the face
+        _ab3 = getattr(self, '_alpha_by', {})
+        for _key, _pa in _ab3.items():
+            _sel = _pa > 0.5
+            if _sel.sum() < 500:
+                continue
+            _u = np.clip(canvas, 0, 255).astype(np.uint8)
+            _yc = cv2.cvtColor(_u, cv2.COLOR_RGB2YCrCb)
+            _skin = (_sel & (_yc[..., 1] > 135) & (_yc[..., 1] < 180)
+                     & (_yc[..., 2] > 85) & (_yc[..., 2] < 135))
+            if _skin.sum() < 300:
+                continue
+            _lab = cv2.cvtColor(_u, cv2.COLOR_RGB2LAB).astype(np.float32)
+            _L = _lab[..., 0]
+            _med = float(np.median(_L[_skin]))
+            _hot = _skin & (_L > _med + 30)
+            _base_m = _skin & ~_hot
+            if _hot.sum() < 150 or _base_m.sum() < 150:
+                continue
+            _a = _lab[..., 1] - 128.0
+            _b = _lab[..., 2] - 128.0
+            _ch_hot = float(np.hypot(_a[_hot], _b[_hot]).mean())
+            _ch_base = float(np.hypot(_a[_base_m], _b[_base_m]).mean())
+            _ratio = _ch_hot / max(_ch_base, 1e-3)
+            if _ratio < HL_CHROMA_RATIO:
+                _k = float(np.clip((HL_CHROMA_RATIO * _ch_base) / max(_ch_hot, 1e-3), 1.0, 3.0))
+                _w = 1.0 + (_k - 1.0) * cv2.GaussianBlur(_hot.astype(np.float32), (0, 0), 3.0)
+                _lab[..., 1] = np.clip(128.0 + _a * _w, 0, 255)
+                _lab[..., 2] = np.clip(128.0 + _b * _w, 0, 255)
+                canvas = cv2.cvtColor(np.clip(_lab, 0, 255).astype(np.uint8),
+                                      cv2.COLOR_LAB2RGB).astype(np.float32)
+                self.log.setdefault('skin_richness', {})[_key] = dict(
+                    hl=round(_ch_hot, 1), base=round(_ch_base, 1),
+                    ratio=round(_ratio, 2), target=HL_CHROMA_RATIO, k=round(_k, 2))
+                print(f'  skin richness: {_key} highlight/base chroma {_ratio:.2f} '
+                      f'-> lifted x{_k:.2f} toward {HL_CHROMA_RATIO}')
         # ---- R55 FACE HEADROOM: after LOOK, before anything reads the file --
         # The LOOK stage normalises GLOBAL luma to a constant. With a dark
         # plate it scales the whole canvas up, and faces that arrived correct
@@ -1881,7 +2016,9 @@ class Thumb:
                 _u = np.clip(canvas, 0, 255).astype(np.uint8)
                 _L = cv2.cvtColor(_u, cv2.COLOR_RGB2LAB)[..., 0].astype(np.float32)
                 _sL = float(_L[_sm].mean()); _bL = float(_L[_bm].mean())
-                _want = _sL - SEPARATION_DL
+                _aim = _sL - SEPARATION_DL
+                # R57 - the aim is clamped into his accepted plate envelope.
+                _want = float(np.clip(_aim, BG_L_MIN, BG_L_MAX))
                 if _bL > 1.0:
                     _k = float(np.clip(_want / _bL, 0.55, 1.35))
                     _sc = np.where(_bm, _k, 1.0).astype(np.float32)
@@ -1889,7 +2026,13 @@ class Thumb:
                     canvas = canvas * _sc[..., None]
                     self.log["separation_solve"] = dict(
                         subject_L=round(_sL, 1), was=round(_bL, 1),
-                        target=round(_want, 1), k=round(_k, 3))
+                        aim=round(_aim, 1), target=round(_want, 1), k=round(_k, 3),
+                        band=[round(BG_L_MIN, 1), round(BG_L_MAX, 1)],
+                        clamped=bool(abs(_want - _aim) > 0.05))
+                    if abs(_want - _aim) > 0.05:
+                        print(f'  separation: plate aim {_aim:.1f} is outside his accepted '
+                              f'background band [{BG_L_MIN:.1f}, {BG_L_MAX:.1f}] '
+                              f'-> plate graded to {_want:.1f} (R57)')
 
         if GRAIN > 0:
             rng = np.random.default_rng(7)

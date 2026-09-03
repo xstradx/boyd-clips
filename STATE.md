@@ -14,6 +14,81 @@ is on disk, not in a context window):
 5. The gates decide the floor, not the model. A build that passes them with a
    different taste call is a valid build; a build that skips them is not.
 
+## 2026-09-03 — PERKINS posted; R56/R57 fixed the washed-out faces
+
+**Where were we** (print this on "where were we?"):
+- **Done (posted):** PERKINS long-form is LIVE, Public, `9mrARjeKJd8`
+  (https://youtu.be/9mrARjeKJd8) — 2026-09-03. ID read from the DOM href, oEmbed
+  200 with the exact title and author "Texas Trial Tracker". Title A live:
+  `He Says He Was Shot. Judge Boyd: "Well, Let's Google."`; description + 24 tags
+  + the REBUILT thumbnail; Not made for kids; monetisation On + mid-rolls; ad
+  suitability None of the above -> Safe for ads (rating saved). Published through
+  the "we're still checking your video" dialog (copyright check was already clean;
+  ad-suitability check was still running — RE-CHECK the monetisation state).
+- **Done (posted):** PERKINS short is LIVE, Public, `7bzmB2KX0uk`
+  (https://youtube.com/shorts/7bzmB2KX0uk) — oEmbed 200, exact title. Title
+  `Judge Boyd Wanted Proof He Was Shot: "Well, Let's Google."`, description with
+  `Full hearing: https://youtu.be/9mrARjeKJd8`, 16 tags, Not made for kids,
+  Safe for ads, Related video = `9mrARjeKJd8` ("Changes saved").
+- **RETRACTED / root cause, 2026-09-03.** His words: *"Okay but correct the
+  color"* / *"the faces all washed and white where its hard to really see their
+  face"*. The thumbnails sitting in `READY-TO-POST/<CASE>/` from the 09-02 batch
+  ARE the five he rejected — `PERKINS_thumb.jpg` is byte-for-byte the file in
+  `tools/fixtures/rejected_2026_09_02/`. I offered him one to post. R51-R55 all
+  landed AFTER the batch wrote those files (13:44-17:01 vs 12:53) and only PACE
+  was ever redone. **CLAYTON, GARCIA_J and LOPEZGONZALEZ are still the rejected
+  builds on disk — rebuild before any of them is shown or posted.**
+- **R57 (new, the actual cause).** The separation solve chased
+  `SEPARATION_DL = +18.6` from an outside 68-thumbnail corpus, and its own
+  comment called a brighter background "the 'subjects don't pop' defect". But
+  FOUR of the five he accepted put the background BRIGHTER than the people:
+
+        case       subject_L  background_L     dL
+        OFFERUP        126.1        107.2   +18.9
+        CARTHIEF        91.2        137.8   -46.6
+        SANCHEZ         86.3        144.1   -57.8
+        MONKEY         106.7        124.3   -17.6
+        THOMPSON        94.2        149.1   -54.9
+        PERKINS(old)   106.3         89.2   +17.1   <- the rejected build
+
+  A dark plate makes the people the brightest thing in frame, and LOOK then
+  scales the whole canvas up to hit its luma constant — which is exactly the
+  "washed and white" he named. Fix: `SEPARATION_DL` stays the aim, but the plate
+  it produces is CLAMPED into the accepted `background_L` envelope, read from
+  `config/quality_floor.json` so it moves when the floor moves (same construction
+  as R51). `BG_L_MIN/BG_L_MAX`, env-overridable via `BOYD_BG_L_MIN`.
+- **R56 (was uncommitted on disk, now committed).** Skin richness: highlight
+  chroma / base chroma. His accepted five 1.20-1.46, our builds 0.52-0.74 —
+  highlights lost half their colour, which reads as a white patch on the face.
+  Lifted toward `HL_CHROMA_RATIO` 1.25 (`BOYD_HL_RATIO`).
+- **PERKINS rebuild, measured.** Plate at the corpus median (137.8) + `GRAIN`
+  1.35 (brighter plate crosses the grain weight peak, so 1.8 measured 1.93 vs the
+  accepted max 1.76). Final: `grain_hf 1.76  background_L 135.6  contrast_sd 82.1
+  subject_L 105.9  separation_dL -29.6` -> **THUMB_GRADE_OK**, BUILD_GATES PASS,
+  verify_thumb A/C/D SHIP, CLUTTER_OK 0.186, 1280x720 JPEG 4:4:4. Also added the
+  missing kicker (`SHE READ IT OUT LOUD...`) — the batch build shipped with none,
+  ink cover 0.130 vs the accepted 0.192-0.226, which is why its faces were solved
+  at 425 px and the frame was almost all skin. With the kicker face_h is 338.
+  Old build kept at `thumbwork/PERKINS/preR56/`.
+- **Still weak, said out loud, NOT automated:** Boyd's face in this hearing's
+  source frame carries a pink/magenta cast on the cheek and lips and posterises
+  under HYPIR. It is in the pre-R56 build too — R56 did not create it, it made it
+  slightly more saturated. Levers not taken: a different `judge_t`, or
+  `--judge-from-library best` (it picked `boyd_THOMPSON_approved.png` but then
+  failed R38 `heads not level: boyd 164 / defendant 160` — needs a
+  `defendant_nudge` retune for the library judge).
+- **Apparatus defect, open:** `tools/thumb_pipeline.py --selftest` (R44 judge
+  cutout reuse) is STATEFUL — 3 failures on a cold run, 30 on a re-run. It leaks
+  state between runs (the library at `assets/harvest/reactions/boyd/` is clean, so
+  it is elsewhere). `selftest_all` therefore prints 34/35 SELFTEST_FAIL. Not
+  blocking on it for a grade change, but it must be fixed before it is trusted.
+- **Next:** (1) rebuild CLAYTON / GARCIA_J / LOPEZGONZALEZ thumbnails through
+  R56/R57 — they are the rejected files; (2) re-check monetisation on
+  `9mrARjeKJd8` once the ad-suitability check finishes; (3) A/B title test (B, C)
+  on `9mrARjeKJd8` and on `BmM4AsCk86g`; (4) fix the R44 selftest; (5) outcome
+  tracking on the four live videos.
+
+
 ## 2026-09-02 — TORRES built end to end (short via the chain, cold-open long-form, thumbnail); R46–R49
 
 **Where were we** (print this on "where were we?"):
