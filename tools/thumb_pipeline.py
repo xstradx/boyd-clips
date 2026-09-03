@@ -281,6 +281,111 @@ def hypir(src_png, out_png, caption, upscale=4):
     return out_png
 
 
+# ------------------------------------------------- 3b subject, HIS order ----
+def subject_cut_first(work, who, caption, upscale=4):
+    """Cut out FIRST, then upscale, then colour.
+
+    Nathan, 2026-09-03: *"cut them out actually upscale them with the HYPIR ...
+    and then once they're upscale, go ahead and color them in those examples
+    that I showed you"*.
+
+    What the default order does instead is HYPIR -> colour -> matte, and two
+    things follow from it that he has been pointing at:
+
+      * the matte is traced around what the RESTORER invented at the hair edge,
+        not around the real hair. Measured on the PACE judge under that order:
+        mean alpha 61/255 in the hair band, 23% of hair pixels fully opaque.
+      * the colour correction measures and moves the whole rectangular crop,
+        background included, with only the face's skin steering it.
+
+    This path:
+      1. matte the RAW crop            -> alpha at true source resolution
+      2. composite on neutral grey     -> no background detail enters the restore
+      3. HYPIR the cut-out             -> 4x
+      4. alpha 4x + guided-filter refine AGAINST the restored RGB, so the
+         upscaled alpha is re-fitted to the detail HYPIR recovered instead of
+         being a blurry Lanczos copy of a small mask
+      5. colour under that alpha       -> the background can never steer the
+         white balance or the black point
+    """
+    import numpy as np, cv2
+    raw = os.path.join(work, f"{who}_raw.png")
+    cut = os.path.join(work, f"{who}_cut.png")
+    grey = os.path.join(work, f"{who}_cutgrey.png")
+    hyp = os.path.join(work, f"{who}_hypir.png")
+    col = os.path.join(work, f"{who}_colour.png")
+    surg = os.path.join(work, f"{who}_surgical.png")
+
+    matte(raw, cut)                                    # 1
+    rgba = cv2.imread(cut, cv2.IMREAD_UNCHANGED)
+    if rgba is None or rgba.ndim != 3 or rgba.shape[2] != 4:
+        raise SystemExit(f"cut-first: {cut} is not RGBA")
+    a0 = rgba[..., 3].astype(np.float32) / 255.0
+    flat = (rgba[..., :3].astype(np.float32) * a0[..., None]
+            + 128.0 * (1.0 - a0[..., None]))           # 2
+    cv2.imwrite(grey, np.clip(flat, 0, 255).astype(np.uint8))
+
+    hypir(grey, hyp, caption, upscale=upscale)         # 3
+    hi = cv2.imread(hyp)
+    H, W = hi.shape[:2]
+
+    # 4. RE-MATTE AT FULL RESOLUTION. Measured 2026-09-03 on PACE: taking the
+    # 250x320 alpha and upscaling it 4x makes the edge 4x coarser than the
+    # image it now belongs to - composited over a saturated field the plate
+    # showed straight through the hairline and around both heads (soft-edge
+    # went 3.2% -> 11.4% on the judge, 3.6% -> 15.9% on the defendant, and it
+    # is bleed, not detail - the green control makes that unmissable).
+    #
+    # The fix keeps his order and adds nothing to it conceptually: the subject
+    # is ALREADY cut out, so this second pass runs against a flat grey field
+    # instead of a courtroom, which is a far easier matte than the one the old
+    # order had to make. The first cut is what keeps the background out of the
+    # restore; this one is what gives the edge its real resolution.
+    a4 = cv2.resize(rgba[..., 3], (W, H), interpolation=cv2.INTER_LANCZOS4)
+    refined = os.path.join(work, f"{who}_cut4.png")
+    try:
+        matte(hyp, refined)
+        _r = cv2.imread(refined, cv2.IMREAD_UNCHANGED)
+        if _r is not None and _r.ndim == 3 and _r.shape[2] == 4:
+            # keep it inside the upscaled silhouette: the second pass can only
+            # REFINE the cut, never re-admit background the first pass removed
+            # NOT clamped to the upscaled source alpha. That clamp was mine and
+            # it was wrong: this pass runs on a crop that has ALREADY had its
+            # background removed, so there is nothing to re-admit, and taking
+            # min() with a blurry 4x upscale threw away exactly the thin-hair
+            # alpha the full-res pass exists to recover - the plate showed
+            # through the top of the defendant's head in the finished frame.
+            a4 = _r[..., 3].astype(np.float32)
+            print(f"  cut-first {who}: alpha re-matted at {W}x{H} against the "
+                  f"grey field")
+    except Exception as _e:
+        print(f"  cut-first {who}: full-res re-matte failed ({_e}) - "
+              f"Lanczos alpha only")
+
+    # 4b. COLOUR DECONTAMINATION. Every partial-alpha pixel at the silhouette
+    # is a blend of the person and the neutral grey this pass composited them
+    # onto in step 2, and after the restore it still carries that grey - which
+    # reads as a fringe the moment the cut-out lands on the plate (over a
+    # saturated control field it is unmissable). The background here is a known
+    # constant, so the true foreground is recoverable exactly rather than
+    # estimated: F = (C - (1-a)*B) / a. Below a=0.15 the division is unstable
+    # and the pixel is nearly invisible anyway, so it is left alone.
+    _a = np.clip(a4.astype(np.float32) / 255.0, 0.0, 1.0)[..., None]
+    _safe = _a >= 0.15
+    _un = np.where(_safe, (hi.astype(np.float32) - (1.0 - _a) * 128.0)
+                   / np.maximum(_a, 1e-3), hi.astype(np.float32))
+    hi = np.clip(_un, 0, 255).astype(np.uint8)
+    print(f"  cut-first {who}: grey decontaminated off "
+          f"{100.0 * float(((_a[..., 0] > 0.02) & (_a[..., 0] < 0.98)).mean()):.2f}% "
+          f"partial-alpha pixels")
+
+    import skin_colour_fix as _S                       # 5
+    fixed = _S.fix(hi, alpha=a4)
+    cv2.imwrite(col, fixed)
+    cv2.imwrite(surg, np.dstack([fixed, np.clip(a4, 0, 255).astype(np.uint8)]))
+    return surg
+
+
 # ----------------------------------------------------------------- 4 matte --
 MATTE_MODEL = "birefnet-portrait"
 MATTE_PROVIDERS = ["CUDAExecutionProvider", "CPUExecutionProvider"]
@@ -801,7 +906,8 @@ def judge_from_library(case, c, work, judge_source=None, headline=None, search=N
 
 
 # ------------------------------------------------------------------- main --
-def prep(case, work, kicker=None, judge_source=None, regen=False):
+def prep(case, work, kicker=None, judge_source=None, regen=False,
+         cut_first=False):
     os.makedirs(work, exist_ok=True)
     c = cases()[case]
     video = os.path.join(ROOT, c["video"])
@@ -966,15 +1072,25 @@ def prep(case, work, kicker=None, judge_source=None, regen=False):
     if not os.path.exists(bg_raw):
         bg_raw = pick_clean_plate(case, bg_raw)
 
-    print("[3/5] HYPIR 4x, per crop, caption-conditioned"
-          + (f"  (judge skipped - {_lname} is already restored)" if lib else ""))
-    if not lib:
-        hypir(jr, os.path.join(work, "judge_hypir.png"),
-              "a close-up photograph of a judge speaking from the bench in a courtroom, "
-              "sharp facial detail, natural skin texture, high quality")
-    hypir(dr, os.path.join(work, "defendant_hypir.png"),
-          "a close-up photograph of a person standing in a courtroom facing the bench, "
-          "sharp facial detail, natural skin texture, high quality")
+    JCAP = ("a close-up photograph of a judge speaking from the bench in a courtroom, "
+            "sharp facial detail, natural skin texture, high quality")
+    DCAP = ("a close-up photograph of a person standing in a courtroom facing the bench, "
+            "sharp facial detail, natural skin texture, high quality")
+    if cut_first:
+        # HIS ORDER, 2026-09-03. The subject stages 3, 3b and 4 collapse into
+        # one pass per person: matte the raw crop, restore the cut-out, refine
+        # the alpha against the restored detail, colour under that alpha.
+        print("[3/5] cut-first: matte the RAW crop -> HYPIR the cut-out -> "
+              "colour under its own alpha")
+        if not lib:
+            subject_cut_first(work, "judge", JCAP)
+        subject_cut_first(work, "defendant", DCAP)
+    else:
+        print("[3/5] HYPIR 4x, per crop, caption-conditioned"
+              + (f"  (judge skipped - {_lname} is already restored)" if lib else ""))
+        if not lib:
+            hypir(jr, os.path.join(work, "judge_hypir.png"), JCAP)
+        hypir(dr, os.path.join(work, "defendant_hypir.png"), DCAP)
     hypir(bg_raw, os.path.join(work, "bg_hypir.png"),
           "an empty courtroom interior, wooden benches, ceiling lights, "
           "sharp architectural detail, high quality", upscale=2)
@@ -1015,7 +1131,7 @@ def prep(case, work, kicker=None, judge_source=None, regen=False):
     import numpy as np
     import skin_colour_fix as _S
     _subj = {}
-    for _w in (("defendant",) if lib else ("judge", "defendant")):
+    for _w in (() if cut_first else (("defendant",) if lib else ("judge", "defendant"))):
         _h = os.path.join(work, f"{_w}_hypir.png")
         _c = os.path.join(work, f"{_w}_colour.png")
         if os.path.exists(_h):
@@ -1026,11 +1142,14 @@ def prep(case, work, kicker=None, judge_source=None, regen=False):
     def _src_for(_w):
         return _subj.get(_w, os.path.join(work, f"{_w}_hypir.png"))
 
-    print("[4/5] mattes (alpha only)"
-          + (f"  (judge skipped - {_lname} is already matted)" if lib else ""))
-    if not lib:
-        matte(_src_for("judge"), os.path.join(work, "judge_surgical.png"))
-    matte(_src_for("defendant"), os.path.join(work, "defendant_surgical.png"))
+    if cut_first:
+        print("[4/5] mattes - already done inside the cut-first pass")
+    else:
+        print("[4/5] mattes (alpha only)"
+              + (f"  (judge skipped - {_lname} is already matted)" if lib else ""))
+        if not lib:
+            matte(_src_for("judge"), os.path.join(work, "judge_surgical.png"))
+        matte(_src_for("defendant"), os.path.join(work, "defendant_surgical.png"))
 
     print("[5/5] faces  (detected on the RAW crop, scaled by the HYPIR factor)")
     # Detect on the SOURCE crop, not the restored one. Measured 2026-08-29 on
@@ -1995,6 +2114,10 @@ if __name__ == "__main__":
                          "since 2026-09-02: measured worse than the HYPIR frame "
                          "(speckled noise, face drift) and costs ~15 min of model "
                          "load per build.")
+    ap.add_argument("--cut-first", action="store_true",
+                    help="his 2026-09-03 order: matte the RAW crop, THEN HYPIR the "
+                         "cut-out, THEN colour it under its own alpha. The default "
+                         "order mattes a restored image and colours a rectangle.")
     ap.add_argument("--prep-only", action="store_true")
     ap.add_argument("--type-style", metavar="STYLE",
                     help="type treatment for title + kicker (tools/thumb_type.py "
@@ -2004,7 +2127,8 @@ if __name__ == "__main__":
     jsrc = None
     if a.judge_from_library:
         jsrc = "library" if a.judge_from_library.lower() == "best" else f"library:{a.judge_from_library}"
-    prep(a.case, a.work, kicker=a.kicker, judge_source=jsrc, regen=a.regen)
+    prep(a.case, a.work, kicker=a.kicker, judge_source=jsrc, regen=a.regen,
+         cut_first=a.cut_first)
     if a.prep_only:
         sys.exit(0)
     # THE GATES MUST ACTUALLY BLOCK. build() has always returned the verdict and

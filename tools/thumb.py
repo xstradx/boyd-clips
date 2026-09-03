@@ -1364,7 +1364,16 @@ class Thumb:
             self.log["defendant_nudge"] = dict(dx=_ddx, dy=_ddy)
         tops = {}
         for al, k, ctr in ((jal, "boyd", jc[0]), (dal, "defendant", dc[0])):
-            band = (al > 0.4)[:, max(0, ctr - 150):min(W, ctr + 150)]
+            # ONE THRESHOLD FOR PLACING AND FOR CHECKING. `cut()` keys the head
+            # top on the SOLID silhouette (`_al > 128`, i.e. 0.502) precisely so
+            # a single wisp cannot move it; this assert was reading 0.4, a
+            # different contour. With a softer alpha the 0.4-0.5 band widens and
+            # the two disagree - measured 2026-09-03 on the cut-first PACE
+            # build, boyd 184 / defendant 180 against a tolerance of 2, while
+            # the placement itself had levelled them. A check that measures a
+            # different quantity than the thing it is checking will fail builds
+            # that are correct.
+            band = (al > 0.502)[:, max(0, ctr - 150):min(W, ctr + 150)]
             r = np.where(band.any(axis=1))[0]
             tops[k] = int(r.min()) if r.size else -1
         self.log["head_tops"] = tops
