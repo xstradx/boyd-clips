@@ -1546,7 +1546,7 @@
   "note": "Sentencing after a plea with a seven-year cap; the State opposed probation and asked for seven. Cause number read off the docket call at 3484.64: 'The court is calling 2026 CR4753 State versus Charlie Ray Perkins.' Two-tile Zoom: defendant LEFT (orange jail uniform, x~0.18 of the full frame; his attorney is the LARGER face at x~0.41, which is why defendant_at is load-bearing), Judge Boyd RIGHT. The hearing is NOT contiguous: main block 3484.2-5801 (mother Tina Williams, sister Diamond Perkins, the defendant), recall 1 at 6254.6-6325.9 (the sister's phone and the news article), recall 2 at 7977.9-8387 (the ruling: two years, the State asked seven). Hook / R49 cold open 5748.8-5754.0 'Well, let's Google.' / 'Let me Google it.'; judge_t 5750 is that moment, plate_t 5250 is his allocution ('I was just misbehaving'). The long-form source is a Perkins-only cut (_scratch/perkins_cut.py, 14 chronological pieces, nothing reordered, 1117 s) because one contiguous span would carry five other defendants.",
   "defendant_nudge": [
    0,
-   -4
+   0
   ]
  },
  "GARCIA_J": {
