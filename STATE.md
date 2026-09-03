@@ -89,6 +89,35 @@ is on disk, not in a context window):
   tracking on the four live videos.
 
 
+## 2026-09-03 - R56/R57: the skin is corrected to his measured band; the global look stops touching people
+
+**Where were we** (print this on "where were we?"):
+- **Done:** `tools/skin_colour_fix.py` (R56) corrects each subject's skin to the
+  band measured off HIS artefacts - the designer sheet he sent (a* +11..+14,
+  chroma 18.6-22.2) and his five accepted thumbnails (a* +9..+24, chroma
+  16.5-25.6). The PACE judge entered the composite at chroma 9.2, less than half
+  of anything he has accepted. R57 locks subject tone: LOOK no longer multiplies
+  people (+6.65 L* on PACE), `face_L_balance` and the chroma lift are off by
+  default, the separation glow stays. `BOYD_SIMPLE` no longer lies about what it
+  disables. Commit `0932931`.
+- **Done:** `D:/Boyd Clips/thumbwork/PACE_ship/PACE_SHIP.jpg` - BUILD_GATES PASS
+  (E F G I J K L H) + A/C/D SHIP, built with `--judge-from-library best`.
+  `selftest_all` 36/36 ALL_OK, `check_rules_refs` ALL_OK, `FLOOR_GATES_OK` (the
+  accepted five still pass every gate).
+- **Retracted, in the rules file and to him:** "the compositor paints light on
+  the faces, 12.2% / 35.8% lifted" was detector-box misalignment, not light.
+  Alignment-free, every face percentile goes DOWN. Three white-patch metrics
+  then failed to separate accepted from rejected - `tools/_white_patch_corpus.py`
+  keeps that disproof. The white on Boyd is in the PACE hearing's own footage of
+  her; from the approved THOMPSON cutout it is gone.
+- **Dead:** AI regeneration of subjects. Shown the raw HYPIR crop beside two Qwen
+  regenerations he said *"No I like left"*. `--regen` stays off.
+- **Next:** the defendant's blown forehead/scalp - it is in HIS SOURCE FRAME
+  (gate C 173 against a 180 limit), so it is R54 frame-picker work, not grading.
+  Then re-run the other four cases (CLAYTON, GARCIA_J, LOPEZGONZALEZ, PERKINS)
+  through the R56/R57 pipeline before any of them is shown or posted.
+- **Blocked:** nothing.
+
 ## 2026-09-02 — TORRES built end to end (short via the chain, cold-open long-form, thumbnail); R46–R49
 
 **Where were we** (print this on "where were we?"):
