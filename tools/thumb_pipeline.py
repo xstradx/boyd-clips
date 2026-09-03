@@ -323,9 +323,21 @@ def matte(src, dst):
     ALPHA ONLY - a matte that changes RGB is a bug, verified byte-identical on
     SANCHEZ. bria-rmbg stays banned: CC BY-NC, and this channel is monetised.
     """
+    # R56, 2026-09-03: the skip must be STALENESS-AWARE, not existence-only.
+    # The colour correction writes a NEW input (`<who>_colour.png`) beside the
+    # HYPIR crop, so on any work dir that already had a matte from an earlier
+    # build the matte was skipped and the corrected pixels were never consumed:
+    # measured on PERKINS, `defendant_colour.png` sat at skin chroma 19.2 while
+    # `_placed_rgb_defendant.png` came out at 13.9 - the uncorrected 14.2. The
+    # build looked like it applied R56 (the log printed the correction) and did
+    # not. An existence check answers "has this ever been made", never "is it
+    # still made from THIS input".
     if os.path.exists(dst):
-        print(f"  [skip] {os.path.basename(dst)}")
-        return dst
+        if os.path.getmtime(dst) >= os.path.getmtime(src):
+            print(f"  [skip] {os.path.basename(dst)}")
+            return dst
+        print(f"  [stale] {os.path.basename(dst)} is older than "
+              f"{os.path.basename(src)} - re-matting")
     import numpy as np, cv2
     from PIL import Image
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

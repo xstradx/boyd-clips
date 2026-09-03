@@ -1742,6 +1742,15 @@ class Thumb:
         if _pre_look is not None:
             _sal = getattr(self, "_subject_alpha", None)
             if _sal is not None:
+                # Subjects keep their own pixels through LOOK, wholesale.
+                # 2026-09-03: a refinement that kept LOOK's CONTRAST term on the
+                # subjects and took back only the brightness lift was tried and
+                # reverted the same build - contrast in RGB expands a*/b* too, so
+                # skin chroma went to 33.5 / 27.6 against a band of 16.5-25.6 and
+                # gates F and I both refused it. Third attempt on one axis is the
+                # signal to stop: the frame's `contrast_sd` sits below his
+                # accepted envelope as a result, and that is REPORTED by
+                # check_thumb_grade rather than tuned away here.
                 _w = np.clip(_sal, 0, 1)[..., None].astype(np.float32)
                 _lifted = float(((cv2.cvtColor(np.clip(canvas, 0, 255).astype(np.uint8),
                                                cv2.COLOR_RGB2GRAY).astype(np.float32)
@@ -1793,7 +1802,20 @@ class Thumb:
                                 0.0, None).astype(np.float32)
                 _clipped = float((_amt > _head).mean())
                 _amt = np.where(_amt > 0, np.minimum(_amt, _head), _amt)
-                canvas = canvas * (1.0 + _amt[..., None])
+                # R57, 2026-09-03: LUMINANCE ONLY. An RGB multiply keeps the
+                # channel ratios, so it scales CHROMA with the luma - the burn
+                # ring around the face drags skin chroma down with it. Measured
+                # on PERKINS: the crops entered at chroma 19.0 / 19.2 and
+                # reached `skin_final` at 15.8 / 12.8, under the accepted floor
+                # of 16.5, and gate I refused the build. This file already
+                # learned the lesson once for the brightness balance ("an RGB
+                # multiply for brightness once took her skin from S 86.3 to
+                # 16.6"); the dodge never did. Scale L* in Lab and leave a*/b*.
+                _lb = cv2.cvtColor(np.clip(canvas, 0, 255).astype(np.uint8),
+                                   cv2.COLOR_RGB2LAB).astype(np.float32)
+                _lb[..., 0] = np.clip(_lb[..., 0] * (1.0 + _amt), 0, 255)
+                canvas = cv2.cvtColor(_lb.astype(np.uint8),
+                                      cv2.COLOR_LAB2RGB).astype(np.float32)
             self.log["dodge_burn"] = dict(dodge=DB_DODGE, burn=DB_BURN,
                                           ceiling=DB_DODGE_CEILING,
                                           limited_px_frac=round(_clipped, 4))
@@ -1832,8 +1854,15 @@ class Thumb:
                 _g = cv2.cvtColor(_u, cv2.COLOR_RGB2GRAY).astype(np.float32)
                 _t = np.where(_g > SUBJ_SHOULDER,
                               SUBJ_SHOULDER + (_g - SUBJ_SHOULDER) * SUBJ_SHOULDER_K, _g)
+                # R57: same correction as the dodge above - the shoulder is a
+                # highlight roll-off, not a desaturation. Applied as an RGB
+                # ratio it took the specular's colour out with its brightness.
                 _r = np.where(_m, _t / np.maximum(_g, 1e-3), 1.0)
-                canvas = canvas * _r[..., None]
+                _lb = cv2.cvtColor(np.clip(canvas, 0, 255).astype(np.uint8),
+                                   cv2.COLOR_RGB2LAB).astype(np.float32)
+                _lb[..., 0] = np.clip(_lb[..., 0] * _r, 0, 255)
+                canvas = cv2.cvtColor(_lb.astype(np.uint8),
+                                      cv2.COLOR_LAB2RGB).astype(np.float32)
 
                 # (b) skin brought TO the corpus target, per subject, both
                 # directions - lifted if dull, pulled back if hot, and left

@@ -14,6 +14,41 @@ is on disk, not in a context window):
 5. The gates decide the floor, not the model. A build that passes them with a
    different taste call is a valid build; a build that skips them is not.
 
+## 2026-09-03 (later) - the LIVE PERKINS thumbnail was replaced with the R56/R57 build
+
+**Where were we** (print this on "where were we?"):
+- **Done (live):** the thumbnail on `9mrARjeKJd8` is now
+  `thumbwork/PERKINS/PERKINS_thumb_R59.jpg`. His ask: *"now that you did it
+  better please fix the thumbnail that you had just posted because you did it in
+  those wrong colors"*. Replaced through Studio (no API credentials on this
+  machine); "Changes saved", Save + Undo both greyed. VERIFIED INDEPENDENTLY, not
+  from the page: `i.ytimg.com/vi/9mrARjeKJd8/maxresdefault.jpg` fetched 200 and
+  measures mean|diff| **3.03 against the new build** vs **26.25 against the old
+  one** - the CDN is serving the new file.
+- **The bug that made the first three rebuild attempts read as "no change".**
+  `matte()` skipped whenever its output existed. R56 writes a NEW input
+  (`<who>_colour.png`), so on PERKINS - a work dir with mattes from the 09-02
+  batch - the matte never re-ran and the corrected pixels were never composited:
+  `defendant_colour.png` chroma 19.2 on disk, `_placed_rgb_defendant.png` 13.9
+  (the uncorrected 14.2). The build printed the correction and had not applied
+  it. The skip is now staleness-aware and prints `[stale] ... re-matting`.
+  Observation 0054.
+- **Also landed:** the dodge/burn and the highlight shoulder are luminance-only
+  (Lab L*, a*/b* untouched) - an RGB multiply carries chroma with the luma, the
+  lesson this file already learned once for the brightness balance.
+- **Tried and REVERTED the same build:** keeping LOOK's contrast term on the
+  subjects and taking back only the lift. Contrast in RGB expands a*/b*, so skin
+  went to chroma 33.5 / 27.6 against a band of 16.5-25.6 and gates F and I both
+  refused it. Third attempt on one axis = stop.
+- **Reported, not tuned away:** `check_thumb_grade` FAILs 2 on this build -
+  `contrast_sd 72.2` against his accepted envelope [78.2, 82.8] and `grain_hf
+  1.78` against [0.87, 1.72]. The frame is flatter than his accepted five
+  because the subjects no longer take the global contrast pass. BUILD_GATES PASS
+  and verify_thumb A/C/D SHIP; `selftest_all` 36/36 ALL_OK.
+- **Next:** CLAYTON, GARCIA_J and LOPEZGONZALEZ on disk are still the 09-02
+  rejected builds - rebuild through R56/R57 before any is shown or posted. Then
+  the defendant frame-picker work (R54) for blown foreheads.
+
 ## 2026-09-03 — PERKINS posted; R56/R57 fixed the washed-out faces
 
 **Where were we** (print this on "where were we?"):
