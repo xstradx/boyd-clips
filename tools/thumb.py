@@ -1141,8 +1141,15 @@ class Thumb:
             # whenever one exists, and the weighted search is only the fallback
             # for a frame that has no clean spot at all.
             best_clean = None
-            for ty in range(int(H * 0.18), int(H * 0.78), 10):
-                for tx in range(int(W * 0.20), int(W * 0.72), 10):
+            # 5 px, not 10. The search returns the CLOSEST clean spot to the
+            # aim point, so its step is the precision of the answer: on PACE the
+            # same aim point (534,434) landed at drift 0.21 in one build and
+            # 0.27 in another purely because the coarse grid straddled the
+            # opening between the two cut-outs differently. He picked the 0.21
+            # one by eye (2026-09-03, "Top arrow is better") - the fix is a
+            # finer grid, not a different constant.
+            for ty in range(int(H * 0.18), int(H * 0.78), 5):
+                for tx in range(int(W * 0.20), int(W * 0.72), 5):
                     if tx + aw > W or ty + ah > H:
                         continue
                     ov = int((amask & blocked[ty:ty + ah, tx:tx + aw]).sum())

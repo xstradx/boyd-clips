@@ -579,3 +579,28 @@ device the verdict came from before calling it a reversal.
   `NATHAN_RULES.md` Q1 (ambiance and zooms on the shorts, asked 2026-08-28), and
   the clickbaity-font options he asked for at 17:25 today — *"give me multiple
   options to pick from and we could lock one in"*.
+
+## 2026-09-03 — the cut-first order, judged twice
+
+- **P (accepted, colour):** *"I would say it looks a lot better"* — the R56/R57
+  skin correction on the live PERKINS thumbnail.
+- **N (the order):** shown the same PACE frame built both ways, he picked the
+  CURRENT-ORDER build twice: *"Boyd pose on the top looks better"* (that one was
+  my error - I had seeded the cut-first dir from a stale work dir, so it used a
+  different judge frame; `judge_t 5087` is pinned in cases.json and the rebuild
+  matched the pose) and then, on a like-for-like pair, *"Top arrow is better"*.
+- **VERDICT: the default order does not change.** `matte -> HYPIR -> colour`
+  stays behind `--cut-first`. It measures level with the default on hair and
+  edge (soft edge 4.74% / 4.44% vs 3.23% / 3.57%) and gives the tightest colour
+  drift of any build (0.2 / 0.4), but gate E refuses it on the PACE defendant
+  (ratio 0.70 vs a 1.4 floor) and his eye has now chosen the default twice. Not
+  argued with, recorded.
+- **N (arrow), fixed:** *"what's going on with the arrow and words"*. The arrow
+  had never been aimed at anybody - placed at a fixed fraction of the CANVAS and
+  then nudged off faces, so pointing at the defendant was luck. It now aims at
+  his own face box, and the search prefers a placement clear of subjects AND
+  gallery. My first attempt at that fix made it worse (no gallery overlap, but
+  the tip drifted into empty room) and is recorded as such.
+- **Still open, his call, not answered:** the three style directions off the
+  designer references he sent (dark graded plate + coloured rim light / bottom
+  two-tone type / both).

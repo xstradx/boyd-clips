@@ -14,6 +14,33 @@ is on disk, not in a context window):
 5. The gates decide the floor, not the model. A build that passes them with a
    different taste call is a valid build; a build that skips them is not.
 
+## 2026-09-03 (later still) - the arrow is aimed now; cut-first stays behind a flag
+
+**Where were we** (print this on "where were we?"):
+- **His verdict, twice:** shown the same PACE frame built both ways he picked the
+  DEFAULT order both times - *"Boyd pose on the top looks better"* (my error: I
+  seeded the cut-first dir from a stale work dir so it used a different judge
+  frame; `judge_t 5087` is pinned in cases.json and the rebuild matched) and then
+  *"Top arrow is better"* on a like-for-like pair. **The default order does not
+  change.** `--cut-first` stays available and measures level on hair/edge with
+  the tightest colour drift of any build (0.2 / 0.4), but gate E refuses it on
+  the PACE defendant and his eye has chosen twice.
+- **Arrow, root cause and fix.** It had never been aimed at anybody: placed at
+  `ARROW_CX_FRAC` - a fraction of the CANVAS - then nudged off faces, so whether
+  it pointed at the defendant was luck (drift 0.01 on one build, tip in empty
+  room on the next). It now aims at the defendant's own face box
+  (`log["arrow_aim"]`), the search prefers a spot clear of subjects AND gallery,
+  and the grid is 5 px. Both orders: `on_blocked_px 0, on_gallery_px 0`.
+  My first attempt at this made it worse and is recorded in the verdicts ledger.
+- **Green:** `selftest_all` 37/37 ALL_OK, `check_rules_refs` ALL_OK.
+- **OPEN, his call:** three style directions off the thumbnail-designer
+  references he sent - (A) dark graded plate + coloured rim light on the
+  subjects, (B) bottom-anchored two-tone type, (C) both. Every reference does all
+  three; four of his five accepted builds have the background BRIGHTER than the
+  people, which is the opposite.
+- **Next:** CLAYTON, GARCIA_J and LOPEZGONZALEZ are still the 09-02 rejected
+  builds on disk - rebuild before any is shown or posted.
+
 ## 2026-09-03 (later) - the LIVE PERKINS thumbnail was replaced with the R56/R57 build
 
 **Where were we** (print this on "where were we?"):
