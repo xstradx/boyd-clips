@@ -151,6 +151,16 @@ def chain(video, segs, out, work=None, verbose=True):
         if rc != 0 or "SHORT_OK" not in txt or not os.path.exists(out):
             return refuse("engine", f"short_engine exit {rc}, SHORT_OK={'SHORT_OK' in txt}", out)
         print("  OK    engine  SHORT_OK")
+        # 4b pace - R58. Every gate above can pass on a short where nothing is
+        # happening; "Short was kinda underwhelming and slow, boring" (2026-09-03)
+        # measured 138.3 wpm against his accepted 195-236. The span is the fault,
+        # so this refuses the build rather than shipping it for him to reject.
+        rc, txt = _run([py, os.path.join(ROOT, "tools", "check_short_pace.py"),
+                        out, "--words", tight_words], log)
+        if rc != 0 or "SHORT_PACE_FAIL" in txt:
+            return refuse("pace", "under the pace floor of his accepted shorts - "
+                                  "re-pick the SPAN, do not re-cut this one", out)
+        print("  OK    pace    SHORT_PACE_OK")
         # 5 map - so the short editor can convert marks on THIS file to source
         raw_map = json.load(open(raw_map_p, encoding="utf-8"))
         timemap = json.load(open(tm, encoding="utf-8"))

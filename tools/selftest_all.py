@@ -82,6 +82,9 @@ SUITE = [
     # 2026-09-02, "fix the reason why you're not able to see or detect that":
     # R52. Five invented scalars failed; the comparison sheet found it at once.
     ("vs_accepted R52 six-up sheet vs the accepted five; missing and stale sheets refused", ["tools/vs_accepted.py", "--selftest"]),
+    # 2026-09-03, "Short was kinda underwhelming and slow, boring": R58. Every
+    # other short gate passed it. The short he called slow is the control.
+    ("check_short_pace R58 wpm envelope of his accepted shorts; the slow one is the control", ["tools/check_short_pace.py", "--selftest"]),
 ]
 
 PASS_TOKENS = ("SELFTEST_PASS", "VS_ACCEPTED_SELFTEST_OK", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",

@@ -133,5 +133,21 @@
    "tools/make_short.py"
   ],
   "note": "2026-09-01: this file is the SINGLE source of the short's house constants. The three readers derive every module-level constant (W, H, LUFS_TARGET, ENTRANCE, FONT, CAP_PX, GRADE_EQ, ...) from it at import; a key the code needs that is missing here FAILS the import, it does not default. Nathan, 2026-08-31: 'save everything as the normal floor when making future shorts' and 'that short was made off the old rules or whatever and should be made with our new ones'. R40: tools/floor_stamp.py hashes this file into every short's sidecar, so adding a key here makes every earlier short stale by design."
+ },
+ "pace": {
+  "note": "R58. Nathan, 2026-09-03, on PERKINS_SHORT: 'Short was kinda underwhelming and slow, boring'. Measured words-per-minute on the DELIVERED file (aligned words / duration). The four shorts he has accepted or posted cluster 195-236 wpm; the one he called slow measures 138.3 - 29% under the lowest accepted. This is the envelope, not a hand-tuned threshold: it moves when the corpus moves. Control that proves the gate can fail = PERKINS_SHORT.mp4 (his 'slow' verdict).",
+  "metric": "len(<work>/<stem>_tight_words.json) / ffprobe duration * 60",
+  "accepted": {
+   "SANCHEZ": 235.6,
+   "CARTHIEF": 200.0,
+   "OFFERUP": 226.3,
+   "TORRES": 195.0
+  },
+  "rejected": {
+   "PERKINS_SHORT (slow)": 138.3
+  },
+  "floor_wpm": 185.2,
+  "floor_note": "min(accepted) - 5%. PERKINS_SHORT_V2 rebuild measures 225.0 -> PASS.",
+  "why_it_happened": "the span was chosen to match the title hook ('let's Google', a 1.4s line) instead of being read as a scene. Its source span carried a 27.1s single unbroken turn - a lawyer reading a news article aloud - against 7.4s longest in the span that replaced it."
  }
 }

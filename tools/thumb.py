@@ -237,7 +237,7 @@ if SUBJ_TONE_LOCKED:
 # Style-2 corpus median subject-minus-background separation, from the 68
 # thumbnail calibration (IQR +11.5 to +29.9 in L*).
 SEPARATION_DL = 18.6
-# ---- R57: the PLATE is bounded by his accepted corpus, not by SEPARATION_DL --
+# ---- R59: the PLATE is bounded by his accepted corpus, not by SEPARATION_DL --
 # 2026-09-03: "correct the color ... the faces all washed and white where its
 # hard to really see their face". Measured, accepted five vs the batch build:
 #
@@ -1130,6 +1130,17 @@ class Thumb:
         if blocked is not None:
             want_x, want_y = x0, y0
             best = None
+            # A CLEAN SPOT BEATS A NEAR ONE. Nathan, 2026-09-03, on a build
+            # where the arrow slid onto a man in the gallery: *"what's going on
+            # with the arrow and words"*. The weighted score let 50 px of
+            # gallery overlap be bought back by saving drift, so the arrow
+            # pointed at a stranger instead of at the defendant - measured
+            # on_gallery_px 50 / drift 0.44 against 0 / 0.01 for the same case
+            # one build earlier. His rule is that the arrow is clear of the
+            # subjects and the type, so a placement that is CLEAN wins outright
+            # whenever one exists, and the weighted search is only the fallback
+            # for a frame that has no clean spot at all.
+            best_clean = None
             for ty in range(int(H * 0.18), int(H * 0.78), 10):
                 for tx in range(int(W * 0.20), int(W * 0.72), 10):
                     if tx + aw > W or ty + ah > H:
@@ -1141,6 +1152,10 @@ class Thumb:
                     score = ov + og * ARROW_GALLERY_COST + d * ARROW_DRIFT_COST
                     if best is None or score < best[0]:
                         best = (score, tx, ty, ov, d)
+                    if ov == 0 and og == 0 and (best_clean is None or d < best_clean[0]):
+                        best_clean = (d, tx, ty, ov, d)
+            if best_clean is not None:
+                best = best_clean
             if best:
                 _, x0, y0, ov, d = best
                 og = int((amask & gallery[y0:y0 + ah, x0:x0 + aw]).sum())
@@ -2074,7 +2089,7 @@ class Thumb:
                 _L = cv2.cvtColor(_u, cv2.COLOR_RGB2LAB)[..., 0].astype(np.float32)
                 _sL = float(_L[_sm].mean()); _bL = float(_L[_bm].mean())
                 _aim = _sL - SEPARATION_DL
-                # R57 - the aim is clamped into his accepted plate envelope.
+                # R59 - the aim is clamped into his accepted plate envelope.
                 _want = float(np.clip(_aim, BG_L_MIN, BG_L_MAX))
                 if _bL > 1.0:
                     _k = float(np.clip(_want / _bL, 0.55, 1.35))
@@ -2089,7 +2104,7 @@ class Thumb:
                     if abs(_want - _aim) > 0.05:
                         print(f'  separation: plate aim {_aim:.1f} is outside his accepted '
                               f'background band [{BG_L_MIN:.1f}, {BG_L_MAX:.1f}] '
-                              f'-> plate graded to {_want:.1f} (R57)')
+                              f'-> plate graded to {_want:.1f} (R59)')
 
         if GRAIN > 0:
             rng = np.random.default_rng(7)
@@ -2202,7 +2217,27 @@ class Thumb:
         if getattr(self, "arrow_xy", None):
             tx, ty = int(self.arrow_xy[0]), int(self.arrow_xy[1])
         else:
-            tx, ty = int(ARROW_CX_FRAC * W), int(ARROW_CY_FRAC * H)
+            # AIM IT AT THE DEFENDANT. Nathan, 2026-09-03: *"what's going on
+            # with the arrow and words"* - and the honest answer was that the
+            # arrow has never been aimed at anybody. It was placed at a fixed
+            # fraction of the CANVAS and then nudged off faces, so whether it
+            # read as pointing at him was luck: on one build the house position
+            # happened to sit by his shoulder (drift 0.01), and on the next,
+            # with the subjects a little wider, the same constant left the tip
+            # in empty room. A pointer whose target is a canvas coordinate is
+            # not pointing at anything.
+            _d = self.log.get("defendant") or {}
+            _fh, _cx = _d.get("face_h"), _d.get("cx")
+            _ht = _d.get("head_top")
+            if _fh and _cx is not None and _ht is not None:
+                tx = int(_cx + _fh * 0.80)      # just off his cheek, not on it
+                ty = int(_ht + _fh * 0.85)      # about eye level
+                tx = max(int(W * 0.18), min(int(W * 0.78), tx))
+                ty = max(int(H * 0.20), min(int(H * 0.80), ty))
+                self.log["arrow_aim"] = "defendant face"
+            else:
+                tx, ty = int(ARROW_CX_FRAC * W), int(ARROW_CY_FRAC * H)
+                self.log["arrow_aim"] = "canvas default (no defendant box)"
         al_ = self.arrow_at(tx, ty, faces_in(np.clip(canvas, 0, 255).astype(np.uint8)),
                             want=getattr(self, 'arrow_want', None))
         self.log["arrow_target"] = [tx, ty]

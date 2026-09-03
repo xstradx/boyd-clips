@@ -1371,6 +1371,86 @@ skin balance, chroma lift) may change a subject's face luminance or chroma. The
 global look applies to the plate. The only stage still permitted to touch a
 subject is R55's headroom pull, which only ever darkens.
 
+### R58 - a short must carry as much talking per second as the ones he accepted
+
+Nathan, 2026-09-03, on the PERKINS short an hour after it went live: *"Short was
+kinda underwhelming and slow, boring"*.
+
+Every gate in the chain had passed it - CHAIN_OK, SHORT_OK, FLOOR_OK, cuts on
+speech boundaries, loudness, captions on the seam, judge on top. Nothing measured
+whether anything was HAPPENING. Words per minute on the delivered file:
+
+    SANCHEZ   235.6    accepted
+    OFFERUP   226.3    accepted
+    CARTHIEF  200.0    accepted
+    TORRES    195.0    posted
+    -------------------------------------------
+    PERKINS   138.3    "slow, boring"   <- 29% under the lowest accepted
+    PERKINS   225.0    the rebuild      -> passes
+
+The cause is upstream of the editor. The span was picked to MATCH THE TITLE HOOK
+("let's Google" - a 1.4 s line) instead of being read as a scene, so the short
+inherited a 27.1 s single unbroken turn - a lawyer reading a news article aloud,
+an address and a date - and ended on "does anybody know what time that was?".
+The span that replaced it (the stolen gun: "Who did you buy it from?" / "I don't
+really know like that.") runs 15.7 turns/min with a 7.4 s longest turn.
+
+RULE: the title hook and the short's span are two different decisions. Pick the
+span by reading the scene (`tools/banger_digest.py`, R50) - short answers, no long
+unbroken turn - then write the title from what is in it. A hook line is not a scene.
+
+CHECK: `tools/check_short_pace.py`, run inside `tools/short_chain.py` as step 4b;
+under the floor is a REFUSED build, not a warning. The floor is
+`min(accepted) - 5%` read from `config/short_floor.json` `pace.accepted`, so it
+moves when the corpus moves and is never a hand-tuned number (R51's construction).
+The CONTROL that proves the gate can fail is `PERKINS_SHORT.mp4`, the one he
+called slow. Re-cutting a slow span tighter does not reach the floor - the tool
+says so in its failure text.
+
+NOT AUTOMATED: whether a scene is actually funny or shocking. wpm says a short is
+not DEAD; it cannot say it is good.
+
+### R59 - the plate is graded into his accepted band, not to a borrowed constant
+
+Nathan, 2026-09-03: *"Okay but correct the color"* / *"the faces all washed and
+white where its hard to really see their face"*.
+
+Measured, his accepted five against the batch build:
+
+    case       subject_L  background_L     dL
+    OFFERUP        126.1        107.2   +18.9
+    CARTHIEF        91.2        137.8   -46.6
+    SANCHEZ         86.3        144.1   -57.8
+    MONKEY         106.7        124.3   -17.6
+    THOMPSON        94.2        149.1   -54.9
+    PERKINS        106.3         89.2   +17.1   <- the build he rejected
+
+FOUR of the five he accepted put the BACKGROUND brighter than the people. The
+separation solve chased `SEPARATION_DL = +18.6`, a median from an outside
+68-thumbnail corpus, and its own comment called a brighter background "the
+'subjects don't pop' defect" - i.e. the code named his accepted look as a defect
+and graded it out. A dark plate then makes the subjects the brightest thing in
+frame, and the LOOK stage lifts the whole canvas to reach its luma constant.
+(R57 stops that lift touching subjects; this rule stops the plate being dark in
+the first place. They are complementary - R57 protects the people, R59 fixes the
+ground they stand on.)
+
+RULE: `SEPARATION_DL` stays the AIM, but the plate it produces is clamped into
+the `background_L` envelope of his accepted builds, read from
+`config/quality_floor.json`. `BG_L_MIN` / `BG_L_MAX` in `tools/thumb.py`,
+overridable with `BOYD_BG_L_MIN` for a build that wants the corpus median rather
+than its floor.
+
+CHECK: `tools/check_thumb_grade.py` (R51) already measures `background_L` and
+`contrast_sd` against the accepted envelope - this rule is what makes a build
+able to pass it. PERKINS rebuilt: `background_L 89.2 -> 135.6`,
+`contrast_sd 73.0 -> 82.1`, `dL +17.1 -> -29.6`, THUMB_GRADE_FAIL -> THUMB_GRADE_OK.
+
+NOTE, 2026-09-03: this rule was first written as "R57" while a parallel session
+was writing a DIFFERENT R57 in this file. Renumbered to R59 on discovery. Two
+rules under one number is the accumulate-don't-supersede failure, so check the
+highest rule number in this file before claiming the next one.
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured
@@ -1393,6 +1473,7 @@ the selftest suite when a row lies.
 | `tools/identity.py` | WIRED | `tools/thumb_pipeline.py`, `tools/selftest_all.py` (leave-one-out selftest), `tools/short_engine.py` (R46 `gate_judge_top`), `scripts/make_short.py` (R46 `judge_tile`) |
 | `tools/master_audio.py` | WIRED | R47 - `tools/short_engine.py` (master step, a raise is a REFUSED build), `scripts/make_short.py`, `scripts/build_body.py`, `scripts/build_longform.py`; `tools/selftest_all.py` (`--selftest` A-D, control fixture `tools/fixtures/speech_overshoot_torres.mp4`) |
 | `tools/short_chain.py` | WIRED | R48 - the ONLY short render entry: `scripts/make_short.py --no-master` -> `tools/align_words.py` -> `tools/tighten.py --tail auto` -> `tools/short_engine.py` (must print `SHORT_OK`) -> composed `.map.json`; emitted by `scripts/build_short_editor.py`, `scripts/build_editor.py`, `scripts/build_browse_editor.py`, run by `scripts/batch_vertical.py`, `scripts/studio_server.py`; `tools/selftest_all.py` (`--selftest`) |
+| `tools/check_short_pace.py` | WIRED | R58 - the wpm envelope of his accepted shorts; run by `tools/short_chain.py` as step 4b (under the floor = REFUSED build); `tools/selftest_all.py` (`--selftest`: accepted shorts pass, `PERKINS_SHORT.mp4` - the one he called slow - is the control and must fail) |
 | `tools/check_short_entry.py` | WIRED | R48 - `tools/selftest_all.py` (`--selftest` with the old studio_server command as the CONTROL, then the scan of `scripts/*editor*.py`, `scripts/studio*.py`, `scripts/batch_vertical.py`) |
 | `tools/tighten.py` | WIRED | R35/R47/R48 shorts path, run by `tools/short_chain.py` (`--tail auto` = `measured_tail`, `--timemap` for the engine's cut gate); `tools/selftest_all.py` (`--selftest`, reverb-tail control, auto-tail vs fixed-tail control) |
 | `tools/snap_cuts.py` | WIRED | `tools/tighten.py` (silences), `tools/short_engine.py`; `tools/selftest_all.py` (`--selftest`) |

@@ -368,9 +368,37 @@ def main() -> None:
     if not srcs:
         print("no downloaded section for " + args.video)
         return
-    src = Path(srcs[0])
-    m = re.search(r"_(\d+)-(\d+)\.mp4$", src.name)
-    sec = float(m.group(1)) if m else 0.0
+    # Pick the section that CONTAINS the requested segments, not srcs[0].
+    # 2026-09-03: it took srcs[0] blindly. With two sections on disk for one
+    # video that silently cuts from the wrong part of the hearing - the segment
+    # times are absolute, so a wrong `sec` offset just slides the cut somewhere
+    # else in the stream and everything downstream still "succeeds".
+    _want = []
+    for sp in args.seg:
+        x, y = sp.split(":")
+        _want.append((float(x), float(y)))
+    _lo, _hi = min(a for a, _ in _want), max(b for _, b in _want)
+    _cands = []
+    for p in srcs:
+        mm = re.search(r"_(\d+)-(\d+)\.mp4$", Path(p).name)
+        if not mm:
+            continue
+        a, b = float(mm.group(1)), float(mm.group(2))
+        _cands.append((a, b, p))
+    _fit = [c for c in _cands if c[0] <= _lo and c[1] >= _hi]
+    if not _fit:
+        have = ", ".join(f"{a:.0f}-{b:.0f}" for a, b, _ in _cands) or "none parseable"
+        print(f"no downloaded section covers {_lo:.1f}-{_hi:.1f} for {args.video}; "
+              f"sections on disk: {have}. Pull the span first "
+              f"(scripts/prefetch_sources.py) rather than cutting from the wrong one.")
+        return
+    # the tightest covering section
+    _fit.sort(key=lambda c: c[1] - c[0])
+    src = Path(_fit[0][2])
+    sec = _fit[0][0]
+    if len(_cands) > 1:
+        print(f"    source section {src.name} (covers {sec:.0f}-{_fit[0][1]:.0f}, "
+              f"chosen because it contains {_lo:.1f}-{_hi:.1f})")
 
     segs = []
     for sp in args.seg:
