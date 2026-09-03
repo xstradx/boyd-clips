@@ -1441,6 +1441,22 @@ the `background_L` envelope of his accepted builds, read from
 overridable with `BOYD_BG_L_MIN` for a build that wants the corpus median rather
 than its floor.
 
+**REJECTED, 2026-09-03, same day: the corpus MEDIAN as the clamp floor.** I
+rebuilt PERKINS with `BOYD_BG_L_MIN=137.8` (the median of his accepted plates)
+and showed it to him next to the build that was live. His verdict: *"No you made
+it worse"*. Measured, what the median actually did: whole-frame mean L 100.9 ->
+112.2, so the bright, busy courtroom behind the people started competing with
+them, and the subjects sat at L 92.5 against a 136.3 plate (dL -43.8) - they
+recede. **Use the band FLOOR (107.2), not the median.** The live build sits at
+107.5 and is the one he kept.
+
+MY ERROR, recorded because it is the reusable part: I presented the median build
+as better *because it passed THUMB_GRADE (R51) where the live one failed
+`contrast_sd`*. A floor is not a ranking. Passing a gate the other build fails
+does not make a build better, and a gate must never be quoted at him as a reason
+to prefer a picture. R52 says the comparison is read, not scored; that applies to
+my own builds against each other, not just against the accepted five.
+
 CHECK: `tools/check_thumb_grade.py` (R51) already measures `background_L` and
 `contrast_sd` against the accepted envelope - this rule is what makes a build
 able to pass it. PERKINS rebuilt: `background_L 89.2 -> 135.6`,
