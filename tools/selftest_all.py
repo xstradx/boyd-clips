@@ -37,7 +37,7 @@ SUITE = [
     # script nothing called, two of a file that did not exist)
     ("check_rules_refs rules cite only real, wired checkers", ["tools/check_rules_refs.py"]),
     ("floor_stamp    R40 stale-floor refusal can still fail", ["tools/floor_stamp.py", "--selftest"]),
-    ("check_title    R41 weak/stated-outcome title refusal can still fail", ["tools/check_title.py", "--selftest"]),
+    ("check_title    R41 rewritten - his own winners must never be refused and must outscore his five worst", ["tools/check_title.py", "--selftest"]),
     ("check_variants R42 invisible-variant refusal can still fail", ["tools/check_variants.py", "--selftest"]),
     ("check_clutter  R43 element-budget / ink-cover refusal can still fail", ["tools/check_clutter.py", "--selftest"]),
     ("thumb_type     every type preset renders, its devices are ink, house == thumb constants", ["tools/thumb_type.py"]),
@@ -85,6 +85,9 @@ SUITE = [
     # 2026-09-03, "Short was kinda underwhelming and slow, boring": R58. Every
     # other short gate passed it. The short he called slow is the control.
     ("check_short_pace R58 wpm envelope of his accepted shorts; the slow one is the control", ["tools/check_short_pace.py", "--selftest"]),
+    # 2026-09-03, his choice: gates advise, they do not veto. This proves the
+    # switch actually works in both directions and defaults to advise.
+    ("gatemode      advisory gates never stop a build; BOYD_GATES=refuse still does", ["tools/gatemode.py"]),
 ]
 
 PASS_TOKENS = ("SELFTEST_PASS", "VS_ACCEPTED_SELFTEST_OK", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",

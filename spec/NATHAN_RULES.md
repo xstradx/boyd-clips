@@ -793,29 +793,58 @@ CHECK: `tools/floor_stamp.py`. Every thumbnail build writes the SHA-256 of
 the current hash, and the youtube-channel skill runs it before anything is
 posted (§1d).
 
-### R41 — Titles are hooks, not descriptions
+### R41 - titles follow the formula that wins this niche (REWRITTEN 2026-09-03)
 
-> "Those titles are weak" — #173, 2026-08-31
-> "I guess a/b test them but idk I think title could be better do 3 different
-> ones" — #174
+**The old R41 was wrong and cost views for days.** It said "a title names a
+specific act or quote, withholds the outcome, and never states the sentence",
+and `tools/check_title.py` REFUSED any title that stated one.
 
-My titles described what the video was about. The evidence already in hand:
-his best recent performer withholds the ending; the worst states the sentence;
-on the reference channel a 2–5 word specific act beat a summary 200×. The
-measured house constants are in `spec/PACKAGING.md`: 50–65 characters with a
-hard ceiling of 70, name the judge (80% of the winning top 40 do), 2–4
-emphasised words that are the beats — actor, verb, stake.
+Measured 2026-09-03 with yt-dlp - his own channel ranked by views, and every
+Judge Boyd video on YouTube over 100k - then run through our own checker:
 
-A title names a specific act or quote grounded in a transcript line, withholds
-the outcome, and never states the sentence. Three angles for the A/B test.
-Profanity censored (channel rule). If the browser tool refuses a string, that
-is a rewrite with the same angle, not a stop.
+| views | title | our gate said |
+|---|---|---|
+| 865,000 | Day 1: The family found them in a locked car - Savanah Soto Capital Murder Trial | **REFUSED** 80 chars |
+| 39,000 | Judge Boyd Sentences San Antonio Rapper "IZZY93" To PRISON! | **REFUSED** states the sentence |
+| 27,000 | Thug In Disbelief After Judge Boyd Sentences Him To Prison. | **REFUSED** states the sentence |
+| 22,000 | Judge Boyd Sentences Father Who STARVED his 10-Year Old Daughter | **REFUSED** sentence length |
+| 747,486 | Judge Boyd Sentences 22-Year-Old in Predator Sting | **REFUSED** sentence length |
+| 281,247 | Judge Boyd Sentences Honors Student to 6 YEARS PRISON | **REFUSED** sentence length |
 
-CHECK: `python tools/check_title.py "<title>" --transcript <file>` — refuses
-over 70 characters, a stated sentence (`N years`, `sentenced to`, `found
-guilty`, `verdict`), uncensored profanity, a quoted span that is not verbatim
-in the transcript (R16), and warns when the judge is not named or the length is
-outside 50–65.
+**Seven of the nine best-performing Judge Boyd titles in existence were refused
+by our own checker.** The five WORST shorts on his channel (977 - 2,000 views)
+are the quote-led, outcome-withheld ones the rule was built to produce - four of
+them written by me. The rule did not describe his corpus; it described one
+inference from one A/B on 2026-08-31 that then hardened into a veto.
+
+His instruction, 2026-09-03: *"if there's something in the instructions that you
+know is wrong and ESPECIALLY if I spend DAYS telling you it's wrong then maybe it
+would be smart to undo whatever's causing and delete it"*. Asked to choose, he
+picked **copy the rival formula**. So the outcome refusal is DELETED, not relaxed.
+
+THE FORMULA, read off the 100k+ corpus:
+
+    [who + what they did, blunt] + Judge Boyd + [reaction verb] + [the outcome]
+
+- **State the outcome.** It is the payoff, not a spoiler.
+- **CAPS the payoff word** - PRISON, STARVED, LIFE, MONSTER.
+- **A reaction verb for the judge** - SNAPS, LOSES IT, RAGES, ERUPTS, HAMMERS,
+  SLAMS, SHOWS NO MERCY, HUMILIATES, DENIES, REJECTS, BEGS, IN DISBELIEF.
+- **Name the crime concretely**, asterisking the sensitive word (Se*, Rap*d,
+  MOLEST*D) - what the winning channels do, and it satisfies his censor rule.
+- Up to ~85 characters. His 865k best is 80. The old hard ceiling of 70 refused it.
+
+CHECK: `python tools/check_title.py "<title>" [--transcript <file>]`. It now
+SCORES 0-100 against the formula and only REFUSES two things, both accuracy, not
+taste: uncensored profanity (standing channel rule) and a quoted span that is not
+verbatim in the transcript (R16 - inventing a quote from a real person in a real
+courtroom is a factual error, not a style choice). Its known-answer set is HIS
+CHANNEL, not an invented fixture: `--selftest` requires that no winning title is
+ever refused and that the winners outscore his five worst. Measured at the
+rewrite: winners 45-100, losers 0-30, no overlap.
+
+NOT AUTOMATED: whether a title is actually a good hook. The score says a title
+has the shape that wins; it cannot say the case is worth clicking.
 
 ### R42 — Variants must differ at feed size
 

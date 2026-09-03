@@ -1548,6 +1548,18 @@ def build(case, work, out_jpg, white=None, yellow=None, kicker=None, arrow=True,
     print("BUILD_GATES PASS" if _ok else "BUILD_GATES FAIL")
     ok, _ = V.score(out_jpg)
     print(("GATES PASS  " if ok else "GATES FAIL  ") + out_jpg)
+    # 2026-09-03, his choice: gates advise, they do not veto. The JPEG is already
+    # written by this point, so a failing gate no longer makes the build vanish -
+    # it prints, is recorded, and the picture is judged by looking at it.
+    import gatemode
+    if not (ok and _ok):
+        if not _ok:
+            gatemode.note("thumb:BUILD_GATES", "verify_build / case_search failed", kind="defect")
+        if not ok:
+            gatemode.note("thumb:verify_thumb", "A/C/D score failed", kind="taste")
+    gatemode.summary(os.path.basename(out_jpg))
+    if gatemode.advisory():
+        return True
     # the verdict is BOTH: until 2026-09-01 only verify_thumb's score came
     # back, so a build with a failing build gate still returned True to the
     # caller and read as "GATES PASS" one line after "BUILD_GATES FAIL"

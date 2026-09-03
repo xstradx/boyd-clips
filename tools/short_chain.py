@@ -17,7 +17,11 @@ from the editor pages ever was.
 
     python tools/short_chain.py --video ID --seg START:END [--seg ...] --out OUT.mp4
 
-runs, in order, each step refusing loudly and leaving no OUT on failure:
+runs, in order. Since 2026-09-03 a failing gate ADVISES rather than vetoes
+(BOYD_GATES=advise is the default; BOYD_GATES=refuse restores the old
+behaviour). A step whose OUTPUT was never written still stops - there is
+nothing for the next step to eat - and the run ends with a summary of
+everything that would have been refused:
 
     1  raw     scripts/make_short.py --no-master      (the editor's exact cuts)
     2  words   tools/align_words.py --model large-v3  (word timestamps)
@@ -87,12 +91,26 @@ def sidecars(out):
             os.path.splitext(out)[0] + ".map.json")
 
 
-def refuse(step, why, out):
+def refuse(step, why, out, kind="taste"):
+    """Gate failure. Under BOYD_GATES=advise (the default since 2026-09-03) a
+    gate does NOT kill the build when the output actually exists - it warns
+    loudly and the chain carries on, because Nathan asked for the veto to come
+    out of the rules and the judgement to come back to the picture. A step whose
+    output does not exist still stops: there is nothing for the next step to eat."""
+    import gatemode
+    have_out = os.path.exists(out)
+    if gatemode.advisory() and have_out:
+        gatemode.note(f"short:{step}", why, kind=kind)
+        return None
     for p in sidecars(out):
         if os.path.exists(p):
             os.remove(p)
     print(f"  FAIL  {step:7} {why}")
-    print(f"  REFUSED at step {step} - no {os.path.basename(out)} written")
+    if gatemode.advisory() and not have_out:
+        print(f"  STOPPED at step {step} - {os.path.basename(out)} was never written, "
+              f"so there is nothing for the next step to use (this is not a taste veto)")
+    else:
+        print(f"  REFUSED at step {step} - no {os.path.basename(out)} written")
     return 1
 
 
@@ -124,8 +142,10 @@ def chain(video, segs, out, work=None, verbose=True):
         if rc != 0 or not os.path.exists(raw) or not os.path.exists(raw_map_p):
             # make_short prints and returns 0 on "no downloaded section" /
             # "tiles not measurable" - the FILE is the verdict, not the exit
-            return refuse("raw", f"make_short exit {rc}, raw={os.path.exists(raw)} "
+            _r = refuse("raw", f"make_short exit {rc}, raw={os.path.exists(raw)} "
                                  f"map={os.path.exists(raw_map_p)}", out)
+            if _r:
+                return _r
         print("  OK    raw")
         # 2 words
         rc, txt = _run([py, os.path.join(ROOT, "tools", "align_words.py"), raw, raw_words,
@@ -135,7 +155,8 @@ def chain(video, segs, out, work=None, verbose=True):
         except Exception:                                   # noqa: BLE001
             words = []
         if rc != 0 or not words:
-            return refuse("words", f"align_words exit {rc}, {len(words)} words", out)
+            _r = refuse("words", f"align_words exit {rc}, {len(words)} words", out)
+            if _r: return _r
         print(f"  OK    words   {len(words)} words")
         # 3 tight - edges in measured silence, tail measured, timemap for the gate
         rc, txt = _run([py, os.path.join(ROOT, "tools", "tighten.py"), raw, raw_words, tight,
@@ -143,24 +164,30 @@ def chain(video, segs, out, work=None, verbose=True):
                         "--src-start", f"{first_start:.2f}"], log)
         if rc != 0 or not (os.path.exists(tight) and os.path.exists(tight_words)
                            and os.path.exists(tm)):
-            return refuse("tight", f"tighten exit {rc}", out)
+            _r = refuse("tight", f"tighten exit {rc}", out)
+            if _r: return _r
         print("  OK    tight")
         # 4 engine - every house rule as a gate, SHORT_OK + floor stamp
         rc, txt = _run([py, os.path.join(ROOT, "tools", "short_engine.py"), tight, tight_words,
                         out, "--timemap", tm], log)
         if rc != 0 or "SHORT_OK" not in txt or not os.path.exists(out):
-            return refuse("engine", f"short_engine exit {rc}, SHORT_OK={'SHORT_OK' in txt}", out)
+            _r = refuse("engine", f"short_engine exit {rc}, SHORT_OK={'SHORT_OK' in txt}", out, kind="defect")
+            if _r: return _r
         print("  OK    engine  SHORT_OK")
         # 4b pace - R58. Every gate above can pass on a short where nothing is
         # happening; "Short was kinda underwhelming and slow, boring" (2026-09-03)
-        # measured 138.3 wpm against his accepted 195-236. The span is the fault,
-        # so this refuses the build rather than shipping it for him to reject.
+        # measured 138.3 wpm against his accepted 195-236. The span is the fault.
+        # Advisory since 2026-09-03: it tells you the span is dead, it does not
+        # take the decision away from you.
         rc, txt = _run([py, os.path.join(ROOT, "tools", "check_short_pace.py"),
                         out, "--words", tight_words], log)
         if rc != 0 or "SHORT_PACE_FAIL" in txt:
-            return refuse("pace", "under the pace floor of his accepted shorts - "
-                                  "re-pick the SPAN, do not re-cut this one", out)
-        print("  OK    pace    SHORT_PACE_OK")
+            _r = refuse("pace", "under the pace floor of his accepted shorts - "
+                                "re-pick the SPAN, do not re-cut this one", out)
+            if _r:
+                return _r
+        else:
+            print("  OK    pace    SHORT_PACE_OK")
         # 5 map - so the short editor can convert marks on THIS file to source
         raw_map = json.load(open(raw_map_p, encoding="utf-8"))
         timemap = json.load(open(tm, encoding="utf-8"))
@@ -175,6 +202,8 @@ def chain(video, segs, out, work=None, verbose=True):
         json.dump(side, open(os.path.splitext(out)[0] + ".map.json", "w", encoding="utf-8"),
                   indent=1)
         print(f"  OK    map     {len(pieces)} pieces -> {os.path.splitext(out)[0]}.map.json")
+    import gatemode
+    gatemode.summary(os.path.basename(out))
     print(f"  CHAIN_OK  {out}")
     return 0
 
@@ -220,15 +249,47 @@ def selftest():
     p2 = compose_map(raw_map, tm2)
     chk("seam straddle splits in two", [(p["src_start"], p["src_end"]) for p in p2],
         [(108.0, 110.0), (200.0, 202.0)])
-    # refusal: a failed step removes every shippable-looking file
-    with tempfile.TemporaryDirectory() as d:
-        out = os.path.join(d, "X_SHORT.mp4")
-        for p in sidecars(out):
-            open(p, "w").write("x")
-        rc = refuse("engine", "control", out)
-        chk("refusal exits non-zero", rc, 1)
-        chk("refusal leaves no output / stamp / map",
-            [os.path.exists(p) for p in sidecars(out)], [False] * len(sidecars(out)))
+    # 2026-09-03: gates ADVISE by default and REFUSE under BOYD_GATES=refuse.
+    # Both directions are tested, because an advisory gate that silently became
+    # a veto (or a veto that silently became advisory) is the failure mode.
+    import gatemode
+    _prev = os.environ.get("BOYD_GATES")
+    try:
+        # refuse mode: a failed step still removes every shippable-looking file
+        os.environ["BOYD_GATES"] = "refuse"
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "X_SHORT.mp4")
+            for p in sidecars(out):
+                open(p, "w").write("x")
+            rc = refuse("engine", "control", out)
+            chk("BOYD_GATES=refuse: refusal exits non-zero", rc, 1)
+            chk("BOYD_GATES=refuse: refusal leaves no output / stamp / map",
+                [os.path.exists(p) for p in sidecars(out)], [False] * len(sidecars(out)))
+        # advise mode (the default): the build survives and the files stay
+        os.environ["BOYD_GATES"] = "advise"
+        gatemode.reset()
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "X_SHORT.mp4")
+            for p in sidecars(out):
+                open(p, "w").write("x")
+            rc = refuse("engine", "control", out)
+            chk("BOYD_GATES=advise: gate does NOT stop the build", rc, None)
+            chk("BOYD_GATES=advise: the output survives",
+                [os.path.exists(p) for p in sidecars(out)], [True] * len(sidecars(out)))
+            chk("BOYD_GATES=advise: the failure is still RECORDED, not swallowed",
+                len(gatemode.record()) >= 1, True)
+        # advise mode, but the output was never written: must still stop
+        gatemode.reset()
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "X_SHORT.mp4")
+            rc = refuse("raw", "control - no file produced", out)
+            chk("BOYD_GATES=advise: a step with no output still stops", rc, 1)
+    finally:
+        if _prev is None:
+            os.environ.pop("BOYD_GATES", None)
+        else:
+            os.environ["BOYD_GATES"] = _prev
+        gatemode.reset()
     # the chain's steps are the ones the docstring promises, in that order
     src = open(__file__, encoding="utf-8").read()
     body = src[src.index("def chain("):src.index("def _tail_from(")]
