@@ -1282,6 +1282,95 @@ into paste (face p99 208, 0.0% over L235 - the look he rejected); with no
 clamp at all faces ran 21-24% blown; 215/0.40 lands at p99 234 and 0.2-0.3%,
 inside his accepted five (p99 188-255, 0.02-2.5%).
 
+### R56 - a face's skin is corrected TO the accepted band, and the gate checks residual, not drift
+
+Nathan, 2026-09-03, sending a thumbnail designer's before/after sheet: *"when i
+said fix the colors this is what i meant like how thumbnail makers do it"* - and,
+shown a raw HYPIR crop beside two AI regenerations, *"No I like left"*. So the
+people are never regenerated; they are colour corrected.
+
+MEASURED that day (`tools/_colour_target.py`), median skin in Lab:
+
+| | skin a* | chroma |
+|---|---|---|
+| the designer's AFTER column | +11 … +14 | 18.6 - 22.2 |
+| his five ACCEPTED thumbnails | +9 … +24 | 16.5 - 25.6 |
+| PACE defendant (rejected) | +6 | 16.8 |
+| **PACE judge (rejected)** | +8 | **9.9** |
+
+Boyd was at less than HALF the skin chroma of every thumbnail he has accepted.
+That is the "grey", "waxy", "colourless" complaint he has repeated since
+2026-08-31, as a number for the first time - it was never sharpness and never
+the upscaler.
+
+RULE: between HYPIR and the matte, each subject is white-balanced on its own
+face's skin pixels, its chroma restored to the corpus target (20.0) and its
+black point put back. `tools/skin_colour_fix.py`. The HYPIR frame is never
+overwritten - it is the artefact he said he liked, and every later comparison is
+measured against it.
+
+AND THE GATE HAD TO CHANGE WITH IT. Gate F keyed on drift from the source crop,
+so it refused the correction he asked for: fixing a face that starts at 9.2
+REQUIRES a large drift, and a large drift for her beside a small one for him
+(16.8, nearly in band) is the signature of a CORRECT per-face correction, not a
+defect. As written, gate F could only ever pass a build that left her grey. F now
+measures each face's RESIDUAL from the corpus target instead. What it was
+protecting against - the parity rule repainting her to match him - still fails,
+proved against a control with the judge deliberately re-greyed
+(`_CONTROL_greyjudge.jpg`: residual j=10.1 d=2.7, imbalance 7.4, FAIL) while the
+corrected build passes at imbalance 1.0.
+
+### R57 - the global look belongs to the plate; the subject's tone has one authority
+
+Nathan, 2026-09-03: *"No no they still looked washed"*, then *"Like there's
+something that you did to judge Boyd's face and the guy to have that bright
+white effect"*.
+
+**RETRACTION, recorded because it was told to him.** The first measurement said
+the compositor was painting light onto the faces - 12.2% of the defendant's face
+and 35.8% of Boyd's "lifted more than +8 L*". That number came from resizing one
+detector's face box onto another detector's face box and differencing per pixel.
+Two boxes from two detections are not the same pixel selection. Measured
+alignment-free, every luminance percentile of both faces goes DOWN from crop to
+composite (judge p50 49.4 -> 45.1, p90 67.5 -> 63.9, p99 80.8 -> 78.4). The
+faces were never lifted.
+
+**Three metrics were then tried and all three FAILED to separate** his accepted
+five from the builds he rejected: per-pixel face lift, biggest bright blob as a
+fraction of the face (rejected builds 0.00-0.90% sit INSIDE the accepted
+0.00-1.78%, and the crop he said he liked measures 1.75%), and head+hair
+contrast range (accepted 95.3-99.2, rejected 96.1-96.9). `tools/_white_patch_corpus.py`
+keeps that disproof so it is not re-invented. A number that does not separate the
+two sets is not a cause, and dressing one up as the cause is the failure this
+repo keeps repeating.
+
+**What the eyes settled, comparing Boyd at the same size across builds:** the
+white on her face is in the PACE hearing's own footage of her, not in a stage.
+Built from the approved `boyd_THOMPSON_approved.png` cutout instead of re-cut
+from this hearing, the white is simply gone and her skin reads deep and black-
+haired like the builds he accepted. The defendant's pale scalp IS in his source
+frame and is a frame-picker problem (R54), not a grade problem.
+
+**Two real defects were found and fixed on the way, both measured:**
+
+1. `BOYD_SIMPLE=1` printed "chroma lift, skin L all disabled" and disabled
+   neither. `face_L_balance` still ran at pull 0.60, dragging Boyd's face from
+   L 108.0 toward the 135.5 midpoint she shares with the defendant. A switch
+   whose message is untrue is worse than no switch: every "surgery off" build
+   since was judged as if the surgery were off. Now `FACE_L_PULL = 0.0`.
+2. The LOOK stage multiplies the WHOLE CANVAS - people included - until the
+   frame's mean grey hits `LOOK["luma"]`. With a dark plate that is always a
+   lift, and R55 only pulled a face back once it CLIPPED, so a face could be
+   washed pale all the way to the blow-out cap and pass every gate. Measured on
+   PACE: a mean **+6.65 L*** lift on subject pixels. Subjects are now snapshotted
+   before LOOK and restored after it (`look_subject_locked` in the build log).
+
+RULE: after R56 the subject's tone has ONE authority - the corrected crop. No
+global stage (LOOK, SAT_TRIM, definition) and no parity stage (`face_L_balance`,
+skin balance, chroma lift) may change a subject's face luminance or chroma. The
+global look applies to the plate. The only stage still permitted to touch a
+subject is R55's headroom pull, which only ever darkens.
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured
@@ -1330,6 +1419,9 @@ the selftest suite when a row lies.
 | `tools/verify_build.py` | WIRED | `tools/thumb_pipeline.py` (`build()` returns `ok and _ok` since 2026-09-01), `tools/selftest_all.py`, both skills |
 | `tools/expression.py` | WIRED | `tools/thumb_pipeline.py`, `tools/thumb.py`, `tools/library.py` (`rank()` re-scores live), `tools/selftest_all.py`. 2026-09-01: eyeLookDown penalty replaced by a head-pitch cost + lid ramp; FLOOR 0.04 anchored on the approved minimum (SANCHEZ 0.0520 full-cutout); the approved CARTHIEF cutout no longer scores 0.0 |
 | `tools/check_registry.py` | WIRED | `tools/verify_build.py` gate H, `tools/selftest_all.py` |
+| `tools/_white_patch_corpus.py` | MANUAL | R57 - the measurement that DISPROVED three white-patch hypotheses on 2026-09-03 (per-pixel face lift, biggest bright blob, head contrast range). Kept so the next session does not re-invent them: none separates his accepted five from the builds he rejected |
+| `tools/_colour_target.py` | MANUAL | R56 - the one-off measurement that produced the corpus skin band (his designer sheet + the five accepted builds). Re-run by hand when the accepted set changes; nothing on the build path calls it |
+| `tools/skin_colour_fix.py` | WIRED | R56 - `tools/thumb_pipeline.py` (between HYPIR and the matte, writes `<who>_colour.png` and never overwrites `<who>_hypir.png`), `tools/verify_build.py` gate F (residual target), `tools/selftest_all.py` |
 | `tools/check_rules_refs.py` | WIRED | `tools/selftest_all.py` |
 | `tools/selftest_all.py` | WIRED | boyd-thumbnail skill; the runner itself |
 | `tools/thumbeng/variety.py` | WIRED | boyd-thumbnail skill (R39). Its 0.30 limit rejects all five accepted builds (max pair 0.455) — a report, not a ship gate |

@@ -63,3 +63,6 @@ tools/_lf_full.wav
 models/*.task
 models/*.onnx
 research/**/*.mp4
+
+# workflow worktrees - embedded repos, never part of this one
+.claude/

@@ -126,7 +126,13 @@ SIMPLE = os.environ.get('BOYD_SIMPLE', '') == '1'
 # R57 defaults. Overridden inside the SIMPLE block below; declared here so
 # every reference resolves whether or not SIMPLE is set.
 SKIN_CHROMA_LIFT_OFF = False
-SUBJ_TONE_LOCKED = False
+# R57 is ON BY DEFAULT, not only under BOYD_SIMPLE. Nothing Nathan has ever
+# asked for says the global luma normaliser should brighten the PEOPLE; that is
+# a bug, and it lifted every subject +6.65 L* on PACE. BOYD_SIMPLE additionally
+# turns off the rim and the parity stages, but SIMPLE also fails the build's own
+# "separation glow" checklist item - his 2026-08-31 rule - so it is a diagnostic
+# mode, not a shipping one.
+SUBJ_TONE_LOCKED = os.environ.get('BOYD_LOOK_ON_SUBJECTS', '') != '1'
 
 def _envf(name, default):
     """Sweepable constant. The defaults below are DERIVED from the five he
@@ -208,6 +214,19 @@ SKIN_CHROMA_TARGET = 20.6
 SKIN_CHROMA_BAND = 1.2
 SKIN_L_TARGET = 134.0     # uint8 Lab, measured off v23, the tone he chose
 SKIN_L_BAND = 5.0
+
+# R57, 2026-09-03. With R56 correcting each subject to the measured corpus
+# target BEFORE the composite, the parity stages are a second and contradictory
+# authority on the same pixels - and gate F says so on its own: built with them
+# on, the judge drifts 3.6 from her corrected crop against the defendant's 0.2,
+# imbalance 3.4 against a 2.5 limit. So they are off by default now, not only
+# under BOYD_SIMPLE. The rim/separation glow is NOT touched - that is his own
+# 2026-08-31 rule and the build checklist requires it.
+if SUBJ_TONE_LOCKED:
+    FACE_L_PULL = 0.0
+    SKIN_SAT_PULL = 0.0
+    SKIN_CHROMA_BAND = 999.0
+    SKIN_L_BAND = 999.0
 # HIGHLIGHT SHOULDER ON SUBJECTS. Nathan: "There's still harsh white lighting on
 # faces". Measured: EVERY face clipped to L*255, up to 30.5% of Boyd's face
 # above L*210 on SANCHEZ. A shoulder identical to this already existed - applied

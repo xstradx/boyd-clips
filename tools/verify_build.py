@@ -230,9 +230,24 @@ def gate_F(work, out_jpg):
         return None, "no output"
     W = fin.shape[1]
     src = {}
-    for who, raw in (("judge", "judge_raw.png"), ("defendant", "defendant_raw.png")):
-        p = os.path.join(work, raw)
-        if not os.path.exists(p):
+    for who in ("judge", "defendant"):
+        # R56/R57, 2026-09-03. The reference is the crop AS IT ENTERS THE
+        # COMPOSITE, which since R56 is the colour-corrected one. Measuring
+        # against `<who>_raw.png` made this gate count R56's own declared
+        # correction as a repaint, so it could only ever pass a build that left
+        # Boyd grey (she enters the composite at chroma 9.2 against an accepted
+        # band of 16.5-25.6). Everything the gate was written to catch - the
+        # saturation-parity repaint - happens AFTER this point and is still
+        # measured exactly as before; the OFFERUP v19 control still fails.
+        # ONLY `_colour.png` displaces `_raw.png`. Falling back through
+        # `_hypir.png` moved the reference for builds that predate R56 and
+        # failed the accepted THOMPSON (imbalance 3.1 against a 2.5 limit) - a
+        # gate change that re-judges his approved work is a regression, not a
+        # fix. Builds without an R56 crop are measured exactly as before.
+        p = next((q for q in (os.path.join(work, f"{who}_colour.png"),
+                              os.path.join(work, f"{who}_raw.png"))
+                  if os.path.exists(q)), None)
+        if p is None:
             continue
         im = cv2.imread(p)
         b = _biggest_face(im)
@@ -268,6 +283,10 @@ def gate_F(work, out_jpg):
         rows.append(f"{who}: drift {drift[who]:.1f}")
     if len(drift) < 2:
         return None, "need both faces"
+    # The imbalance formula is the ORIGINAL one and stays: driving both faces
+    # to the same destination repaints whichever started further away, and that
+    # is what this refuses. What changed under R56 is only the REFERENCE it
+    # measures from (see the source selection above).
     imb = abs(drift["judge"] - drift["defendant"])
     return (imb <= MAX_CHROMA_IMBALANCE), "  ".join(rows) + f"   imbalance {imb:.1f}"
 

@@ -28,6 +28,7 @@ SUITE = [
     ("expression     measured frame selection", ["tools/expression.py", "--selftest"]),
     ("verify_thumb   gates A/C/D can still fail", ["tools/verify_thumb.py", "--selftest"]),
     ("verify_build   gates E/F/G/I/J/K/L/H can still fail", ["tools/verify_build.py", "--selftest"]),
+    ("skin_colour    R56 correction lands inside his accepted band", ["tools/skin_colour_fix.py", "--selftest"]),
     ("thumb_metrics  metric reproduction + separability", ["tools/verify_thumb_metrics.py"]),
     ("master_audio   loudness stage", ["tools/master_audio.py", "--selftest"]),
     ("check_registry no orphaned checkers", ["tools/check_registry.py"]),

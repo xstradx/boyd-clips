@@ -989,11 +989,36 @@ def prep(case, work, kicker=None, judge_source=None, regen=False):
     else:
         print("  regenerate: OFF (measured worse than HYPIR 2026-09-02; --regen to force)")
 
+    # R56 SKIN COLOUR. Nathan, 2026-09-03, sending a designer's before/after
+    # sheet: *"when i said fix the colors this is what i meant like how
+    # thumbnail makers do it"* - and, on the raw HYPIR crop, *"No I like left"*.
+    # So the people are NOT to be regenerated; they are to be COLOUR CORRECTED.
+    # Measured that day (tools/_colour_target.py): the PACE judge sat at skin
+    # chroma 9.9 against 16.5-25.6 across all five thumbnails he has accepted -
+    # less than half. That is the "grey / waxy / colourless" complaint, stated
+    # as a number for the first time.
+    # The HYPIR frame is NEVER overwritten - it is the thing he said he likes,
+    # and every comparison since is measured against it.
+    import cv2 as _cv2
+    import numpy as np
+    import skin_colour_fix as _S
+    _subj = {}
+    for _w in (("defendant",) if lib else ("judge", "defendant")):
+        _h = os.path.join(work, f"{_w}_hypir.png")
+        _c = os.path.join(work, f"{_w}_colour.png")
+        if os.path.exists(_h):
+            print(f"  {_w}:")
+            _cv2.imwrite(_c, _S.fix(_cv2.imread(_h)))
+            _subj[_w] = _c
+
+    def _src_for(_w):
+        return _subj.get(_w, os.path.join(work, f"{_w}_hypir.png"))
+
     print("[4/5] mattes (alpha only)"
           + (f"  (judge skipped - {_lname} is already matted)" if lib else ""))
     if not lib:
-        matte(os.path.join(work, "judge_hypir.png"), os.path.join(work, "judge_surgical.png"))
-    matte(os.path.join(work, "defendant_hypir.png"), os.path.join(work, "defendant_surgical.png"))
+        matte(_src_for("judge"), os.path.join(work, "judge_surgical.png"))
+    matte(_src_for("defendant"), os.path.join(work, "defendant_surgical.png"))
 
     print("[5/5] faces  (detected on the RAW crop, scaled by the HYPIR factor)")
     # Detect on the SOURCE crop, not the restored one. Measured 2026-08-29 on
@@ -1179,8 +1204,30 @@ def build(case, work, out_jpg, white=None, yellow=None, kicker=None, arrow=True,
     import verify_thumb as V
     c = cases()[case]
     faces = json.load(open(os.path.join(work, "faces.json")))
+    # R56 ON THE LIBRARY PATH. prep() skips HYPIR for a library judge, so she is
+    # the one subject the colour correction never reaches - measured 2026-09-03,
+    # gate I FAIL at chroma 13.7 against a band of 16.5-25.6 while the defendant
+    # beside her sat at 19.0. It runs HERE, in build(), and writes a NEW file:
+    # judge_surgical.png must stay byte-identical to the library cutout, which
+    # R44's reuse contract asserts in eleven places (writing the correction in
+    # place broke 14 of its selftest checks).
+    _jpng = os.path.join(work, "judge_surgical.png")
+    _jcol = os.path.join(work, "judge_surgical_colour.png")
+    if not os.path.exists(os.path.join(work, "judge_hypir.png")) \
+            and os.path.exists(_jpng):
+        import cv2 as _cv2
+        import numpy as _np
+        import skin_colour_fix as _S
+        _rgba = _cv2.imread(_jpng, _cv2.IMREAD_UNCHANGED)
+        if _rgba is not None and _rgba.ndim == 3 and _rgba.shape[2] == 4:
+            print("  judge (library):")
+            _fx = _S.fix(_rgba[..., :3], alpha=_rgba[..., 3])
+            _cv2.imwrite(_jcol, _np.dstack([_fx, _rgba[..., 3]]))
+            _cv2.imwrite(os.path.join(work, "judge_colour.png"), _fx)
+    if os.path.exists(_jcol):
+        _jpng = _jcol
     t = T.Thumb(plate_png=os.path.join(work, "defendant_surgical.png"),
-                judge_png=os.path.join(work, "judge_surgical.png"),
+                judge_png=_jpng,
                 plate_face=tuple(faces["defendant"]),
                 judge_face=tuple(faces["judge"]),
                 texts=(white or c["white"], yellow or c["yellow"]),
@@ -1631,11 +1678,17 @@ def selftest():
     lib_score = float(X.score(shapes, prof))
     lo_score = float(X.score(shapes_lo, prof))
 
+    # The `regenerate` stage is NOT listed. It has been off by default since
+    # 2026-09-02 (measured worse than the HYPIR frame) and `run()` below calls
+    # prep() without --regen, so expecting it made five checks read "every
+    # stage ran (4/5)" / "(6/7)" and fail on a pipeline that was behaving
+    # correctly. Verified 2026-09-03 against `git show HEAD`: these five were
+    # already failing before R56/R57 touched anything.
     JUDGE_STAGES = {("grab", "judge_raw.png"), ("hypir", "judge_hypir.png"),
-                    ("regenerate", "judge_hypir.png"), ("matte", "judge_surgical.png"),
+                    ("matte", "judge_surgical.png"),
                     ("face_of", "judge_raw.png")}
     DEF_STAGES = {("grab", "defendant_raw.png"), ("hypir", "defendant_hypir.png"),
-                  ("regenerate", "defendant_hypir.png"), ("matte", "defendant_surgical.png"),
+                  ("matte", "defendant_surgical.png"),
                   ("face_of", "defendant_raw.png"), ("plate", "bg_raw.png"),
                   ("hypir", "bg_hypir.png")}
 
