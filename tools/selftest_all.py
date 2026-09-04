@@ -24,6 +24,10 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # (label, argv). Order is cheapest-first so a broken environment shows up fast.
 SUITE = [
     ("tiles          seam / tile detection", ["tools/tiles.py", "--selftest"]),
+    ("incidents      multi-angle incident grouping", ["tools/incidents.py", "--selftest"]),
+    ("bwc_sync       N-camera audio alignment", ["tools/bwc_sync.py", "--selftest"]),
+    ("denver         Drive folder listing + audio stream", ["tools/denver.py", "--selftest"]),
+    ("title_grammar  measured title levers + noise", ["tools/title_grammar.py", "--selftest"]),
     ("identity       Boyd recognition, leave-one-out", ["tools/identity.py", "--selftest"]),
     ("expression     measured frame selection", ["tools/expression.py", "--selftest"]),
     ("verify_thumb   gates A/C/D can still fail", ["tools/verify_thumb.py", "--selftest"]),
@@ -88,6 +92,12 @@ SUITE = [
     # 2026-09-03, his choice: gates advise, they do not veto. This proves the
     # switch actually works in both directions and defaults to advise.
     ("gatemode      advisory gates never stop a build; BOYD_GATES=refuse still does", ["tools/gatemode.py"]),
+    # 2026-09-03: the skill reference published a floor table whose every row was
+    # wrong - grain min 23.3 against a real 0.9-1.7, skin chroma MAX 18.6 against a
+    # real MIN 19.1. A number in prose cannot be re-measured. The control is that
+    # exact shipped table.
+    ("check_floor_ref no floor NUMBER is stated as current in prose; the shipped table is the control", ["tools/check_floor_ref.py", "--selftest"]),
+    ("check_floor_ref the live skill files state no floor number", ["tools/check_floor_ref.py"]),
 ]
 
 PASS_TOKENS = ("SELFTEST_PASS", "VS_ACCEPTED_SELFTEST_OK", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
