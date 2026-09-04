@@ -1,0 +1,41 @@
+{
+ "elements": [
+  {
+   "i": 0,
+   "type": "card",
+   "dur": 1.2
+  },
+  {
+   "i": 1,
+   "type": "court",
+   "dur": 2.0
+  },
+  {
+   "i": 2,
+   "type": "clip",
+   "dur": 1.5
+  },
+  {
+   "i": 3,
+   "type": "still",
+   "dur": 1.2
+  },
+  {
+   "i": 4,
+   "type": "card",
+   "dur": 1.2
+  }
+ ],
+ "boundaries": [
+  1.2,
+  3.2,
+  4.7,
+  5.9
+ ],
+ "duration": 7.137,
+ "canvas": [
+  1080,
+  1920
+ ],
+ "fps": 30
+}

@@ -1,0 +1,23 @@
+{
+ "elements": [
+  {
+   "i": 0,
+   "type": "card",
+   "dur": 1.0
+  },
+  {
+   "i": 1,
+   "type": "card",
+   "dur": 1.0
+  }
+ ],
+ "boundaries": [
+  1.0
+ ],
+ "duration": 2.033,
+ "canvas": [
+  1080,
+  1920
+ ],
+ "fps": 30
+}

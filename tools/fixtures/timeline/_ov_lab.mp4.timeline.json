@@ -1,0 +1,16 @@
+{
+ "elements": [
+  {
+   "i": 0,
+   "type": "court",
+   "dur": 1.5
+  }
+ ],
+ "boundaries": [],
+ "duration": 1.536,
+ "canvas": [
+  1080,
+  1920
+ ],
+ "fps": 30
+}

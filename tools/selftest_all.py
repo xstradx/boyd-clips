@@ -27,6 +27,9 @@ SUITE = [
     ("incidents      multi-angle incident grouping", ["tools/incidents.py", "--selftest"]),
     ("bwc_sync       N-camera audio alignment", ["tools/bwc_sync.py", "--selftest"]),
     ("denver         Drive folder listing + audio stream", ["tools/denver.py", "--selftest"]),
+    ("verify_stamp   sync vs the burned-in clock (independent oracle)", ["tools/verify_stamp.py", "--selftest"]),
+    ("cutplan        multi-angle edit plan + refusals", ["tools/cutplan.py", "--selftest"]),
+    ("shotqual       ranks angles by what is visible", ["tools/shotqual.py", "--selftest"]),
     ("title_grammar  measured title levers + noise", ["tools/title_grammar.py", "--selftest"]),
     ("identity       Boyd recognition, leave-one-out", ["tools/identity.py", "--selftest"]),
     ("expression     measured frame selection", ["tools/expression.py", "--selftest"]),
@@ -98,6 +101,10 @@ SUITE = [
     # exact shipped table.
     ("check_floor_ref no floor NUMBER is stated as current in prose; the shipped table is the control", ["tools/check_floor_ref.py", "--selftest"]),
     ("check_floor_ref the live skill files state no floor number", ["tools/check_floor_ref.py"]),
+    # 2026-09-03, "you're still going off of examples and not fixing the problem
+    # inside the pipeline": the renderer could only ever emit a 2-up crop of ONE
+    # video. tools/short_timeline.py gives it a timeline of heterogeneous elements.
+    ("short_timeline card/court/clip/still concat; controls: identical elements show NO cut, missing asset refused", ["tools/short_timeline.py", "--selftest"]),
 ]
 
 PASS_TOKENS = ("SELFTEST_PASS", "VS_ACCEPTED_SELFTEST_OK", "THUMB_GRADE_SELFTEST_OK", "BANGER_DIGEST_SELFTEST_OK", "ENGINE_SELFTEST_PASS", "ALL_OK", "REPRO_OK", "FLOOR_GATES_OK",
