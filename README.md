@@ -3,26 +3,32 @@
 Automated daily clipping of Judge Stephanie Boyd's 187th District Court
 livestream ([`@judgestephanieboyd4233`](https://www.youtube.com/@judgestephanieboyd4233/streams)).
 
-Each run produces **one long-form video** of a full case and **one vertical
-short** cut from inside it, with the short's description pointing back at the
-long-form. Shorts feed long-form; that's the funnel.
+The target is **one long-form video** and **one vertical Short** from the same
+best available case each day. One global daily limit covers all new dockets and
+the unproduced case bank. Production remains in manual review mode. See the
+[September 12 build record](docs/DAILY-V1-BUILD-2026-09-12.md) for exact limits,
+proof, and what will happen on the next run.
 
 ---
 
 ## How it works
 
 ```
-discover     list new streams                       metadata only, ~2s
+lead scan    inspect six recent competitor clips    metadata + captions only
+   ↓         match exact phrases to original court footage
+discover     list new original streams              metadata only
    ↓
 transcribe   YouTube auto-captions → word timings   free, no video downloaded
    ↓
-segment      split the docket into individual cases  Claude
+segment      split the docket into individual cases  DeepSeek V4.1 Flash
    ↓
-gate + score safety rules first, then the rubric     Claude
+gate + score safety rules first, then the rubric     DeepSeek V4.1 Flash
    ↓
-select       highest-scoring case that clears every gate
+select       global best eligible case or strongest unproduced bank case
    ↓
-render       download ONLY that case's minutes, cut, caption
+plan         Producer/Shorts Brain + three paired title/thumbnail concepts
+   ↓
+render       download ONLY original court minutes, cut, caption, QC
    ↓
 publish      long-form first → URL → short          gated by autonomy.mode
 ```
@@ -40,21 +46,34 @@ the other way round would mean ~15 GB/week of video to find one good case.
 cd C:\Users\natha\Projects\boyd-clips
 python -m pip install -e .
 
-copy config\.env.example config\.env
-# add your ANTHROPIC_API_KEY to config\.env
+codex login
 
 python -m boydclips.cli doctor
 ```
 
 `doctor` checks yt-dlp, ffmpeg (including libass, needed for burned-in
-captions), the Anthropic SDK, credentials, and your config. Do not schedule
-anything until it reports `ready`.
+captions), the configured backend, credentials, and your config. Astra is the
+project orchestrator. Bounded workers run through `scripts/deepseek_worker.py`;
+isolated production calls use DeepSeek V4.1 Flash through API name
+`deepseek-flash`; no Anthropic key is needed. Image generation uses a separate
+tool and allowance. A healthy environment does not prove
+editorial or unattended production readiness; follow the audit's staged gates.
 
-**Keep yt-dlp current.** A five-month-old yt-dlp silently returned only 360p
-for this channel while 720p was available — `run_daily.ps1` self-updates it on
-every run for exactly this reason.
+For one bounded worker task, pipe the complete assignment to
+`python scripts/deepseek_worker.py`. For independent work, pass a JSON array of
+`id`, `task`, `effort`, and `sandbox` fields to
+`python scripts/deepseek_workers.py MANIFEST --output-dir OUTPUT`. The batch
+runner caps concurrency at eight, saves each final message and log, and requires
+Astra to inspect the live result. Eight is a ceiling, not a default.
+
+**Keep yt-dlp current.** An old build once returned only 360p while 720p was
+available. The daily driver does not upgrade software during a production run;
+update yt-dlp separately after testing the update.
 
 ### Daily schedule
+
+The repository includes the guarded driver below, but this task does not install
+the schedule automatically. Install it only after a reviewed live rehearsal:
 
 ```powershell
 schtasks /create /tn "BoydClips" /sc daily /st 19:40 /f `
@@ -73,13 +92,16 @@ don't exist yet.
 |---|---|
 | `boyd doctor` | Environment and config check |
 | `boyd discover` | List new dockets, touch nothing else |
-| `boyd run --dry-run` | Analyse and select, download and render nothing |
+| `boyd run --dry-run` | Rank locally banked cases only; zero discovery, model, download, or render work |
 | `boyd run` | The full pipeline |
-| `boyd approve <case_key>` | Record approval; publishes when mode allows |
+| `boyd approve <case_key> --concept A|B|C` | Bind approval to one exact title-thumbnail pair and artifact hashes |
 | `boyd reject <case_key> --reason "..."` | Record rejection (`--safety` if safety-related) |
 | `boyd stats` | Reliability ledger and autonomy promotion readiness |
 | `boyd bank` | Qualifying runner-up cases held for slow days |
 | `boyd auth youtube` | One-time OAuth |
+| `boyd release-check <packet>` | Verify the selected long-form and thumbnail for manual Studio release; no production or upload |
+
+`release-check` reads an existing release JSON packet and checks its exact video/thumbnail hashes, media, title, description and Not Made for Kids setting. It reuses the selected files without requiring a Short or unselected A/B/C arms. `local_files_verified` is an integrity result, not editorial approval, upload or scheduling confirmation. The full-package/API release checks remain unchanged.
 
 ---
 
@@ -166,45 +188,31 @@ not the default for good reason.
 
 ---
 
-## Cost
+## Limits and usage
 
-Measured against real transcripts from this channel (claude-opus-5,
-`effort: high`):
-
-| Docket | Transcript | Cost |
-|---|---|---|
-| 52 min | 4.7k tokens | $0.38 |
-| 108 min | 18k tokens | $0.52 |
-| 171 min | 28k tokens | $0.61 |
-
-A typical two-session day is about **$1.00**. Roughly $30/month.
-
-**Output tokens dominate** — ~12k out per docket at $25/1M costs more than the
-input on shorter dockets. If you want this cheaper, `analysis.effort` is the
-lever, not transcript size; dropping the segmentation stage to `medium` is the
-obvious first try.
-
-Cross-call prompt caching does *not* apply, despite the `cache_control` block
-in `analyze.py`: caching is a prefix match over `tools → system → messages`,
-and each stage sends a different system prompt, so the prefix diverges before
-the transcript is reached. Unifying the three system prompts behind a shared
-cached prefix would make the transcript reusable — worth doing if cost matters,
-not done yet.
-
-Transcription is free. Bandwidth is a few hundred MB/day rather than several
-GB, because only the published case is ever downloaded.
+Each run is capped at one complete long-form/Short pair, 20 model calls,
+one attempt per call, six competitor leads, and nine generated thumbnail
+images. Starting another A/B/C set requires at least three images left. Exhausted
+technical budgets return a failed-run signal; an honest editorial `HOLD` or weak
+case returns a clean skip. Every run writes the call records, prompt/input hashes,
+reported image count, candidates, failures, and output paths to
+`logs/daily-runs/`. Token counts and cost stay `null` until measured data exists.
 
 ---
 
 ## Status
 
-Verified working end to end against the live channel: discovery, caption
-fetching and word-timing parse, section download, long-form and short renders,
-word-highlight captions, letterbox detection, and tile stacking.
+The daily V1 control path is proved offline: global selection and fallback,
+competitor matching, one canonical case story, Producer/Shorts Brain handoff,
+three paired packaging candidates, readiness hashes/QC, resumable delivery,
+hard usage caps, zero-usage dry-run behavior, and a single-run process lock.
 
-**Not yet exercised:** the three Claude calls, which need `ANTHROPIC_API_KEY`
-set in `config/.env`. Run `boyd run --dry-run` first — it analyses and selects
-without downloading or rendering anything.
+**September 19 model routing:** `gpt-6-astra` orchestrates. Project workers,
+analysis, Producer Brain, and thumbnail direction use DeepSeek V4.1 Flash
+(`deepseek-flash`). No Claude or Sol fallback is enabled. A fresh unattended
+render on this exact routing is still unproven. `autonomy.mode` remains `manual`,
+the YouTube API audit flag remains false, and no schedule has been installed;
+therefore the next run can attempt a local review bundle but cannot public-post.
 
 **Not implemented:** TikTok and Instagram publishing. Both need platform
 approval that hasn't happened yet, and Instagram additionally requires the video

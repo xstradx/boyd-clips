@@ -65,6 +65,10 @@ BUILD_PATH = (
     "tools/check_thumb_grade.py",
     # R52 (2026-09-02): the comparison sheet, read before any build is shown.
     "tools/vs_accepted.py",
+    # thumbnail.mode direct_gen (2026-09-06) + R60 (2026-09-07): the daily
+    # route's first thumbnail path, and the in-place re-caption that re-runs
+    # its gates. What they invoke is on the thumbnail path by construction.
+    "src/boydclips/thumbnail.py", "tools/thumb_recaption.py",
 )
 # The publish path lives in the skills, outside the repo. Read if present.
 PUBLISH_PATH = (

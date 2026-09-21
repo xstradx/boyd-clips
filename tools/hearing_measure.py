@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """One place that cuts a docket stream into hearings and MEASURES each one.
 
+BOYD_EDITORIAL_V2 (2026-09-06): this file FINDS and ORDERS hearings. It does
+not define a good video. `find_score` / `rank_score` are attribution-free
+lexical PRE-FILTERS that decide what the editorial pass reads first; the
+verdict — story angle, seven-dimension score, gate, MAKE/HOLD/SKIP — comes
+from prompts/score_cases.md via `tools/banger_digest.py --editorial`, the same
+prompt the daily pipeline runs. Rubric, tiers and proxy labels:
+src/boydclips/editorial.py. Do not add a second definition of a banger here.
+
 `scripts/find_called_hearings.py`, `scripts/rank_hearings.py` and
 `tools/check_picker.py` all import this; none of them carries its own regex.
 

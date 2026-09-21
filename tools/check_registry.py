@@ -139,6 +139,15 @@ def references(name, own_path):
                     # left every video 7dB quiet. Prose about a module is not a
                     # call to it, wherever the prose lives.
                     txt = _strip_docstrings(txt)
+                elif rel.endswith((".ps1", ".sh")):
+                    # Shell entry points execute checks too. Count an actual
+                    # Python command, never an example in a comment or echo.
+                    txt = re.sub(r"(?s)<#.*?#>", "", txt)
+                    txt = "\n".join(ln.split("#", 1)[0] for ln in txt.splitlines())
+                    command = (r"^\s*(?:&\s*)?(?:python(?:\d(?:\.\d+)?)?(?:\.exe)?|py(?:\.exe)?)"
+                               r"\s+[^\r\n]*\b" + re.escape(name) + r"\.py\b")
+                    if not re.search(command, txt, re.M):
+                        continue
                 # INVOCATION, not mention: an import, an importlib call, a
                 # subprocess on the .py, or a direct .main()/.run()/.selftest().
                 # Erring toward UNDER-counting is the safe direction here - it
@@ -163,7 +172,7 @@ def audit():
         if name in INTENTIONALLY_MANUAL:
             continue
         refs = references(name, path)
-        code_refs = [r for r in refs if r.endswith(".py")]
+        code_refs = [r for r in refs if r.endswith((".py", ".ps1", ".sh"))]
         rows.append((name, path, len(code_refs), len(refs)))
         if not code_refs:
             (doc_only if refs else orphans).append(name)

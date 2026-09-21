@@ -1,11 +1,21 @@
-"""Re-score the repeat-defendant shortlist on the CURRENT rubric.
+"""
+LEGACY — 2026-08-18 repeat-shortlist workflow. NOT on the daily path and not
+the current scoring definition. The live editorial layer is BOYD_EDITORIAL_V2
+(src/boydclips/editorial.py, prompts/score_cases.md); use tools/editorial_eval.py
+to re-score stored cases and `tools/banger_digest.py --editorial` on the manual
+path. Rows in the `rescores` table are keyed by rubric_version, so anything this
+workflow stored under the retired rubric is ignored under the current version.
+
+Re-score the repeat-defendant shortlist on the CURRENT rubric.
 
 WHY
 ---
 Checked 2026-08-18: all 727 cases in state/pipeline.db were scored on the
 RETIRED rubric — human_stakes / dramatic_turn / judge_moment / self_contained.
-Zero were scored on the live one — pushback / boyd_register / receipt /
-consequence / hook_strength.
+Zero were scored on the live one (then pushback / boyd_register / receipt /
+consequence / hook_strength; since 2026-09-06 the seven BOYD_EDITORIAL_V2
+dimensions in src/boydclips/editorial.py — this script re-scores with whatever
+prompts/score_cases.md currently says).
 
 That is not a cosmetic difference. The current rubric exists specifically to
 stop rewarding what the old one rewarded; prompts/score_cases.md says outright
@@ -33,6 +43,9 @@ Resumable: each docket's result caches to work/<video_id>/rescore_repeats.json.
     python scripts/rescore_repeats.py
 """
 from __future__ import annotations
+
+import sys as _sys
+_sys.stderr.write('[LEGACY] ' + __doc__.strip().splitlines()[0] + ' -- see the module docstring\n')
 
 import json
 import logging

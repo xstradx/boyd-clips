@@ -8,7 +8,9 @@
     boyd docket [--days N]      Boyd's upcoming hearings, before they air
     boyd who <name>             jail record + custody status for a defendant
     boyd archive                snapshot the county's expiring 7-day jail data
-    boyd approve <case_key>     record approval and publish a held clip
+    boyd approve <case_key> --concept A|B|C
+                                approve one exact title-thumbnail pair
+    boyd release-check <packet> verify selected files for manual Studio release
     boyd reject <case_key>      record rejection with a reason
     boyd stats                  reliability ledger and promotion readiness
     boyd bank                   banked runner-up cases
@@ -32,6 +34,7 @@ from pathlib import Path
 from .config import load_config
 from .pipeline import Pipeline, setup_logging
 from .publish import YouTubePublisher, publish_pair
+from . import readiness
 from . import moments as _moments
 from .oncamera import analyse, detect_layout, sample_frames
 from .transcribe import Transcript
@@ -47,6 +50,18 @@ def _ant_profile_active() -> bool:
     try:
         return subprocess.run(
             ["ant", "auth", "status"], capture_output=True, text=True, timeout=15
+        ).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def _codex_login_active() -> bool:
+    """The Codex CLI retains account auth even with --ignore-user-config."""
+    if shutil.which("codex") is None:
+        return False
+    try:
+        return subprocess.run(
+            ["codex", "login", "status"], capture_output=True, text=True, timeout=15
         ).returncode == 0
     except (OSError, subprocess.SubprocessError):
         return False
@@ -73,15 +88,38 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         return 1
 
     # Only check the credential the configured backend actually needs.
-    backend = cfg.get("analysis.backend", "claude_cli")
-    if backend == "claude_cli":
+    backend = cfg.get("analysis.backend", "codex_cli")
+    if backend == "codex_cli":
+        codex = shutil.which("codex")
+        print(f"  [{'ok ' if codex else 'MISS'}] codex CLI      "
+              f"{codex or '-- required by analysis.backend=codex_cli'}")
+        ok &= bool(codex)
+        if codex:
+            # A provider named under analysis.provider replaces the account
+            # login: the isolated CLI session is handed that provider and reads
+            # its key from the environment. Checking `codex login` here would
+            # report a healthy run as broken.
+            provider = cfg.get("analysis.provider") or {}
+            env_key = (provider or {}).get("env_key")
+            if env_key:
+                key_set = bool(os.environ.get(str(env_key)))
+                print(f"  [{'ok ' if key_set else 'MISS'}] model auth     "
+                      f"{provider.get('name') or 'provider'} via {env_key}"
+                      f"{'' if key_set else ' -- set it in config/.env'}")
+                ok &= key_set
+            else:
+                auth = _codex_login_active()
+                print(f"  [{'ok ' if auth else 'MISS'}] Codex login    "
+                      f"{'authenticated' if auth else '-- run: codex login'}")
+                ok &= auth
+    elif backend == "claude_cli":
         claude = shutil.which("claude")
         print(f"  [{'ok ' if claude else 'MISS'}] claude CLI     "
               f"{claude or '-- required by analysis.backend=claude_cli'}")
         ok &= bool(claude)
         if claude:
             print(f"  [ok ] auth           via Claude Code login (no API key needed)")
-    else:
+    elif backend == "sdk":
         try:
             import anthropic  # noqa: F401
             print("  [ok ] anthropic SDK")
@@ -96,6 +134,9 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             print("  [MISS] ANTHROPIC_API_KEY -- set it in config/.env, run `ant auth login`,")
             print("                             or set analysis.backend: claude_cli")
             ok = False
+    else:
+        print(f"  [MISS] analysis backend -- unknown value {backend!r}")
+        ok = False
 
     if cfg.get("publish.youtube.enabled"):
         token = cfg.root / "config" / "youtube_token.json"
@@ -130,11 +171,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         one = pipe.run_moment(args.moment, dry_run=args.dry_run)
         results = [one] if one else []
     elif args.case:
-        one = pipe.run_case(args.case, dry_run=args.dry_run)
+        one = pipe.run_case(args.case, dry_run=args.dry_run,
+                            revisit_reason=getattr(args, "revisit_reason", None))
         results = [one] if one else []
     else:
         results = pipe.run_daily(limit=args.limit, dry_run=args.dry_run)
-    pipe.cleanup()
+    if not args.dry_run:
+        pipe.cleanup()
     pipe.close()
 
     if not results:
@@ -149,7 +192,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             print(f"    short:     {r['short']['title']}")
     if pipe.cfg.get("autonomy.mode") == "manual":
         print("\nautonomy.mode=manual — review the folders above, then:")
-        print("  boyd approve <case_key>   (case_key is in manifest.json)")
+        print("  boyd approve <case_key> --concept A|B|C   (case_key is in manifest.json)")
     return 0
 
 
@@ -217,38 +260,66 @@ def cmd_approve(args: argparse.Namespace) -> int:
         print(f"unknown case: {args.case_key}")
         return 1
 
-    store.record_decision(args.case_key, "approved", args.reason or "")
-
     conn = store._conn  # noqa: SLF001 -- narrow read, no public accessor needed
     clips = {
         row["kind"]: dict(row)
         for row in conn.execute("SELECT * FROM clips WHERE case_key = ?", (args.case_key,))
     }
     if not clips:
-        print("approval recorded (no rendered clips found for this case)")
+        print("approval refused: no rendered clips found for this case")
         store.close()
-        return 0
+        return 1
+
+    longform = clips.get("longform")
+    short = clips.get("short")
+    if not longform or not short:
+        print("approval refused: bundle requires both long-form and Short")
+        store.close()
+        return 1
+
+    manifest_path = Path(longform["file_path"]).resolve().parent / "manifest.json"
+    try:
+        evidence = readiness.approve_manifest(manifest_path, args.concept)
+    except readiness.ReadinessError as exc:
+        print(f"approval refused: {exc}")
+        store.close()
+        return 1
+    store.record_decision(
+        args.case_key,
+        "approved",
+        args.reason or "",
+        artifact_hash=evidence["bundle_hash"],
+    )
+    store.set_clip_title(longform["clip_id"], evidence["title"])
+    longform["title"] = evidence["title"]
 
     if cfg.get("autonomy.mode") == "manual":
-        print("approval recorded. autonomy.mode=manual, so nothing was published.")
-        print("Set autonomy.mode to 'assisted' or 'auto' in config/pipeline.yaml to publish.")
-        store.close()
-        return 0
-
-    if store.case_published(args.case_key):
-        print(f"{args.case_key} is already published — not uploading again.")
-        print("Approval was still recorded. Use --force only if you mean to duplicate.")
+        print(
+            f"approval recorded for exact bundle {evidence['bundle_hash'][:12]} "
+            f"with packaging concept {args.concept}. autonomy.mode=manual, so nothing was published."
+        )
+        print("Publishing remains separately gated by mode, credentials, and YouTube API audit status.")
         store.close()
         return 0
 
     report = publish_pair(
         cfg, store,
-        longform=clips.get("longform"),
-        short=clips.get("short"),
+        longform=longform,
+        short=short,
         context={"hook_line": case.get("hook_quote", "")},
     )
     print(json.dumps(report, indent=2, default=str))
     store.close()
+    return 0 if report.get("complete") else 1
+
+
+def cmd_release_check(args: argparse.Namespace) -> int:
+    try:
+        result = readiness.check_manual_release(Path(args.packet))
+    except readiness.ReadinessError as exc:
+        print(f"Release check failed: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0
 
 
@@ -258,7 +329,44 @@ def cmd_reject(args: argparse.Namespace) -> int:
     store.record_decision(
         args.case_key, "rejected", args.reason or "", safety_related=args.safety
     )
-    print(f"rejected {args.case_key}" + (" (safety-related)" if args.safety else ""))
+    # Story-level memory (2026-09-17): a rejection belongs to the STORY, and its
+    # editorial status is a different field from "the file decodes". `--short`
+    # marks the Short cut itself, which is what blocks it from moving toward
+    # publishing; the reason is kept verbatim against the story.
+    from .stories import StoryLedger
+    ledger = StoryLedger(store.conn)
+    case = store.get_case(args.case_key)
+    story_id = None
+    if case is not None:
+        video_id, _, start = args.case_key.rpartition(":")
+        story_id = ledger.resolve(video_id, float(start or 0), case.get("end_s"),
+                                  case.get("cause_number"), case.get("defendant_name"))
+        ledger.add_feedback(
+            story_id, "short_editorial" if args.short else "package_verdict",
+            (args.reason or "rejected"), source="operator (boyd reject)",
+            quote=(args.reason or ""), status="REJECTED")
+        ledger.add_decision(
+            story_id, "SHORT_REJECTED_BY_USER" if args.short else "PACKAGE_REJECTED",
+            reason=(args.reason or ""), source="operator (boyd reject)",
+            quote=(args.reason or ""))
+        ledger.upsert_story(story_id, selection_eligible=False,
+                            review_state=("NEEDS_USER_REEDIT" if args.short else "REJECTED"),
+                            ineligible_reason=(args.reason or "rejected"))
+    for directory in sorted((cfg.path("paths.out") / "review").glob(f"*_{args.case_key.replace(':', '_')}")):
+        manifest_path = directory / "manifest.json"
+        if not manifest_path.is_file():
+            continue
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        record = (manifest.get("outputs") or {}).get("short") if args.short else None
+        if record is not None:
+            record["editorial_status"] = "NEEDS_USER_REEDIT"
+            record["editorial_note"] = args.reason or "rejected by the user"
+            manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+                                     encoding="utf-8")
+            print(f"  marked the Short in {manifest_path.parent.name} NEEDS_USER_REEDIT")
+    print(f"rejected {args.case_key}" + (" (safety-related)" if args.safety else "")
+          + (" (Short cut)" if args.short else "")
+          + (f" — story {story_id}" if story_id else ""))
     store.close()
     return 0
 
@@ -458,12 +566,15 @@ def build_parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run")
     run.add_argument("--moment", help="render a judged moment, e.g. zHchVGBX9iA:10721")
     run.add_argument("--dry-run", action="store_true",
-                     help="analyse and select, but download and render nothing")
+                     help="rank stored bank cases only; no discovery, model, download, or render")
     run.add_argument("--limit", type=int, default=None,
-                     help="override output.clips_per_day")
+                     help="lower the configured daily maximum for this run")
     run.add_argument("--case", default=None, metavar="CASE_KEY",
                      help="render one specific scored case instead of the "
                           "day's top pick (see `boyd bank` for keys)")
+    run.add_argument("--revisit-reason", default=None, metavar="WHY",
+                     help="state why a story the ledger already holds is being "
+                          "reopened; without it a finished story is refused")
     run.set_defaults(func=cmd_run)
 
     docket = sub.add_parser("docket")
@@ -486,14 +597,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     approve = sub.add_parser("approve")
     approve.add_argument("case_key")
+    approve.add_argument("--concept", "--thumbnail", dest="concept",
+                         choices=("A", "B", "C"), required=True,
+                         help="select the reviewed A/B/C title-thumbnail pair")
     approve.add_argument("--reason", default="")
     approve.set_defaults(func=cmd_approve)
+
+    release_check = sub.add_parser("release-check", help="check existing selected files; no production or upload")
+    release_check.add_argument("packet", help="path to the existing manual release JSON packet")
+    release_check.set_defaults(func=cmd_release_check)
 
     reject = sub.add_parser("reject")
     reject.add_argument("case_key")
     reject.add_argument("--reason", default="")
     reject.add_argument("--safety", action="store_true",
                         help="mark as a safety-related rejection (blocks autonomy promotion)")
+    reject.add_argument("--short", action="store_true",
+                        help="the Short CUT is rejected: mark it NEEDS_USER_REEDIT, which "
+                             "blocks publishing and records the reason against the story")
     reject.set_defaults(func=cmd_reject)
 
     sub.add_parser("stats").set_defaults(func=cmd_stats)

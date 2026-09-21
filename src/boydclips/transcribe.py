@@ -223,6 +223,24 @@ PHRASE_FIXES: dict[str, str] = {
     "bear kounty": "Bexar County",
 }
 
+# Nathan heard and locked this one Perry line against the source audio.  It is
+# case-specific: the same auto-caption text elsewhere must remain untouched.
+CASE_PHRASE_FIXES: dict[str, dict[str, str]] = {
+    "oL6lV6gCyOc": {
+        "when i made them choices back then it ain't nothing like that one":
+            "when I made them choices back then it ain't nothin' like now",
+        "y'all stipulated to you": "y'all stipulated to.",
+    },
+}
+
+# Local large-v3 and medium.en independently recover the negation in this
+# exact phone-dispute answer. Evidence: posting-recovery-implementation-2026-09-19
+# media-qc/short-asr*.json. Match source time and original token so another
+# speaker or case saying "would" never inherits this correction.
+CASE_WORD_FIXES: dict[str, tuple[tuple[float, str, str], ...]] = {
+    "IDGfe1rPUQo": ((6536.239, "would", "wouldn't"),),
+}
+
 
 def apply_phrase_fixes(words: list[Word]) -> tuple[list[Word], int]:
     """Correct known mistranscriptions in place, preserving timing.
@@ -254,6 +272,36 @@ def apply_phrase_fixes(words: list[Word]) -> tuple[list[Word], int]:
     return words, fixed
 
 
+def apply_case_phrase_fixes(video_id: str, words: list[Word]) -> tuple[list[Word], int]:
+    """Apply source-verified fixes for one video while retaining word starts.
+
+    A shorter correction leaves the final spurious ASR token empty.  The word
+    list and every retained token timestamp therefore keep their original
+    indices; caption consumers already ignore empty tokens.
+    """
+    fixes = CASE_PHRASE_FIXES.get(video_id, {})
+    if not words:
+        return words, 0
+    lowered = [w.w.lower().strip(".,?!:;\"") for w in words]
+    fixed = 0
+    for wrong, right in fixes.items():
+        wt, rt = wrong.lower().split(), right.split()
+        n = len(wt)
+        for i in range(len(words) - n + 1):
+            if lowered[i:i + n] != wt:
+                continue
+            replacement = rt + [""] * (n - len(rt))
+            for k, token in enumerate(replacement):
+                words[i + k] = Word(t=words[i + k].t, w=token)
+            fixed += 1
+    for source_t, wrong, right in CASE_WORD_FIXES.get(video_id, ()):
+        for i, word in enumerate(words):
+            if abs(word.t - source_t) < 0.001 and word.w == wrong:
+                words[i] = Word(t=word.t, w=right)
+                fixed += 1
+    return words, fixed
+
+
 def get_transcript(
     video_id: str,
     work_dir: Path,
@@ -271,6 +319,8 @@ def get_transcript(
         # Applied on read as well as on write, so transcripts cached before the
         # fix map existed are corrected without re-downloading anything.
         t.words, n = apply_phrase_fixes(t.words)
+        t.words, case_n = apply_case_phrase_fixes(video_id, t.words)
+        n += case_n
         if n:
             cache.write_text(t.to_json(), encoding="utf-8")
         return t
@@ -287,5 +337,6 @@ def get_transcript(
         raise RuntimeError(f"no transcript available for {video_id}")
 
     transcript.words, _ = apply_phrase_fixes(transcript.words)
+    transcript.words, _ = apply_case_phrase_fixes(video_id, transcript.words)
     cache.write_text(transcript.to_json(), encoding="utf-8")
     return transcript

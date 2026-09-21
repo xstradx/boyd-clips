@@ -14,10 +14,11 @@ CONFIG_PATH = ROOT / "config" / "pipeline.yaml"
 ENV_PATH = ROOT / "config" / ".env"
 SPEC_VERSION = "1.1.0"
 
-# Must match the `scores` object in analyze.SCORE_SCHEMA.
-RUBRIC_DIMENSIONS = frozenset(
-    {"pushback", "boyd_register", "receipt", "consequence", "hook_strength"}
-)
+# Must match the `scores` object in analyze.SCORE_SCHEMA — both read the one
+# definition in editorial.DIMENSIONS (BOYD_EDITORIAL_V2).
+from .editorial import DIMENSIONS as _EDITORIAL_DIMENSIONS  # noqa: E402
+
+RUBRIC_DIMENSIONS = frozenset(_EDITORIAL_DIMENSIONS)
 
 
 class Config:
@@ -90,6 +91,14 @@ def _validate(cfg: Config) -> None:
     mode = cfg.get("autonomy.mode")
     if mode not in {"manual", "assisted", "auto"}:
         raise ValueError(f"autonomy.mode must be manual|assisted|auto, got {mode!r}")
+
+    model_calls = int(cfg.require("analysis.max_model_calls_per_run"))
+    if model_calls < 1:
+        raise ValueError("analysis.max_model_calls_per_run must be at least 1")
+
+    image_calls = int(cfg.require("output.max_thumbnail_images_per_run"))
+    if image_calls < 3:
+        raise ValueError("output.max_thumbnail_images_per_run must be at least 3 for A/B/C")
 
     weights = cfg.require("analysis.rubric_weights")
     total = sum(weights.values())

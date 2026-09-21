@@ -106,9 +106,14 @@ def selftest() -> int:
     ok = True
     floor = json.load(open(FLOOR, encoding="utf-8"))
     print("ACCEPTED - they define the envelope, so passing is expected, not proof:")
+    if not floor.get("files"):
+        ok = False
+        print("    !! the known-good controls are missing - the gate is unproven")
     for k, rel in floor["files"].items():
         p = rel if os.path.isabs(rel) else os.path.join("D:/Boyd Clips", rel)
         if not os.path.exists(p):
+            ok = False
+            print(f"    !! accepted build {k} is missing: {p}")
             continue
         if check(k, p):
             ok = False

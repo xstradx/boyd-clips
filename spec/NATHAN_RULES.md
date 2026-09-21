@@ -203,7 +203,7 @@ failures that kept recurring.
 His words, early on, about thumbnail copy. Any line in quotes must appear
 verbatim in the transcript. **NOT AUTOMATED** — the only script that ever
 grepped the transcript and REFUSED (`make_thumbnail_quiet.py`) is dead, and
-`tools/thumb.py` does not check. R41's `tools/check_title.py` is where this
+`tools/thumb.py` does not check. `tools/check_title.py` (PACKAGING.md rules) is where this
 lands. **This is an open defect.**
 
 ### R17 — Colour must match ACROSS videos, not just look right alone
@@ -793,58 +793,36 @@ CHECK: `tools/floor_stamp.py`. Every thumbnail build writes the SHA-256 of
 the current hash, and the youtube-channel skill runs it before anything is
 posted (§1d).
 
-### R41 - titles follow the formula that wins this niche (REWRITTEN 2026-09-03)
+### R41 — RETIRED 2026-09-06. Titles are governed by `spec/PACKAGING.md` (BOYD_EDITORIAL_V2)
 
-**The old R41 was wrong and cost views for days.** It said "a title names a
-specific act or quote, withholds the outcome, and never states the sentence",
-and `tools/check_title.py` REFUSED any title that stated one.
+**There is one live title system and it is not this section.** The rules are
+in `spec/PACKAGING.md` § Titles — BOYD_EDITORIAL_V2 (one story only · promise a
+real payoff · specific curiosity · "Judge Boyd" when her action is the hook ·
+plain spoken English · hard max 70, target 45–65 · no empty hype · title
+families · generate-score-select), with the machine-readable copy in
+`src/boydclips/editorial.py`, applied by `prompts/package_post.md` and
+validated by `tools/check_title.py`. Nathan, 2026-09-06: the title communicates
+the most interesting change, conflict, reveal, decision, consequence or
+behaviour; the EVENT creates the excitement, not adjectives.
 
-Measured 2026-09-03 with yt-dlp - his own channel ranked by views, and every
-Judge Boyd video on YouTube over 100k - then run through our own checker:
+What this section used to say, kept only as history: on 2026-09-03 the earlier
+"withhold the outcome" refusal was measured refusing seven of the nine
+best-performing Judge Boyd titles and was deleted; a formula read off the
+100k+ corpus (`[who + what] + Judge Boyd + [reaction verb] + [outcome]`, CAPS
+payoff word, ~85 chars) replaced it for three days. That formula is now
+retired too: its reaction-verb / CAPS / outcome signals are still *reported*
+by `check_title.py` as measured niche facts, but they no longer score or
+refuse anything. The only refusals are accuracy: uncensored profanity, and a
+quoted span that is not verbatim in the transcript (R16).
 
-| views | title | our gate said |
-|---|---|---|
-| 865,000 | Day 1: The family found them in a locked car - Savanah Soto Capital Murder Trial | **REFUSED** 80 chars |
-| 39,000 | Judge Boyd Sentences San Antonio Rapper "IZZY93" To PRISON! | **REFUSED** states the sentence |
-| 27,000 | Thug In Disbelief After Judge Boyd Sentences Him To Prison. | **REFUSED** states the sentence |
-| 22,000 | Judge Boyd Sentences Father Who STARVED his 10-Year Old Daughter | **REFUSED** sentence length |
-| 747,486 | Judge Boyd Sentences 22-Year-Old in Predator Sting | **REFUSED** sentence length |
-| 281,247 | Judge Boyd Sentences Honors Student to 6 YEARS PRISON | **REFUSED** sentence length |
+CHECK: `python tools/check_title.py "<title>" [--transcript <file>]` —
+`TITLE_OK` plus editorial `flag` lines; `--selftest` requires that no winning
+title in the corpus is refused, that the v2 example titles carry no editorial
+flag, and that generic clickbait / hype / docket language is flagged.
 
-**Seven of the nine best-performing Judge Boyd titles in existence were refused
-by our own checker.** The five WORST shorts on his channel (977 - 2,000 views)
-are the quote-led, outcome-withheld ones the rule was built to produce - four of
-them written by me. The rule did not describe his corpus; it described one
-inference from one A/B on 2026-08-31 that then hardened into a veto.
-
-His instruction, 2026-09-03: *"if there's something in the instructions that you
-know is wrong and ESPECIALLY if I spend DAYS telling you it's wrong then maybe it
-would be smart to undo whatever's causing and delete it"*. Asked to choose, he
-picked **copy the rival formula**. So the outcome refusal is DELETED, not relaxed.
-
-THE FORMULA, read off the 100k+ corpus:
-
-    [who + what they did, blunt] + Judge Boyd + [reaction verb] + [the outcome]
-
-- **State the outcome.** It is the payoff, not a spoiler.
-- **CAPS the payoff word** - PRISON, STARVED, LIFE, MONSTER.
-- **A reaction verb for the judge** - SNAPS, LOSES IT, RAGES, ERUPTS, HAMMERS,
-  SLAMS, SHOWS NO MERCY, HUMILIATES, DENIES, REJECTS, BEGS, IN DISBELIEF.
-- **Name the crime concretely**, asterisking the sensitive word (Se*, Rap*d,
-  MOLEST*D) - what the winning channels do, and it satisfies his censor rule.
-- Up to ~85 characters. His 865k best is 80. The old hard ceiling of 70 refused it.
-
-CHECK: `python tools/check_title.py "<title>" [--transcript <file>]`. It now
-SCORES 0-100 against the formula and only REFUSES two things, both accuracy, not
-taste: uncensored profanity (standing channel rule) and a quoted span that is not
-verbatim in the transcript (R16 - inventing a quote from a real person in a real
-courtroom is a factual error, not a style choice). Its known-answer set is HIS
-CHANNEL, not an invented fixture: `--selftest` requires that no winning title is
-ever refused and that the winners outscore his five worst. Measured at the
-rewrite: winners 45-100, losers 0-30, no overlap.
-
-NOT AUTOMATED: whether a title is actually a good hook. The score says a title
-has the shape that wins; it cannot say the case is worth clicking.
+NOT AUTOMATED: whether a title is actually a good hook. The checker says a
+title is accurate and not obviously weak; it cannot say the case is worth
+clicking. Do not add a second title system here.
 
 ### R42 — Variants must differ at feed size
 
@@ -1496,6 +1474,52 @@ was writing a DIFFERENT R57 in this file. Renumbered to R59 on discovery. Two
 rules under one number is the accumulate-don't-supersede failure, so check the
 highest rule number in this file before claiming the next one.
 
+### R60 - the thumbnail caption is the withheld hook, never a summary of the case
+
+Nathan, 2026-09-07, on the five 2026-09-06 direct_gen thumbnails: *"The current
+captions are weak because some of them read like transcript summaries instead
+of high-CTR thumbnail copy."* The target: *"'What does THAT mean? I need to
+click.' NOT: 'Oh, the thumbnail already told me the story.'"* His style
+examples: `30 DAYS OR A RECORD?`, `25 YEARS`, `BACK AGAIN?!`, `I MAKE MONEY
+MOVE`, `CONSECUTIVE`; *"AGAIN?! only when repeat behavior is actually
+verified"*.
+
+The rule, in his own terms:
+
+- Identify the strongest ACTUAL story hook from the transcript, then write
+  five candidates, rank them for CTR, pick one. Prefer *"curiosity, shock,
+  consequence, contradiction, money, a crazy admission, an ultimatum, repeat
+  behavior, or another specific story detail"*.
+- Prefer 2-5 words, instantly readable on a phone.
+- *"Make sure the chosen caption is fully supported by the source and does
+  not invent anything."* (`JAYWALKING. 6 YEARS.` was rejected on this: it
+  implies the sentence was for jaywalking.)
+- Never the generic filler: *"Judge Boyd Reacts", "Courtroom Drama", "He
+  Says...", "She Explains...", "Defendant Tells Court...", "BIG MISTAKE"*.
+- *"Do not simply summarize the case."* `I CANNOT REMEMBER ANY NAMES.` was
+  a summary of his dodge; `WHO TASED YOU?` is the contradiction that makes
+  the hearing.
+- *"Spellcheck every caption before use."*
+- *"Make sure the thumbnail caption complements the video title instead of
+  repeating the same information."* Garcia's title already carried the
+  30-days-or-conviction ultimatum, so `30 DAYS OR A RECORD?` - his own style
+  example - was the wrong caption for THAT video.
+
+What was applied on the five (2026-09-07): `I CANNOT REMEMBER ANY NAMES.`
+-> `WHO TASED YOU?`; `25 YEARS` -> `TEXTED FROM HIS PHONE`; `Y'ALL LET ME
+OUT.` -> `SO IT'S OUR FAULT?`; `I HAVE EVOLVED.` (repeated the title's joke)
+-> `A GUN FOR A GOLD CHAIN`; `YEAH, I RELAPSED.` -> `DON'T PUT JESUS ON ME.`
+
+CHECK: `tools/check_caption.py` REFUSES the listed filler, profanity and a
+defendant-name token, and FLAGS (advice, printed) a word count outside 2-5,
+two or more content words shared with the title, and any word not spoken in
+the hearing (the transcript is the dictionary - there is no spellchecker on
+this machine). `tools/thumb_recaption.py` runs it before a pixel moves and
+exits 3 on a refusal; `tools/thumb_direct.py`'s `text_grounded` gate still
+proves the line is verbatim or built from case words. NOT AUTOMATED: whether
+the line is the STRONGEST hook, and whether it withholds rather than tells -
+the five-candidate ranking is written out for him every time.
+
 ## Checker registry (verified by `tools/check_rules_refs.py`)
 
 Every `*.py` named anywhere in this file has a row, and the state is measured
@@ -1552,10 +1576,14 @@ the selftest suite when a row lies.
 | `tools/skin_colour_fix.py` | WIRED | R56 - `tools/thumb_pipeline.py` (between HYPIR and the matte, writes `<who>_colour.png` and never overwrites `<who>_hypir.png`), `tools/verify_build.py` gate F (residual target), `tools/selftest_all.py` |
 | `tools/check_rules_refs.py` | WIRED | `tools/selftest_all.py` |
 | `tools/selftest_all.py` | WIRED | boyd-thumbnail skill; the runner itself |
+| `tools/check_thumbnail_text_workflow.py` | WIRED | `tools/selftest_all.py`; current semantic/hook review on daily legacy/direct/text-only routes, fixed-title and actual-pixel text-only experiment bindings, with missing, stale, weak-copy and artifact-drift negative controls. Semantic review is model judgment, not a measured CTR result or Nathan's taste approval. |
 | `tools/thumbeng/variety.py` | WIRED | boyd-thumbnail skill (R39). Its 0.30 limit rejects all five accepted builds (max pair 0.455) — a report, not a ship gate |
 | `tools/sidebar_sheet.py` | WIRED | boyd-thumbnail skill - the 168 px sheet is read into the chat with every build he is shown |
 | `tools/floor_stamp.py` | WIRED | `tools/thumb_pipeline.py` (`build()` stamps `_build_log.json["floor"]`), `tools/short_engine.py` (`build()` writes `<short>.floor.json`), `tools/selftest_all.py`; youtube-channel skill §1d runs `check` before posting |
-| `tools/check_title.py` | WIRED | `tools/selftest_all.py`; youtube-channel skill §1c runs it on all three title variants (with `--transcript`) before anything is typed into Studio or the A/B test is set |
+| `tools/check_title.py` | WIRED | BOYD_EDITORIAL_V2 title validation (accuracy refusals + editorial flags from `src/boydclips/editorial.py`; rules in `spec/PACKAGING.md`). `tools/selftest_all.py`; youtube-channel skill §1c runs it on all three title variants (with `--transcript`) before anything is typed into Studio or the A/B test is set |
+| `tools/check_caption.py` | WIRED | R60 - `tools/thumb_recaption.py` (imports it; a refusal exits 3 before any render; flags printed and stored in the sidecar `qc.caption_check`), `tools/selftest_all.py` (`--selftest`: listed filler / profanity refused, misspelling / title-repeat / over-length flagged, his `WHO TASED YOU?` passes clean) |
+| `tools/thumb_recaption.py` | WIRED | R60 - boyd-thumbnail skill (the re-caption command); re-captions a direct_gen final in place without regenerating the image (loose ink mask + BiRefNet subject alpha, two-pass inpaint, house Anton type, then `thumb_direct.qc_concept` + `old_type_removed` + `no_old_type_residue`); backs the previous final up to `superseded_captions/`. Control measured 2026-09-07: Rodriguez's grey `YEAH, I RELAPSED.` left 54,143 residue px under the strict mask and 0 under the loose one |
+| `tools/thumb_direct.py` | WIRED | thumbnail.mode direct_gen (2026-09-06): `src/boydclips/thumbnail.py` (`build_direct`, the daily route's first thumbnail path; the rerun and batch scripts under scripts/ call the same entry), `tools/thumb_recaption.py` (its `qc_concept` gates re-run on every re-caption); tests in tests/test_thumb_direct.py. Design + gate table: docs/THUMBNAIL-DIRECT-GEN-2026-09-06.md |
 | `tools/check_variants.py` | WIRED | `tools/selftest_all.py`; boyd-thumbnail skill §3 runs it on every set of variants before they are shown to him |
 | `tools/check_clutter.py` | WIRED | `tools/selftest_all.py`; boyd-thumbnail skill §3 runs it beside `verify_build.py`; `tools/thumb.py` writes the exact ink mask it reads |
 | `tools/check_floor_gates.py` | WIRED | `tools/selftest_all.py` (selftest + the audit) — every gate in `verify_build.py` must pass the five accepted builds in `config/quality_floor.json["files"]`, or the floor file must declare the disagreement by case and gate (`gate_disagreements`). 2026-09-01: the gates as tuned rejected 3 of the 5 |

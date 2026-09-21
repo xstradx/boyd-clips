@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["concepts", "images_generated_total", "notes"],
+  "properties": {
+    "concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["family", "file", "text", "prop", "description", "attempts", "self_score", "rejected_files"],
+        "properties": {
+          "family": {"type": "string", "enum": ["A", "B", "C"]},
+          "file": {"type": "string"},
+          "text": {"type": "string"},
+          "prop": {"type": ["string", "null"]},
+          "description": {"type": "string"},
+          "attempts": {"type": "integer"},
+          "self_score": {"type": "number"},
+          "rejected_files": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "images_generated_total": {"type": "integer"},
+    "notes": {"type": "string"}
+  }
+}

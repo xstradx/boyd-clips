@@ -126,6 +126,33 @@ SIMPLE = os.environ.get('BOYD_SIMPLE', '') == '1'
 # R57 defaults. Overridden inside the SIMPLE block below; declared here so
 # every reference resolves whether or not SIMPLE is set.
 SKIN_CHROMA_LIFT_OFF = False
+# R58, 2026-09-03. Nathan: *"keep everything the same except for when you cut
+# them out and it right after you first generate them with the HYPIR and that's
+# when we restart the coloring or like retouching their face or any editing to
+# do with the color on their face because I think you're doing something that's
+# ruining it"*.
+#
+# So the face is finished ONCE, immediately after the restore, and NOTHING
+# downstream retouches it. R57 had already stopped the global look and the
+# parity stages; these two were still painting on every face afterwards:
+#   dodge/burn        a centre lift of 0.26 across the T-zone + a burn ring
+#   highlight shoulder every subject pixel over L215 rolled off toward 215
+# Both are "retouching their face" by any reading of his sentence. The rim glow
+# is NOT switched off - that is his own separate 2026-08-31 rule and the build
+# checklist requires it - and R55's headroom pull stays because it only ever
+# DARKENS a face that is clipping, which is the defect he named first.
+FACE_FINAL_AT_HYPIR = os.environ.get('BOYD_FACE_RETOUCH', '') != '1'
+# R60, 2026-09-03. Nathan: *"there's not supposed to ever be grain when you're
+# generating them"* and *"A small amount a grain is added ONLY AT THE VERY LAST
+# STEP OF THUMBNAIL GENERATION so if there's anything rough in there it looks
+# better."*
+#
+# So there is exactly ONE grain pass and it is the last thing that happens, over
+# the whole finished frame. The mid-pipeline photo grain is off: it landed on the
+# people while they were still being built, sanding the texture the restore had
+# just recovered, and then the final pass grained them a second time. Two passes
+# also put this build at grain_hf 1.78 against his accepted 0.87-1.72.
+GRAIN_MID_PIPELINE = os.environ.get('BOYD_GRAIN_MID', '') == '1'
 # R57 is ON BY DEFAULT, not only under BOYD_SIMPLE. Nothing Nathan has ever
 # asked for says the global luma normaliser should brighten the PEOPLE; that is
 # a bug, and it lifted every subject +6.65 L* on PACE. BOYD_SIMPLE additionally
@@ -227,6 +254,7 @@ if SUBJ_TONE_LOCKED:
     SKIN_SAT_PULL = 0.0
     SKIN_CHROMA_BAND = 999.0
     SKIN_L_BAND = 999.0
+
 # HIGHLIGHT SHOULDER ON SUBJECTS. Nathan: "There's still harsh white lighting on
 # faces". Measured: EVERY face clipped to L*255, up to 30.5% of Boyd's face
 # above L*210 on SANCHEZ. A shoulder identical to this already existed - applied
@@ -292,6 +320,16 @@ DB_BURN = 0.22    # perimeter deepen
 # no lift, and no pixel is lifted past it. 205 sRGB luma is just under the
 # L*210 the gate measures (L* 210/2.55 = 82.4 -> ~207 sRGB).
 DB_DODGE_CEILING = 205.0
+
+# R58 applied HERE, after every constant it overrides is defined. Set above the
+# definitions (as it was first written) it was silently undone by them: the
+# build log still read `dodge: 0.26` while the code claimed the dodge was off.
+if FACE_FINAL_AT_HYPIR:
+    DB_DODGE = 0.0
+    DB_BURN = 0.0
+    SUBJ_SHOULDER = 255.0
+    SUBJ_SHOULDER_K = 1.0
+
 # Knee raised back to 178. At 158 it was compressing most of a LIT FACE, not
 # just blown highlights, and measured face contrast fell 62.2 -> 57.3 - the
 # "they look super processed / flat" defect. Brightness is now handled by the
@@ -1291,6 +1329,12 @@ class Thumb:
         # highlights still receive some - a completely ungrained region is
         # the tell this exists to remove
         _w = 0.45 + 0.55 * (4.0 * _y * (1.0 - _y)).clip(0, 1)
+        # R60: this pass covers EVERYTHING, subjects included. Nathan,
+        # 2026-09-03: *"A small amount a grain is added ONLY AT THE VERY LAST
+        # STEP OF THUMBNAIL GENERATION so if there's anything rough in there it
+        # looks better."* It is the last thing that happens and it is uniform -
+        # a frame where the people are the only ungrained region reads as a
+        # paste-up, which is the opposite of what he asked for.
         canvas = canvas + (_n * _w)[..., None]
         self.log["final_grain"] = FINAL_GRAIN
         return canvas
@@ -2113,7 +2157,7 @@ class Thumb:
                               f'background band [{BG_L_MIN:.1f}, {BG_L_MAX:.1f}] '
                               f'-> plate graded to {_want:.1f} (R59)')
 
-        if GRAIN > 0:
+        if GRAIN > 0 and GRAIN_MID_PIPELINE:
             rng = np.random.default_rng(7)
             n = rng.normal(0.0, GRAIN, canvas.shape[:2]).astype(np.float32)
             y = (canvas * LUMA_W).sum(axis=2) / 255.0
@@ -2121,6 +2165,12 @@ class Thumb:
             # which left the new crisp rim (a 252-value band) completely ungrained
             # and reading as a long flat line - flat_g_p90 0.045 -> 0.45.
             w = 0.35 + 0.65 * (4.0 * y * (1.0 - y)).clip(0, 1)
+            # R60, 2026-09-03. Nathan: *"there's not supposed to ever be grain
+            # when you're generating them"*. The PEOPLE are generated - restored
+            # or re-rendered - and grain on top of a generated face is noise
+            # added to something that was just cleaned up. It also fights the
+            # very texture the restore exists to recover. The plate is a real
+            # photograph and still gets it; the subjects are held out.
             canvas = canvas + (n * w)[..., None]
             self.log["grain"] = GRAIN
 

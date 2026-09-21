@@ -30,6 +30,7 @@ reason. It is not here because the data supports it.
 
 from __future__ import annotations
 
+import json
 import logging
 import shutil
 import subprocess
@@ -93,6 +94,59 @@ def _sharpest_frame(source: Path, around_s: float, window_s: float,
     log.info("  thumbnail: picked frame at edge-energy %.1f of %d sampled",
              best[0], samples)
     return best[1]
+
+
+def producer_visual_evidence(
+    source: Path,
+    offset: float,
+    case: dict[str, Any],
+    out_dir: Path,
+) -> list[dict[str, Any]]:
+    """Extract bounded same-hearing frames for Producer Brain references."""
+    windows = [
+        (float(window[0]), float(window[1]))
+        for window in (case.get("story_windows") or [[case["start_s"], case["end_s"]]])
+    ]
+    moments: list[float] = []
+    hook = float(case.get("hook_start_s") or windows[0][0])
+    if any(start <= hook <= end for start, end in windows):
+        moments.append(hook)
+    for start, end in windows:
+        duration = end - start
+        for fraction in (0.25, 0.5, 0.75):
+            moments.append(start + duration * fraction)
+    unique: list[float] = []
+    for moment in moments:
+        if not any(abs(moment - existing) < 1.0 for existing in unique):
+            unique.append(moment)
+        if len(unique) == 3:
+            break
+    if not unique:
+        raise RuntimeError("no timestamp available for Producer Brain visual evidence")
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    evidence: list[dict[str, Any]] = []
+    for index, source_time in enumerate(unique, start=1):
+        work = out_dir / f"sample_{index}"
+        work.mkdir(parents=True, exist_ok=True)
+        picked = _sharpest_frame(
+            source,
+            max(0.0, source_time - float(offset)),
+            window_s=3.0,
+            samples=3,
+            work=work,
+        )
+        target = out_dir / f"producer_frame_{index}.png"
+        shutil.copy2(picked, target)
+        evidence.append({
+            "id": f"same-hearing-frame-{index}",
+            "timestamp_s": source_time,
+            "source_path": str(target.resolve()),
+            "subject": "two_shot",
+            "description": "Original same-hearing courtroom frame; identity is rechecked by thumbnail QC.",
+            "same_hearing": True,
+        })
+    return evidence
 
 
 def _crop_to(frame: Path, crop_arg: str, out: Path) -> Path:
@@ -189,6 +243,61 @@ def _measured_arrow_tip(plate: Path, work: Path, subject_w: float,
     return (tip_x / W, tip_y / H)
 
 
+def _judge_tile_side(frame: Path, tiles: tuple[str, str],
+                     cfg: dict[str, Any]) -> tuple[str, str]:
+    """Which detected tile holds Judge Boyd, and how that was decided.
+
+    `subject_side` is an ASSUMPTION recorded in this module's docstring: it was
+    measured on one 2026-04 stream and then applied to every one since, with the
+    note that a flipped Zoom layout "puts the wrong person in the hero slot, and
+    nothing downstream would notice". Measured on dAKO7myCd-g (2024-03-07): Boyd
+    sits in the LEFT tile and the defendant's group on the right, so the
+    assumption handed HER tile to the Q3 builder's defendant isolation, which
+    refused ("cannot identify the defendant") and ended a run whose long-form was
+    already rendered. Identity decides the side when it can and says so; the
+    config value stays as the fallback and is recorded as unverified rather than
+    presented as a measurement.
+    """
+    default = "left" if str(cfg.get("subject_side", "right")).lower() == "left" else "right"
+    try:
+        tools = ROOT / "tools"
+        if str(tools) not in sys.path:
+            sys.path.insert(0, str(tools))
+        import cv2  # noqa: WPS433
+        import identity  # noqa: WPS433
+
+        bgr = cv2.imread(str(frame))
+        if bgr is None:
+            raise ValueError(f"cannot read {frame}")
+        row, score = identity.find_judge(bgr)
+        if row is not None and score >= identity.COSINE_SAME:
+            centre_x = float(row[0]) + float(row[2]) / 2.0
+            width, _height, left_x, _y = (int(v) for v in tiles[0].split("=", 1)[1].split(":"))
+            side = "left" if centre_x < left_x + width else "right"
+            return side, f"identity, cosine {score:.2f}"
+        log.info("  thumbnail: Boyd not recognised in the hook frame (best cosine %.2f)",
+                 score)
+    except Exception as exc:  # noqa: BLE001 - recognition is evidence, never a gate
+        log.info("  thumbnail: identity check unavailable (%s)", exc)
+    return default, f"config subject_side={default} (unverified)"
+
+
+def _record_construction(out: Path, record: dict[str, Any]) -> Path:
+    """Keep the construction audit beside the image it describes.
+
+    The pipeline reads it into the manifest, so "which construction shipped and
+    why" survives as a record rather than as a line in a log nobody re-reads.
+    """
+    try:
+        (out.with_name(out.name + ".construction.json")).write_text(
+            json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as exc:  # the image is the deliverable; the note is evidence
+        log.warning("  thumbnail: could not write the construction record (%s)", exc)
+    return out
+
+
 def build(
     source: Path,
     hook_s: float,
@@ -201,10 +310,12 @@ def build(
 
     Falls back to the single-plate builder when the source is not a stable
     2-up - a Zoom grid or a screen-share has no judge tile to trace, and a
-    cut-out of the wrong rectangle is worse than no cut-out.
+    cut-out of the wrong rectangle is worse than no cut-out - and when the Q3
+    construction refuses because the defendant cannot be isolated (a defendant
+    who is not in jail scrubs, or a matte merged with another person). That
+    refusal is a legitimate refusal to invent a cut-out, not a run-ending fault.
     """
     cfg = cfg or {}
-    subject_side = cfg.get("subject_side", "right")
     tip = cfg.get("arrow_tip", [0.30, 0.46])
 
     work = Path(tempfile.mkdtemp(prefix="boyd-thumb-"))
@@ -222,13 +333,19 @@ def build(
                 "  thumbnail: no stable 2-up - falling back to the single-plate "
                 "builder (no cut-out, no arrow)"
             )
-            return _run_builder(
+            _run_builder(
                 [sys.executable, str(FALLBACK_BUILDER), str(frame), str(out),
                  "--white", white_part, "--yellow", yellow_part],
                 out,
             )
+            return _record_construction(out, {
+                "construction": "single_plate",
+                "fallback_reason": "no stable 2-up in the source",
+            })
 
         left_crop, right_crop = tiles
+        subject_side, side_source = _judge_tile_side(frame, tiles, cfg)
+        log.info("  thumbnail: judge tile is the %s one (%s)", subject_side, side_source)
 
         # ---- the construction Nathan approved, 2026-08-29: "q3 thumbnail is
         # fire". Until now this module hardcoded make_thumbnail_v2 while the
@@ -263,11 +380,42 @@ def build(
                 if key in cfg:
                     cmd += [flag, str(cfg[key])]
             log.info("  thumbnail: Q3 construction (%s)", Q3_BUILDER.name)
-            _run_builder(cmd, out)
+            try:
+                _run_builder(cmd, out)
+            except RuntimeError as exc:
+                # The Q3 builder isolates the defendant by his scrubs and
+                # refuses rather than cutting the wrong person (2026-08-28:
+                # "you cut the defendants whole arm off in one theres have to
+                # be surgical cuts not slop"). A defendant who is not in
+                # custody has no scrubs, so that refusal is expected and is
+                # answered with the approved single-plate fallback instead of
+                # ending a run whose long-form is already rendered.
+                if "cannot identify the defendant" not in str(exc):
+                    raise
+                log.warning(
+                    "  thumbnail: Q3 refused to isolate the defendant (%s) - "
+                    "shipping the single-plate construction; no cut-out of the "
+                    "wrong person", exc,
+                )
+                _run_builder(
+                    [sys.executable, str(FALLBACK_BUILDER), str(frame), str(out),
+                     "--white", white_part, "--yellow", yellow_part],
+                    out,
+                )
+                return _record_construction(out, {
+                    "construction": "single_plate",
+                    "subject_side": subject_side,
+                    "side_source": side_source,
+                    "fallback_reason": str(exc).splitlines()[0][:300],
+                })
             # Q3 grades the picture in memory BEFORE drawing type, so the
             # file-in-place grade() below must not run over it - that is the
             # exact bug render.py documents for video captions.
-            return out
+            return _record_construction(out, {
+                "construction": "q3",
+                "subject_side": subject_side,
+                "side_source": side_source,
+            })
 
         subject_crop, plate_crop = (
             (right_crop, left_crop) if subject_side == "right"
@@ -522,6 +670,114 @@ def _run_builder(cmd: list[str], out: Path) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0 or not out.is_file():
-        tail = "\n".join((proc.stderr or proc.stdout or "").strip().splitlines()[-6:])
+        # Both streams, not stderr-first: a builder that exits through SystemExit
+        # leaves its diagnostics ("defendant: no scrubs found") on stdout while
+        # the message lands on stderr, and keeping only one of them cost a
+        # diagnosis on 2026-09-16.
+        stream_tails = [
+            "\n".join(stream.strip().splitlines()[-6:])
+            for stream in (proc.stderr or "", proc.stdout or "")
+            if stream.strip()
+        ]
+        tail = "\n".join(stream_tails)
         raise RuntimeError(f"{Path(cmd[1]).name} failed: {tail}")
     return out
+
+
+# ---------------------------------------------------------------- thumbnail.mode (2026-09-06)
+#
+# `direct_gen` (Nathan, 2026-09-06): the finished thumbnails are GENERATED by
+# the image model from the real assets and the story (tools/thumb_direct.py,
+# proven through the Claude<->Codex bridge), three concept families per case,
+# QC'd here. The legacy construction below stays as the fallback until the
+# new mode proves itself.
+
+
+def build_for_mode(cfg: dict[str, Any] | None, direct, legacy):
+    """Run `direct` when cfg.mode == direct_gen and return its result; on
+    None or any exception fall back to `legacy`. Both are zero-arg callables
+    so the caller decides what each one does."""
+    mode = str((cfg or {}).get("mode", "legacy")).lower()
+    if mode == "direct_gen":
+        try:
+            r = _direct_build(direct)
+            if r:
+                return r
+            log.warning("thumbnail direct_gen produced no accepted set; falling back to legacy")
+        except Exception as exc:  # noqa: BLE001
+            log.warning("thumbnail direct_gen failed (%s); falling back to legacy", exc)
+        # Under direct_gen the legacy compositor is only the fallback. When it
+        # raises too (2026-09-06: "cannot identify the defendant - pick another
+        # frame" on Alonzo, after the long-form had rendered), the case keeps
+        # its renders and the manifest records the missing thumbnail for the
+        # direct_gen re-run (scripts/thumb_direct_rerun.py). In legacy mode the
+        # exception still propagates: there a crash is the only signal.
+        try:
+            return _legacy_build(legacy)
+        except Exception as exc:  # noqa: BLE001
+            log.error("thumbnail legacy fallback failed too (%s); thumbnail MISSING, case continues", exc)
+            return {"file_path": None, "status": "missing", "review": "required",
+                    "mode": "none", "error": f"direct_gen and legacy both failed: {exc}"}
+    return _legacy_build(legacy)
+
+
+def _direct_build(direct):
+    return direct()
+
+
+def _legacy_build(legacy):
+    return legacy()
+
+
+def build_direct(source: Path, offset: float, case: dict[str, Any], pkg: dict[str, Any],
+                 out_dir: Path, cfg: dict[str, Any] | None = None, *, resume: bool = False) -> dict[str, Any] | None:
+    """The daily route's entry to direct_gen: a case dict assembled from the
+    run (video, hook, packaging quote/description) instead of cases.json.
+    Returns {file_path (the A control), candidates, manifest} or None."""
+    from .pipeline import split_thumbnail_quote  # lazy: pipeline imports this module
+    if pkg.get("producer_brain"):
+        from .thumbnail_copy import require_review
+        require_review(pkg)
+    sys.path.insert(0, str(ROOT / "tools"))
+    import thumb_direct as TD  # noqa: E402
+    white, yellow = split_thumbnail_quote(pkg)
+    # one work dir per case: the old fallback "case" made every route case share
+    # thumbwork/case and reuse the first case's extracted defendant (2026-09-06)
+    key = str(case.get("case_key") or case.get("key") or Path(source).stem).replace(":", "_")
+    cdict = {
+        "_key": key, "video": str(source), "offset": float(offset),
+        "plate_t": float(case.get("hook_start_s", 0.0)), "call_t": float(case.get("start_s", 0.0)),
+        "case_from": float(case.get("start_s", 0.0)), "case_to": float(case.get("end_s", 1e12)),
+        "transcript": case.get("transcript") or "",
+        "white": white, "yellow": yellow,
+        "defendant": str(case.get("defendant_name") or case.get("defendant") or ""),
+        "note": str(pkg.get("description") or pkg.get("summary") or ""),
+        "story_angle": str(pkg.get("story_angle") or pkg.get("hook") or ""),
+        "title_candidates": [
+            str(pair.get("title") or "") for pair in pkg.get("packaging_pairs", [])
+        ],
+        "concept_directions": {
+            str(pair.get("label") or ""): {
+                "title": str(pair.get("title") or ""),
+                "thumbnail_text": str(pair.get("thumbnail_text") or ""),
+                "hypothesis": str(pair.get("thumbnail_hypothesis") or ""),
+                "direction": pair.get("thumbnail_direction") or {},
+            }
+            for pair in pkg.get("packaging_pairs", [])
+        },
+        "hearing_date": str(case.get("hearing_date") or ""),
+    }
+    dcfg = dict((cfg or {}).get("direct") or {})
+    work = out_dir / "thumb_direct_work"
+    resume_args = {"resume": True} if resume else {}
+    manifest = TD.run_case(key, out_dir / "thumb_direct", work, None, cfg=dcfg, case_dict=cdict, **resume_args)
+    finals = manifest.get("finals") or {}
+    complete = bool(manifest.get("complete")) and set(finals) == {"A", "B", "C"}
+    return {"file_path": finals.get("A"), "status": "candidate" if complete else "incomplete",
+            "review": "required",
+            "candidates": finals, "contact_sheet": manifest.get("contact_sheet"),
+            "manifest": str(out_dir / "thumb_direct" / "manifest.json"), "mode": "direct_gen",
+            "model": str((manifest.get("config") or {}).get("model") or ""),
+            "complete": complete,
+            "images_generated_total": int(manifest.get("images_generated_total") or 0),
+            "model_calls_used": int(manifest.get("model_calls_used") or 0)}

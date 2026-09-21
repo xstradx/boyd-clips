@@ -52,6 +52,7 @@ measured to be wrong:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 import subprocess
 import sys
@@ -354,22 +355,41 @@ def scoot(plate: Image.Image, him: np.ndarray, alpha: np.ndarray, shift: int):
 
 
 # ------------------------------------------------------------------ build
+def _cache_key(tag: str, video: Path, crop: str, t: float) -> str:
+    """A cached-frame name that two different frames cannot share.
+
+    The cache used to be keyed by the preset tag and the integer second alone
+    ("carthief_judgecut_271_gf.png"). Every unattended call runs the same preset
+    tag and rounds to whole seconds, so a second case whose hook landed on the
+    same second read the first case's SHEET and CUT-OUT out of work/q3 - a
+    wrong-person composite, with the builder's own QC none the wiser. The source
+    video and the exact crop and time are part of the key now; work/q3 is
+    scratch, so the change only costs one re-extract.
+    """
+    digest = hashlib.sha1(
+        f"{video.stem}|{crop}|{t:.2f}".encode("utf-8")
+    ).hexdigest()[:10]
+    return f"{tag}_{digest}"
+
+
 def build(a) -> Path:
     cache = ROOT / "work" / "q3"
     cache.mkdir(parents=True, exist_ok=True)
     tag = a.preset or "custom"
+    judge_key = _cache_key(tag, Path(a.video), a.judge_crop, float(a.judge_t))
+    plate_key = _cache_key(tag, Path(a.video), a.plate_crop, float(a.plate_t))
 
     jt = extract(a.video, a.clip_start, a.judge_t, a.judge_crop,
-                 cache / f"{tag}_judge_{int(a.judge_t)}.png")
+                 cache / f"{judge_key}_judge.png")
     pt = extract(a.video, a.clip_start, a.plate_t, a.plate_crop,
-                 cache / f"{tag}_plate_{int(a.plate_t)}.png")
+                 cache / f"{plate_key}_plate.png")
     judge_src = Image.open(jt).convert("RGB")
     plate_src = Image.open(pt).convert("RGB")
     print(f"judge tile {judge_src.size} @ src {a.judge_t}   "
           f"plate tile {plate_src.size} @ src {a.plate_t}")
 
     # ---- 1. mattes (cached: BiRefNet-matting is ~60s on CPU per call) ------
-    jc = cache / f"{tag}_judgecut_{int(a.judge_t)}{'' if a.vitmatte else '_gf'}.png"
+    jc = cache / f"{judge_key}_judgecut{'' if a.vitmatte else '_gf'}.png"
     if jc.is_file() and not a.rematte:
         cut_rgba = Image.open(jc).convert("RGBA")
         print(f"  judge cut-out from cache {jc.name}")
@@ -377,7 +397,7 @@ def build(a) -> Path:
         F, al = Q.cutout_hq(judge_src, band=a.band, use_vitmatte=a.vitmatte)
         cut_rgba = Image.fromarray(np.dstack([F, al]), "RGBA")
         cut_rgba.save(jc)
-    pa_p = cache / f"{tag}_platealpha_{int(a.plate_t)}.png"
+    pa_p = cache / f"{plate_key}_platealpha.png"
     if pa_p.is_file() and not a.rematte:
         plate_alpha = np.asarray(Image.open(pa_p).convert("L"))
     else:

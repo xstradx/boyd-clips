@@ -28,6 +28,13 @@ _SESSION_RE = re.compile(r"\b(MORN\w*|AFTER\w*|EVEN\w*)\s*DOCKET", re.IGNORECASE
 # Chronological, for sorting same-day sessions.
 SESSION_ORDER = {"morning": 0, "afternoon": 1, "evening": 2, "unknown": 3}
 
+# The judge a docket belongs to, carried on the docket itself so a stream from
+# another court can never be silently worked as a Boyd hearing downstream.
+# These mirror config/judges.yaml (primary profile stephanie_boyd); the registry
+# stays the authority, this is only the default for the existing Boyd path.
+DEFAULT_JUDGE_ID = "stephanie_boyd"
+DEFAULT_JUDGE_NAME = "Judge Stephanie Boyd"
+
 
 @dataclass
 class Docket:
@@ -36,6 +43,10 @@ class Docket:
     duration_s: float
     docket_date: str  # ISO yyyy-mm-dd, or "" when unparseable
     session: str      # morning | afternoon | unknown
+    # Added after the fact, so every existing positional construction still
+    # works and still means Judge Boyd.
+    judge_id: str = DEFAULT_JUDGE_ID
+    judge_name: str = DEFAULT_JUDGE_NAME
 
     @property
     def url(self) -> str:
@@ -111,9 +122,19 @@ def _run_ytdlp(args: list[str], timeout: int = 300) -> str:
     return proc.stdout
 
 
-def list_recent(channel_url: str, depth: int) -> list[Docket]:
+def list_recent(
+    channel_url: str,
+    depth: int,
+    judge_id: str = DEFAULT_JUDGE_ID,
+    judge_name: str = DEFAULT_JUDGE_NAME,
+) -> list[Docket]:
     """List the most recent streams. Uses --flat-playlist: one request, no
-    per-video extraction, so this stays fast even at depth 50."""
+    per-video extraction, so this stays fast even at depth 50.
+
+    Every returned docket is stamped with the judge whose channel was listed.
+    The defaults keep this call byte-identical for the Boyd path: an existing
+    caller passes a channel and a depth and still gets Boyd dockets.
+    """
     out = _run_ytdlp(
         [
             "--flat-playlist",
@@ -144,6 +165,8 @@ def list_recent(channel_url: str, depth: int) -> list[Docket]:
                 duration_s=duration,
                 docket_date=parse_docket_date(title),
                 session=parse_session(title),
+                judge_id=judge_id,
+                judge_name=judge_name,
             )
         )
     return dockets

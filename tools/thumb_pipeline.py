@@ -2126,7 +2126,12 @@ if __name__ == "__main__":
                          "since 2026-09-02: measured worse than the HYPIR frame "
                          "(speckled noise, face drift) and costs ~15 min of model "
                          "load per build.")
-    ap.add_argument("--cut-first", action="store_true",
+    ap.add_argument("--no-cut-first", dest="cut_first", action="store_false",
+                    default=True,
+                    help="fall back to the pre-2026-09-03 order (HYPIR -> colour "
+                         "-> matte). His order - cut out, restore, THEN colour - "
+                         "is the default now.")
+    ap.add_argument("--cut-first", dest="cut_first", action="store_true",
                     help="his 2026-09-03 order: matte the RAW crop, THEN HYPIR the "
                          "cut-out, THEN colour it under its own alpha. The default "
                          "order mattes a restored image and colours a rectangle.")

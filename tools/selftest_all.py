@@ -23,6 +23,7 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 # (label, argv). Order is cheapest-first so a broken environment shows up fast.
 SUITE = [
+    ("thumbnail_text source review / fixed-image word experiment", ["tools/check_thumbnail_text_workflow.py"]),
     ("tiles          seam / tile detection", ["tools/tiles.py", "--selftest"]),
     ("incidents      multi-angle incident grouping", ["tools/incidents.py", "--selftest"]),
     ("bwc_sync       N-camera audio alignment", ["tools/bwc_sync.py", "--selftest"]),
@@ -31,6 +32,7 @@ SUITE = [
     ("cutplan        multi-angle edit plan + refusals", ["tools/cutplan.py", "--selftest"]),
     ("shotqual       ranks angles by what is visible", ["tools/shotqual.py", "--selftest"]),
     ("title_grammar  measured title levers + noise", ["tools/title_grammar.py", "--selftest"]),
+    ("producer_brain current prompt, case plans, diversity", ["tools/verify_producer_brain_batch_v1.py", "docs/producer_brain_v1/batch_2", "--check-diversity", "--self-test"]),
     ("identity       Boyd recognition, leave-one-out", ["tools/identity.py", "--selftest"]),
     ("expression     measured frame selection", ["tools/expression.py", "--selftest"]),
     ("verify_thumb   gates A/C/D can still fail", ["tools/verify_thumb.py", "--selftest"]),
@@ -39,11 +41,16 @@ SUITE = [
     ("thumb_metrics  metric reproduction + separability", ["tools/verify_thumb_metrics.py"]),
     ("master_audio   loudness stage", ["tools/master_audio.py", "--selftest"]),
     ("check_registry no orphaned checkers", ["tools/check_registry.py"]),
+    # 2026-09-16: the story ledger answers "have we already made this video?".
+    # This proves every artifact it claims still exists on disk, so the memory
+    # cannot quietly rot into a list of paths that were moved or deleted.
+    ("story_ledger   every claimed story artifact still exists", ["tools/story_ledger.py", "verify"]),
     # every checker the rules file names must exist and be on the build path,
     # or the rules file must say it is not (2026-09-01: 14 citations of a
     # script nothing called, two of a file that did not exist)
     ("check_rules_refs rules cite only real, wired checkers", ["tools/check_rules_refs.py"]),
     ("floor_stamp    R40 stale-floor refusal can still fail", ["tools/floor_stamp.py", "--selftest"]),
+    ("check_caption  R60 filler / profanity refusal, spelling + title-repeat flags can still fail", ["tools/check_caption.py", "--selftest"]),
     ("check_title    R41 rewritten - his own winners must never be refused and must outscore his five worst", ["tools/check_title.py", "--selftest"]),
     ("check_variants R42 invisible-variant refusal can still fail", ["tools/check_variants.py", "--selftest"]),
     ("check_clutter  R43 element-budget / ink-cover refusal can still fail", ["tools/check_clutter.py", "--selftest"]),

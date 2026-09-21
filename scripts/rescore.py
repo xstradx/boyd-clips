@@ -32,6 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from boydclips.analyze import Analyzer                           # noqa: E402
+from boydclips import analyze as analyze_mod                     # noqa: E402
 from boydclips.config import RUBRIC_DIMENSIONS, load_config      # noqa: E402
 from boydclips.state import Store                                # noqa: E402
 from boydclips.transcribe import Transcript                      # noqa: E402
@@ -95,7 +96,8 @@ def main() -> int:
             for c in scored:
                 store.save_case(vid, c, c.get("rank"))
             (ROOT / "work" / vid / "scored.json").write_text(
-                json.dumps(scored, ensure_ascii=False, indent=2), encoding="utf-8")
+                json.dumps(analyze_mod.score_cache_dump(scored, analyze_mod.current_rubric_version()),
+                           ensure_ascii=False, indent=2), encoding="utf-8")
             elig = sum(1 for c in scored if c["eligible"])
             best = max((c["total_score"] for c in scored), default=0)
             print(f"    {elig}/{len(scored)} eligible, best {best:.1f}"

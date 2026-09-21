@@ -1,45 +1,26 @@
 # -*- coding: utf-8 -*-
-"""R41 (REWRITTEN 2026-09-03) - titles follow the formula that actually wins
-this niche. R16 - a quoted span is verbatim.
+"""Title check — accuracy refusals + BOYD_EDITORIAL_V2 editorial validation.
 
-WHY THIS FILE WAS REWRITTEN. The old R41 said "withhold the outcome, never
-state the sentence" and this checker REFUSED any title that did. Measured
-2026-09-03 against the real corpus - his own channel ranked by views, and every
-Judge Boyd video on YouTube over 100k:
-
-    865k  Day 1: The family found them in a locked car - Savanah Soto ...  REFUSED (80 chars)
-     39k  Judge Boyd Sentences San Antonio Rapper "IZZY93" To PRISON!     REFUSED (sentences)
-     27k  Thug In Disbelief After Judge Boyd Sentences Him To Prison.     REFUSED (sentences)
-     22k  Judge Boyd Sentences Father Who STARVED his 10-Year Old ...     REFUSED (10-year)
-    747k  Judge Boyd Sentences 22-Year-Old in Predator Sting              REFUSED (22-year)
-    281k  Judge Boyd Sentences Honors Student to 6 YEARS PRISON           REFUSED (6 years)
-
-Seven of the nine best-performing Judge Boyd titles in existence were refused by
-this file. Meanwhile the five WORST shorts on his channel (977 - 2,000 views)
-are the quote-led, outcome-withheld ones this file was built to produce, four of
-them written by me.
-
-Nathan, 2026-09-03: *"if there's something in the instructions that you know is
-wrong and ESPECIALLY if I spend DAYS telling you it's wrong then maybe it would
-be smart to undo whatever's causing and delete it"*. He then chose "copy the
-rival formula". So the outcome refusal is DELETED, not relaxed.
-
-THE FORMULA, read off the 100k+ corpus (see WINNERS below):
-    [who + what they did, in blunt words] + Judge Boyd + [reaction verb] + [outcome]
-    - state the outcome; it is the payoff, not a spoiler
-    - CAPS the payoff word (PRISON, STARVED, LIFE, MONSTER)
-    - a reaction verb for the judge: SNAPS / LOSES IT / RAGES / ERUPTS /
-      HAMMERS / SLAMS / SHOWS NO MERCY / HUMILIATES / DENIES / REJECTS
-    - name the crime concretely; asterisk the sensitive word (Se* / Rap*d /
-      MOLEST*D) - that is what the winning channels do and it matches his
-      standing censor rule
-    - up to ~85 characters; his 865k best is 80
-
-WHAT STILL REFUSES (only two things, both accuracy, not taste)
+TWO THINGS REFUSE (accuracy, never taste):
     uncensored profanity          - his standing channel rule, audio yes text no
     a quoted span that is not verbatim in the transcript (R16) - inventing a
         quote from a real person in a real courtroom is a factual error
-Everything else is a SCORE and a WARNING. This file no longer blocks a title.
+
+EVERYTHING ELSE IS ADVICE, printed as `flag`. The editorial rules are the
+single definition in src/boydclips/editorial.py (Nathan, 2026-09-06):
+    one story only · promise a real payoff · specific curiosity, not generic
+    clickbait · "Judge Boyd" when her action is the hook, not mechanically ·
+    plain spoken English, no docket language · hard max 70 (analyze._trim_title
+    enforces it), editorial target 45-65 · no empty hype words, no emoji, no
+    fake all-caps urgency · candidates from several title FAMILIES.
+
+HISTORY (kept so nobody re-derives it): the 2026-09-03 rewrite deleted the
+"withhold the outcome" refusal after it was measured refusing seven of the nine
+best-performing Judge Boyd titles in existence. The measured winning signals
+from that corpus (reaction verb, outcome stated, concrete stake) are still
+reported below as `measured`, because they are real data about this niche —
+but they no longer drive a score. The 2026-09-06 ruleset asks for the EVENT to
+carry the title; a reaction verb is welcome when it is true, not required.
 
     python tools/check_title.py "<title>" ["<title B>" ...] [--transcript <file>]
     python tools/check_title.py --selftest
@@ -52,26 +33,24 @@ import sys
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 from boydclips.censor import censor, has_profanity  # noqa: E402
+from boydclips import editorial  # noqa: E402
 
-# 80 chars is his own 865k best; 85 leaves a little room. This is a WARN now.
-SOFT_MAX = 85
-BAND = (45, 80)
+HARD_MAX = editorial.TITLE_HARD_MAX
+TARGET = editorial.TITLE_TARGET
 
-# ---- the winning formula, as positive signals (measured, not invented) ------
-# Every verb below appears in a Judge Boyd video over 100k views, 2026-09-03.
+# ---- measured niche signals (reported, not scored) --------------------------
 REACTION_VERBS = [
     "snaps", "loses it", "rages", "erupts", "hammers", "slams", "shows no mercy",
     "humiliates", "denies", "rejects", "stuns", "shuts down", "checks", "turns on",
     "cant believe", "can't believe", "couldn't believe", "couldnt believe",
-    "instantly regrets", "backfired", "pushed too far", "pushes", "warns",
-    "in disbelief", "begs", "caught", "exposes", "shocked", "had enough",
+    "backfired", "pushed too far", "pushes", "warns", "in disbelief", "begs",
+    "caught", "exposes", "shocked", "had enough", "notices", "learns", "finds out",
 ]
-# Outcome words - now a POSITIVE signal. This list used to be the refusal list.
 OUTCOME_WORDS = [
     "sentence", "sentences", "sentenced", "prison", "years", "life", "probation",
     "denied", "granted", "guilty", "verdict", "maximum", "no mercy", "decades",
+    "revoked", "another chance", "last chance",
 ]
-# Concrete stakes. Vague nouns ("case", "hearing", "court") do not count.
 STAKE_WORDS = [
     "child", "daughter", "son", "baby", "infant", "toddler", "kid", "mother",
     "father", "murder", "killed", "stabbed", "shot", "gun", "stolen", "drugs",
@@ -82,7 +61,6 @@ STAKE_WORDS = [
 
 _QUOTE = re.compile(r"[\"\u201c\u201d]([^\"\u201c\u201d]{3,})[\"\u201c\u201d]|(?<![A-Za-z])'([^']{3,})'(?![A-Za-z])")
 _TS = re.compile(r"^\d+$|^\d\d:\d\d:\d\d[,.]\d+ -->|^WEBVTT|^NOTE\b")
-_CAPSWORD = re.compile(r"\b[A-Z]{3,}\b")
 
 
 def _norm(s):
@@ -117,71 +95,62 @@ def quoted_spans(title):
     return [a or b for a, b in _QUOTE.findall(title)]
 
 
-def score(title):
-    """0-100 against the measured winning formula. Advisory."""
+def measured(title):
+    """Which of the measured niche signals the title carries. Reported only."""
     low = title.lower()
-    pts, hits = 0, []
+    hits = []
     if any(v in low for v in REACTION_VERBS):
-        pts += 30; hits.append("reaction verb")
+        hits.append("reaction verb")
     if any(w in low for w in OUTCOME_WORDS):
-        pts += 30; hits.append("states the outcome")
+        hits.append("names the outcome or stake of the decision")
     if any(w in low for w in STAKE_WORDS):
-        pts += 25; hits.append("names a concrete stake")
-    if _CAPSWORD.search(title):
-        pts += 15; hits.append("CAPS payoff word")
+        hits.append("names a concrete stake")
+    return hits
+
+
+def score(title):
+    """Kept for callers that import it. Advisory: measured signals as points."""
+    hits = measured(title)
+    pts = 30 * ("reaction verb" in hits) + 30 * (any(h.startswith("names the outcome") for h in hits)) \
+        + 25 * ("names a concrete stake" in hits)
     return pts, hits
 
 
 def check(title, transcript=None, verbose=True):
-    """Returns (ok, fails, warns). Only accuracy can make ok False now."""
-    fails, warns = [], []
+    """Returns (ok, fails, flags). Only accuracy can make ok False."""
+    fails, flags = [], []
     n = len(title)
 
-    # --- the only two refusals left, both accuracy ---------------------------
+    # --- the only two refusals, both accuracy ---------------------------------
     if has_profanity(title):
         fails.append(f"uncensored profanity - text is always censored: '{censor(title)}'")
     for span in quoted_spans(title):
         if transcript is None:
-            warns.append(f"quoted span '{span}' unverified - pass --transcript to check it (R16)")
+            flags.append(f"quoted span '{span}' unverified - pass --transcript to check it (R16)")
         elif _norm(span) not in transcript:
             fails.append(f"quoted span '{span}' is not verbatim in the transcript (R16)")
 
-    # --- everything else is advice -------------------------------------------
-    if n > SOFT_MAX:
-        warns.append(f"{n} chars - over the soft max {SOFT_MAX} (his 865k best is 80)")
-    elif not BAND[0] <= n <= BAND[1]:
-        warns.append(f"{n} chars, house band {BAND[0]}-{BAND[1]}")
-    if "judge" not in title.lower():
-        warns.append("judge not named - every 100k+ Judge Boyd title names her")
-
-    pts, hits = score(title)
-    missing = []
-    if "reaction verb" not in hits:
-        missing.append("a reaction verb (SNAPS / LOSES IT / HAMMERS / DENIES / BEGS)")
-    if "states the outcome" not in hits:
-        missing.append("the OUTCOME - every 100k+ title states it; withholding it is what lost")
-    if "names a concrete stake" not in hits:
-        missing.append("a concrete stake (the crime, the victim, the thing taken)")
-    if "CAPS payoff word" not in hits:
-        missing.append("a CAPS payoff word")
+    # --- editorial validation (advisory) ---------------------------------------
+    flags.extend(editorial.title_flags(title))
+    fam = editorial.title_family(title)
+    hits = measured(title)
 
     ok = not fails
     if verbose:
-        print(("TITLE_OK    " if ok else "TITLE_FAIL  ") + f"[{n}] score {pts:>3}/100  {title}")
+        print(("TITLE_OK    " if ok else "TITLE_FAIL  ") + f"[{n}] {title}")
         for f in fails:
             print("    REFUSED  " + f)
-        for w in warns:
-            print("    warn     " + w)
+        for w in flags:
+            print("    flag     " + w)
+        print("    family   " + (fam or "none recognised - is the story angle in the title?"))
         if hits:
-            print("    has      " + ", ".join(hits))
-        for m in missing:
-            print("    missing  " + m)
-    return ok, fails, warns
+            print("    measured " + ", ".join(hits))
+    return ok, fails, flags
 
 
-# ---- the known-answer set is now HIS CHANNEL, not my invention --------------
-# (title, views) - measured 2026-09-03 with yt-dlp on @TexasTrialTracker and on
-# every Judge Boyd video found over 100k views.
+# ---- known-answer sets -------------------------------------------------------
+# His channel and the 100k+ Judge Boyd corpus (measured 2026-09-03). Nothing in
+# this list may ever be REFUSED - only accuracy refuses, and these are accurate.
 WINNERS = [
     ("Judge Boyd Sentences San Antonio Rapper \"IZZY93\" To PRISON!", 39000),
     ("Thug In Disbelief After Judge Boyd Sentences Him To Prison.", 27000),
@@ -193,40 +162,50 @@ WINNERS = [
     ("Judge Boyd Hands Down 50-year Sentence To Savage Animal!", 117225),
     ("Murderer Begs For Last Chance - Judge Boyd Shows No Mercy", 110233),
 ]
-LOSERS = [
-    ("Judge Boyd tells her why her son is struggling #shorts", 2000),
-    ("He told the judge it was funny #shorts", 1500),
-    ("Judge Boyd To The Nurse On Probation: \"That's A No.\"", 1500),
-    ("Judge Boyd Stops a Plea to Ask About a Spider Monkey #shorts", 1200),
-    ("Judge Boyd Wanted Proof He Was Shot: \"Well, Let's Google.\"", 977),
+# BOYD_EDITORIAL_V2 example titles: must carry NO editorial flags except length.
+CLEAN = [
+    "Judge Boyd Learns Why He Really Came Back to Court",
+    "He Was Given Another Chance — Then Did It Again",
+    "Judge Boyd Notices His Story Doesn't Add Up",
+    "He Keeps Arguing With Judge Boyd — It Doesn't Help",
+    "His Explanation Leaves Judge Boyd With One Question",
+    "Judge Boyd Gave Him One Last Chance. He's Back.",
+    "Then He Admits Why He Violated Probation",
+    "The Hearing Changes When His Family Speaks",
+]
+# Must be FLAGGED (generic clickbait / hype / docket language) but never refused.
+WEAK = [
+    ("Judge Boyd Couldn't Believe THIS", "clickbait"),
+    ("You Won't Believe What Happens", "clickbait"),
+    ("This Changes EVERYTHING", "clickbait"),
+    ("Judge Boyd DESTROYS Him In SAVAGE Takedown", "hype"),
+    ("Defendant Appears Before Judge Boyd Regarding Motion to Revoke Probation", "docket"),
 ]
 
 
 def selftest():
-    """The control set is his own channel. Winners must outscore losers, and
-    NOTHING in the winning corpus may be refused."""
     ok = True
-    print("R41 rewritten - the corpus is his own channel and the 100k+ Judge Boyd videos")
-    ws, ls = [], []
-    print("  WINNERS (must never be refused):")
+    print("check_title - BOYD_EDITORIAL_V2")
+    print("  WINNERS (never refused):")
     for t, v in WINNERS:
         good, fails, _ = check(t, verbose=False)
-        p, _h = score(t)
-        ws.append(p)
-        flag = "" if good else "   !! REFUSED: " + "; ".join(fails)
         if not good:
             ok = False
-        print(f"    {v:>8,}  score {p:>3}  {t[:62]}{flag}")
-    print("  LOSERS (his five worst shorts - must score lower):")
-    for t, v in LOSERS:
-        p, _h = score(t)
-        ls.append(p)
-        print(f"    {v:>8,}  score {p:>3}  {t[:62]}")
-    wmin, lmax = min(ws), max(ls)
-    print(f"  winners min score {wmin}  vs  losers max score {lmax}")
-    if wmin <= lmax:
-        ok = False
-        print("    !! the score does not separate his winners from his losers")
+        print(f"    {v:>8,}  {'ok ' if good else '!! REFUSED: ' + '; '.join(fails)} {t[:62]}")
+    print("  CLEAN v2 examples (no editorial flag beyond length):")
+    for t in CLEAN:
+        good, fails, flags = check(t, verbose=False)
+        bad = [f for f in flags if "chars" not in f]
+        if not good or bad:
+            ok = False
+        print(f"    {'ok ' if good and not bad else '!! '} {t}  {bad if bad else ''}")
+    print("  WEAK examples (flagged, not refused):")
+    for t, why in WEAK:
+        good, fails, flags = check(t, verbose=False)
+        hit = any(why in f for f in flags)
+        if not good or not hit:
+            ok = False
+        print(f"    {'ok ' if good and hit else '!! '} {why:9s} {t}")
     # accuracy refusals must still bite
     for bad, why in [("Judge Boyd Tells Him \"You're Full of Shit\" to His Face", "profanity"),
                      ("Judge Boyd Said \"I Will Bury You Under The Jail\" Today", "fabricated quote")]:
@@ -237,6 +216,13 @@ def selftest():
             print(f"    !! {why} was NOT refused - the accuracy gate is dead")
         else:
             print(f"    ok   still refuses {why}")
+    # families
+    fams = {editorial.title_family(t) for t in CLEAN}
+    if len(fams - {None}) < editorial.TITLE_MIN_FAMILIES:
+        ok = False
+        print(f"    !! only {len(fams - {None})} families recognised among the clean examples")
+    else:
+        print(f"    ok   {len(fams - {None})} title families recognised: {sorted(f for f in fams if f)}")
     print("TITLE_SELFTEST_OK" if ok else "TITLE_SELFTEST_FAIL")
     return 0 if ok else 1
 

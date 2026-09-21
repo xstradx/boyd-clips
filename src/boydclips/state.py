@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS ledger (
     decision        TEXT NOT NULL,         -- approved | rejected | takedown
     reason          TEXT,
     safety_related  INTEGER NOT NULL DEFAULT 0,
+    artifact_hash   TEXT,
     decided_at      TEXT NOT NULL
 );
 
@@ -106,6 +107,15 @@ class Store:
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA foreign_keys = ON")
         self._conn.executescript(SCHEMA)
+        # Additive migration for databases created before artifact-bound
+        # approvals. Existing decisions remain readable as legacy rows.
+        columns = {row["name"] for row in self._conn.execute("PRAGMA table_info(ledger)")}
+        if "artifact_hash" not in columns:
+            self._conn.execute("ALTER TABLE ledger ADD COLUMN artifact_hash TEXT")
+        self._conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_artifact_decision "
+            "ON ledger(case_key, decision, artifact_hash) WHERE artifact_hash IS NOT NULL"
+        )
         self._conn.commit()
 
     @property
@@ -223,6 +233,56 @@ class Store:
         ).fetchone()
         return row is not None
 
+    def story_rendered(
+        self,
+        case_key: str,
+        video_id: str,
+        cause_number: str | None,
+        start_s: float | None = None,
+        end_s: float | None = None,
+    ) -> bool:
+        """Whether this case, or another sitting of its known cause, has media.
+
+        Discovery may legitimately revisit a non-terminal docket after a partial
+        run.  Those cached case rows must not re-enter global selection once a
+        local clip exists, even though nothing has been published yet.
+
+        2026-09-16: the cause number is not always there to match on. A docket
+        that is re-scored produces OVERLAPPING rows for the same hearing, and on
+        dAKO7myCd-g the re-scored row came back with `cause_number` "unknown",
+        so it sailed past this guard and was rendered as a second package for a
+        hearing that already had one (8340, both clips on disk since 2026-09-06).
+        When the caller supplies the candidate's own window, a case that is
+        mostly inside a window that already has media counts as rendered too.
+        """
+        cause = str(cause_number or "").strip()
+        row = self._conn.execute(
+            "SELECT 1 FROM clips made_clip "
+            "JOIN cases made_case ON made_case.case_key = made_clip.case_key "
+            "WHERE made_case.case_key = ? "
+            "OR (? != '' AND ? != 'unknown' AND made_case.video_id = ? "
+            "AND made_case.cause_number = ?) LIMIT 1",
+            (case_key, cause, cause, video_id, cause),
+        ).fetchone()
+        if row is not None:
+            return True
+        if start_s is None or end_s is None:
+            return False
+        span = float(end_s) - float(start_s)
+        if span <= 0:
+            return False
+        # Half the candidate window inside an already-rendered window: the story
+        # is the same story, whatever the two rows call it.
+        row = self._conn.execute(
+            "SELECT 1 FROM clips made_clip "
+            "JOIN cases made_case ON made_case.case_key = made_clip.case_key "
+            "WHERE made_case.video_id = ? "
+            "AND (MIN(?, made_case.end_s) - MAX(?, made_case.start_s)) >= 0.5 * ? "
+            "LIMIT 1",
+            (video_id, float(end_s), float(start_s), span),
+        ).fetchone()
+        return row is not None
+
     def get_case(self, case_key: str) -> dict[str, Any] | None:
         row = self._conn.execute(
             "SELECT payload FROM cases WHERE case_key = ?", (case_key,)
@@ -234,6 +294,15 @@ class Store:
         scored.json cache exists but its DB rows were never written."""
         return list(self._conn.execute(
             "SELECT case_key FROM cases WHERE video_id = ?", (video_id,)))
+
+    def next_case_start(self, video_id: str, after_s: float) -> float | None:
+        """Nearest later segmented case boundary on the same docket."""
+        row = self._conn.execute(
+            "SELECT MIN(start_s) AS start_s FROM cases "
+            "WHERE video_id = ? AND start_s > ?",
+            (video_id, float(after_s)),
+        ).fetchone()
+        return float(row["start_s"]) if row and row["start_s"] is not None else None
 
     def case_windows(self, video_id: str, start_s: float) -> list[tuple[float, float]]:
         """Every window in the docket belonging to the same case, in order.
@@ -263,7 +332,7 @@ class Store:
             ).fetchone()
             return [(float(hit["start_s"]), float(hit["end_s"]))] if hit else []
 
-        return [
+        rows = [
             (float(r["start_s"]), float(r["end_s"]))
             for r in self._conn.execute(
                 "SELECT start_s, end_s FROM cases "
@@ -271,6 +340,7 @@ class Store:
                 (video_id, cause),
             )
         ]
+        return coalesce_windows(rows)
 
     def get_docket_row(self, video_id: str) -> sqlite3.Row | None:
         """The stored docket for a case, so a single case can be rendered
@@ -285,7 +355,14 @@ class Store:
             self._conn.execute(
                 "SELECT c.* FROM cases c "
                 "WHERE c.safety_pass = 1 AND c.total_score IS NOT NULL "
-                "AND c.case_key NOT IN (SELECT case_key FROM clips) "
+                "AND NOT EXISTS ("
+                "  SELECT 1 FROM clips made_clip "
+                "  JOIN cases made_case ON made_case.case_key = made_clip.case_key "
+                "  WHERE made_case.case_key = c.case_key "
+                "     OR (c.cause_number IS NOT NULL AND c.cause_number != 'unknown' "
+                "         AND made_case.video_id = c.video_id "
+                "         AND made_case.cause_number = c.cause_number)"
+                ") "
                 "ORDER BY c.total_score DESC LIMIT ?",
                 (limit,),
             )
@@ -331,6 +408,22 @@ class Store:
                 (description, clip_id),
             )
 
+    def set_clip_title(self, clip_id: str, title: str) -> None:
+        with self.tx() as c:
+            c.execute("UPDATE clips SET title = ? WHERE clip_id = ?", (title, clip_id))
+
+    def reset_unpublished_clips(self, case_key: str) -> None:
+        """Return a failed local bundle to the bank without deleting its files."""
+        with self.tx() as c:
+            published = c.execute(
+                "SELECT 1 FROM publications p JOIN clips c ON c.clip_id = p.clip_id "
+                "WHERE c.case_key = ? LIMIT 1",
+                (case_key,),
+            ).fetchone()
+            if published:
+                raise RuntimeError("cannot reset clip records after any platform publication")
+            c.execute("DELETE FROM clips WHERE case_key = ?", (case_key,))
+
     def record_publication(
         self, clip_id: str, platform: str, remote_id: str, url: str, privacy: str
     ) -> None:
@@ -353,14 +446,24 @@ class Store:
     # ----------------------------------------------------------------- ledger
 
     def record_decision(
-        self, case_key: str, decision: str, reason: str = "", safety_related: bool = False
+        self, case_key: str, decision: str, reason: str = "", safety_related: bool = False,
+        artifact_hash: str | None = None,
     ) -> None:
         with self.tx() as c:
             c.execute(
-                "INSERT INTO ledger (case_key, decision, reason, safety_related, decided_at) "
-                "VALUES (?,?,?,?,?)",
-                (case_key, decision, reason, 1 if safety_related else 0, _now()),
+                "INSERT OR IGNORE INTO ledger "
+                "(case_key, decision, reason, safety_related, artifact_hash, decided_at) "
+                "VALUES (?,?,?,?,?,?)",
+                (case_key, decision, reason, 1 if safety_related else 0, artifact_hash, _now()),
             )
+
+    def decision_for_artifact(self, case_key: str, artifact_hash: str) -> str | None:
+        row = self._conn.execute(
+            "SELECT decision FROM ledger WHERE case_key = ? AND artifact_hash = ? "
+            "ORDER BY id DESC LIMIT 1",
+            (case_key, artifact_hash),
+        ).fetchone()
+        return str(row["decision"]) if row else None
 
     def reliability(self) -> dict[str, Any]:
         """The evidence base for promoting autonomy.mode. Not a vibe check."""
@@ -370,10 +473,22 @@ class Store:
         # consecutive_approvals, which is the number that gates autonomy.
         rows = list(
             self._conn.execute(
-                "SELECT decision, safety_related FROM ledger "
+                "SELECT case_key, decision, safety_related, artifact_hash FROM ledger "
                 "ORDER BY decided_at DESC, id DESC"
             )
         )
+        unique: list[sqlite3.Row] = []
+        seen: set[tuple[str, str, str]] = set()
+        for row in rows:
+            marker = (
+                str(row["case_key"]), str(row["decision"]),
+                str(row["artifact_hash"] or "legacy"),
+            )
+            if marker in seen:
+                continue
+            seen.add(marker)
+            unique.append(row)
+        rows = unique
         total = len(rows)
         approved = sum(1 for r in rows if r["decision"] == "approved")
         safety_rejects = sum(
@@ -407,3 +522,22 @@ class Store:
                 f"(gate allows {max_safety_rejects})"
             )
         return True, "promotion gate satisfied"
+
+
+def coalesce_windows(rows: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Merge windows of one cause that overlap or touch into their union.
+
+    Sittings of a recessed-and-recalled hearing are disjoint by definition.
+    Two rows that overlap in time are the same sitting written twice (the
+    segmenter's row and an operator-bounded re-score of the same hearing,
+    2026-09-06: Andrew Garcia 8320-8999 and 8340-9465 came back as two
+    "sittings" and the overlapping pieces broke the cap planner). The union
+    keeps every second either row covered and nothing else.
+    """
+    out: list[tuple[float, float]] = []
+    for s, e in sorted(rows):
+        if out and s <= out[-1][1]:
+            out[-1] = (out[-1][0], max(out[-1][1], e))
+        else:
+            out.append((s, e))
+    return out

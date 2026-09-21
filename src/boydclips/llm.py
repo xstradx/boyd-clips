@@ -1,23 +1,25 @@
 """Model backends.
 
-Two ways to reach Claude, chosen by `analysis.backend`:
+Backends are selected explicitly by `analysis.backend`:
+
+  codex_cli   Runs the authenticated Codex CLI in an isolated temporary
+              directory with an explicit model and JSON output schema.
 
   claude_cli  Shells out to the Claude Code CLI in headless mode, reusing the
               OAuth login you already have. No API key, no separate billing.
   sdk         The Anthropic SDK. Needs ANTHROPIC_API_KEY or an `ant auth`
               profile, and gives schema-enforced structured outputs.
 
-The CLI path is the default because it needs no extra credential. It costs one
-real capability: the API can *guarantee* a response matches a JSON schema
-(`output_config.format`), and the CLI cannot. So this module carries its own
-validator and retry loop — the model is asked for JSON, the result is checked
-against the schema in Python, and a failure is fed back as a correction rather
-than propagating a malformed case into the render stage.
+The active Codex CLI route uses its output-schema support and then applies this
+module's existing parser and validator as a second boundary. It makes one
+attempt by default so an invalid response cannot silently spend another call.
+The legacy Claude CLI route retains its older client-side retry behavior.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -26,6 +28,28 @@ from pathlib import Path
 from typing import Any, Protocol
 
 MAX_ATTEMPTS = 3
+
+# Rejected responses are kept verbatim. Diagnosing a malformed reply from a log
+# line alone is guesswork: on 2026-09-16 a Producer response was rejected at
+# "char 26652 of 26652" — the text ended exactly where the JSON parser expected
+# a comma — and no copy of that text survived, so whether it was truncated by a
+# token ceiling or malformed by the model could not be settled from evidence.
+REJECTED_DIR = Path("logs") / "rejected"
+
+
+def dump_rejected(label: str, attempt: int, raw: str,
+                  usage: dict[str, Any] | None = None) -> None:
+    """Keep a rejected response (and the turn's token usage) for diagnosis."""
+    try:
+        REJECTED_DIR.mkdir(parents=True, exist_ok=True)
+        (REJECTED_DIR / f"{label}_attempt{attempt}.txt").write_text(raw, encoding="utf-8")
+        if usage:
+            (REJECTED_DIR / f"{label}_attempt{attempt}.usage.json").write_text(
+                json.dumps(usage, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+    except OSError:
+        pass
+
 
 # Analysis is pure text generation. Claude Code would otherwise happily go read
 # files or search the web mid-task, which would be slower, non-deterministic,
@@ -201,20 +225,260 @@ def extract_json(text: str) -> dict[str, Any]:
     start, end = repaired.find("{"), repaired.rfind("}")
     if start != -1 and end > start:
         text = repaired
+        span = text[start:end + 1]
         # Must not let a JSONDecodeError escape: complete() catches
         # BackendError to drive its retry, so a raw decode error here would
         # bypass the retry loop entirely and abort the run.
         try:
-            parsed = json.loads(text[start:end + 1])
+            parsed = json.loads(span)
             if isinstance(parsed, dict):
                 return parsed
         except json.JSONDecodeError as exc:
+            # Two different failures wore the same message until 2026-09-16.
+            # A parse error AT the end of the text means the reply stops where
+            # the JSON was still expecting more — the shape of a generation that
+            # stopped early (measured on a Producer reply that ended at char
+            # 26652 of 26652, while the same model and backend emitted 52,010
+            # output tokens in one clean turn, so no output ceiling is involved).
+            # Anything earlier is a structurally malformed object. The
+            # distinction is the whole diagnosis, and it is in the error text.
+            if exc.pos >= len(span):
+                detail = ("the reply stops where the JSON still expected more - it "
+                          "ended early rather than carrying a bad object")
+            else:
+                detail = "the reply is malformed mid-response"
             raise BackendError(
                 f"response is not valid JSON ({exc.msg} at char {exc.pos} of "
-                f"{len(text)}); response may be truncated"
+                f"{len(text)}); {detail}; raw reply: logs/rejected/"
             ) from exc
 
     raise BackendError(f"no JSON object in response (first 200 chars: {text[:200]!r})")
+
+
+# -------------------------------------------------------------- Codex CLI
+
+
+class CodexCliBackend:
+    """Text-only structured generation through the authenticated Codex CLI."""
+
+    name = "codex_cli"
+
+    def __init__(self, model: str, effort: str = "medium", timeout_s: int = 1800,
+                 attempts: int = 1, log=None, provider: dict[str, Any] | None = None):
+        # Resolve once, and run the absolute path. On Windows the CLI is an npm
+        # shim (`codex.CMD`); CreateProcess searches PATH for `codex` but will
+        # not append `.CMD`, so passing the bare name raises
+        # "[WinError 2] The system cannot find the file specified" before any
+        # model call is made.
+        self.codex = shutil.which("codex") or shutil.which("codex.cmd")
+        if self.codex is None:
+            raise BackendError(
+                "analysis.backend is 'codex_cli' but the codex CLI is not on PATH."
+            )
+        if attempts < 1:
+            raise BackendError("analysis.cli_attempts must be at least 1")
+        self.model = model
+        self.effort = effort
+        self.timeout_s = timeout_s
+        self.attempts = attempts
+        self.log = log
+        # Token usage of the most recent turn; recorded even when the response
+        # is rejected so the rejection's cause can be measured (a response that
+        # stops at the model's output ceiling looks exactly like a truncated
+        # one, and the usage numbers are the difference).
+        self.last_usage: dict[str, Any] = {}
+        self.provider = dict(provider or {})
+        env_key = self.provider.get("env_key")
+        if env_key and not os.environ.get(str(env_key)):
+            # Fail at construction rather than three stages into a nightly run.
+            raise BackendError(
+                f"analysis.provider.env_key is {env_key!r} but that variable is "
+                "not set. Put it in config/.env (gitignored) or export it."
+            )
+
+    def _provider_flags(self) -> list[str]:
+        """Point the isolated CLI session at an explicitly configured provider.
+
+        Every production call runs with `--ignore-user-config` so no local hook,
+        skill or stray setting can reach it. That also hides the provider the
+        user's own `~/.codex/config.toml` selects, so when `analysis.provider`
+        is set it is passed in explicitly here.
+
+        The API key itself is never an argv entry: the provider is told which
+        environment variable carries it (`env_key`) and config.load_env()
+        supplies that variable from the gitignored config/.env.
+        """
+        if not self.provider:
+            return []
+        name = str(self.provider.get("name") or "").strip()
+        if not name:
+            raise BackendError("analysis.provider is set but has no name")
+        flags = [f'model_provider="{name}"', f'model_providers.{name}.name="{name}"']
+        for field in ("base_url", "wire_api", "env_key"):
+            value = self.provider.get(field)
+            if value:
+                flags.append(f'model_providers.{name}.{field}="{value}"')
+        return flags
+
+    def complete(self, system: str, user: str, schema: dict[str, Any], label: str) -> dict[str, Any]:
+        prompt = (
+            system + JSON_CONTRACT.format(schema=json.dumps(schema, indent=2))
+            + "\n\n---\n\n# USER INPUT\n\n" + user
+            + "\n\nDo not call tools. Return only the requested JSON object."
+        )
+        last_error = ""
+        base_prompt = prompt
+        for attempt in range(1, self.attempts + 1):
+            raw = ""
+            self.last_usage = {}
+            try:
+                raw = self._invoke(prompt, schema, label, attempt)
+                data = prune_unknown(extract_json(raw), schema)
+                errors = validate(data, schema)
+                if not errors:
+                    return data
+                last_error = "; ".join(errors[:8])
+            except RefusalError:
+                raise
+            except (BackendError, ValueError) as exc:
+                last_error = str(exc)
+
+            if self.log:
+                usage_note = ""
+                if self.last_usage:
+                    usage_note = (
+                        f" (in {self.last_usage.get('input_tokens')} / "
+                        f"out {self.last_usage.get('output_tokens')} tokens)"
+                    )
+                self.log.warning("  %s: Codex response rejected — %s%s",
+                                 label, last_error, usage_note)
+            # Keep the exact bytes the parser refused. A rejected response is
+            # the only evidence of whether the model malformed the JSON or the
+            # request was cut short, and the temporary file is gone by now.
+            if raw:
+                dump_rejected(label, attempt, raw, self.last_usage)
+            # 2026-09-16: the retry used to resend the identical prompt, so a
+            # model that malformed the JSON once (measured on deepseek-v4-pro:
+            # one docket scored as malformed and no second attempt was made)
+            # had no better chance on attempt 2. Carry the rejection back.
+            prompt = (
+                base_prompt
+                + "\n\nYour previous reply was rejected: " + last_error
+                + "\nReturn only the JSON object described above, with every required field present."
+            )
+
+        raise BackendError(
+            f"{label}: Codex response failed after {self.attempts} attempt(s). "
+            f"Last error: {last_error}"
+        )
+
+    def _invoke(self, prompt: str, schema: dict[str, Any], label: str, attempt: int) -> str:
+        with tempfile.TemporaryDirectory(prefix="boyd-codex-") as tmp:
+            work = Path(tmp)
+            schema_path = work / "output-schema.json"
+            output_path = work / "last-message.json"
+            schema_path.write_text(json.dumps(schema), encoding="utf-8")
+            command = [
+                self.codex, "exec",
+                "--ignore-user-config",
+                "--ignore-rules",
+                "--ephemeral",
+                "--skip-git-repo-check",
+                "--sandbox", "read-only",
+                "--disable", "shell_tool",
+                "--disable", "unified_exec",
+                "--disable", "multi_agent",
+                "--disable", "image_generation",
+                "--disable", "apps",
+                "--disable", "plugins",
+                "--disable", "computer_use",
+                "--disable", "view_image",
+                "--model", self.model,
+                "--config", f'model_reasoning_effort="{self.effort}"',
+                "--config", 'web_search="disabled"',
+                "--config", 'approval_policy="never"',
+                *[arg for flag in self._provider_flags() for arg in ("--config", flag)],
+                "--output-schema", str(schema_path),
+                "--output-last-message", str(output_path),
+                "--json",
+                "--color", "never",
+                "--cd", str(work),
+                "-",
+            ]
+            try:
+                proc = subprocess.run(
+                    command,
+                    input=prompt,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=self.timeout_s,
+                    cwd=work,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise BackendError(
+                    f"{label}: codex CLI timed out after {self.timeout_s}s"
+                ) from exc
+            except OSError as exc:
+                raise BackendError(f"{label}: could not start codex CLI: {exc}") from exc
+
+            events = self._events(proc.stdout)
+            failure = next((e for e in events if e.get("type") in ("error", "turn.failed")), None)
+            if failure:
+                detail = json.dumps(failure.get("error") or failure.get("message") or failure)
+                if "refus" in detail.lower() or "declin" in detail.lower():
+                    raise RefusalError(f"{label}: model declined the request")
+                raise BackendError(f"{label}: codex CLI reported an error: {detail[:400]}")
+            tool_event = next((e for e in events if self._is_tool_event(e)), None)
+            if tool_event:
+                raise BackendError(
+                    f"{label}: codex CLI emitted a forbidden tool event: "
+                    f"{json.dumps(tool_event)[:400]}"
+                )
+            if proc.returncode != 0:
+                raise BackendError(
+                    f"{label}: codex CLI exited {proc.returncode}: "
+                    f"{(proc.stderr or '').strip()[:400]}"
+                )
+            if not output_path.exists():
+                raise BackendError(f"{label}: codex CLI produced no final response file")
+
+            completed = next((e for e in reversed(events) if e.get("type") == "turn.completed"), {})
+            self.last_usage = dict(completed.get("usage") or {})
+            if self.log:
+                usage = self.last_usage
+                self.log.debug(
+                    "  %s attempt %d: %s in / %s out",
+                    label, attempt, usage.get("input_tokens"), usage.get("output_tokens"),
+                )
+            return output_path.read_text(encoding="utf-8")
+
+    @staticmethod
+    def _events(stdout: str) -> list[dict[str, Any]]:
+        events: list[dict[str, Any]] = []
+        for line in stdout.splitlines():
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(event, dict):
+                events.append(event)
+        return events
+
+    @staticmethod
+    def _is_tool_event(event: dict[str, Any]) -> bool:
+        event_type = str(event.get("type") or "")
+        if event_type.startswith("tool.") or event_type in ("tool_call", "tool_result"):
+            return True
+        if event_type not in ("item.started", "item.completed"):
+            return False
+        item = event.get("item") or {}
+        # Codex reports local configuration diagnostics (for example a hook
+        # timeout clamp) as item.type=error even when the model turn succeeds
+        # and writes the schema-validated final response. It is not a tool call.
+        # A real failed turn is still caught by turn.failed, nonzero exit, or a
+        # missing final-response file above.
+        return str(item.get("type") or "") not in ("reasoning", "agent_message", "error")
 
 
 # ------------------------------------------------------------- claude CLI
@@ -275,12 +539,7 @@ class ClaudeCliBackend:
     def _dump(label: str, attempt: int, raw: str) -> None:
         """Keep the rejected response. Diagnosing a malformed reply from a log
         line alone is guesswork, and these only appear on failures."""
-        try:
-            out = Path("logs") / "rejected"
-            out.mkdir(parents=True, exist_ok=True)
-            (out / f"{label}_attempt{attempt}.txt").write_text(raw, encoding="utf-8")
-        except OSError:
-            pass
+        dump_rejected(label, attempt, raw)
 
     @staticmethod
     def _correction(original: str, error: str) -> str:
@@ -428,9 +687,18 @@ class SdkBackend:
 
 
 def build_backend(cfg, log=None) -> Backend:
-    kind = cfg.get("analysis.backend", "claude_cli")
+    kind = cfg.get("analysis.backend", "codex_cli")
     model = cfg.require("analysis.model")
 
+    if kind == "codex_cli":
+        return CodexCliBackend(
+            model=model,
+            effort=cfg.get("analysis.effort", "medium"),
+            timeout_s=cfg.get("analysis.cli_timeout_s", 1800),
+            attempts=cfg.get("analysis.cli_attempts", 1),
+            log=log,
+            provider=cfg.get("analysis.provider"),
+        )
     if kind == "claude_cli":
         return ClaudeCliBackend(
             model=model, timeout_s=cfg.get("analysis.cli_timeout_s", 1800), log=log
@@ -442,4 +710,6 @@ def build_backend(cfg, log=None) -> Backend:
             max_tokens=cfg.get("analysis.max_tokens", 32000),
             log=log,
         )
-    raise BackendError(f"unknown analysis.backend: {kind!r} (expected claude_cli or sdk)")
+    raise BackendError(
+        f"unknown analysis.backend: {kind!r} (expected codex_cli, claude_cli or sdk)"
+    )

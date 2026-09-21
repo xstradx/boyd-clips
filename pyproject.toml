@@ -21,6 +21,13 @@ whisper = ["faster-whisper>=1.0.0"]
 
 [project.scripts]
 boyd = "boydclips.cli:main"
+texas-case-scout = "texas_case_scout.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+texas_case_scout = ["defaults/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

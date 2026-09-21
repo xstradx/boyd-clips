@@ -31,6 +31,22 @@ log = logging.getLogger("backfill")
 MIN_WORDS = 3000     # thin dockets yielded nothing; not worth the LLM time
 
 
+
+def _cache_current(path):
+    """BOYD_EDITORIAL_V2: only a cache scored under the CURRENT prompt version
+    counts as done; a bare-list (retired rubric) or other-version cache is
+    re-scored by analyze_docket on contact."""
+    import json as _json
+    from boydclips import analyze as _an
+    if not path.exists():
+        return False
+    try:
+        cases, _why = _an.score_cache_load(_json.loads(path.read_text(encoding="utf-8")),
+                                           _an.current_rubric_version())
+    except Exception:
+        return False
+    return cases is not None
+
 def main() -> int:
     limit = 40
     if "--limit" in sys.argv:
@@ -52,7 +68,7 @@ def main() -> int:
     todo = [r for r in rows
             if r["words"] >= MIN_WORDS
             and r["video_id"] not in done
-            and not (Path("work") / r["video_id"] / "scored.json").exists()]
+            and not _cache_current(Path("work") / r["video_id"] / "scored.json")]
     todo.sort(key=lambda r: r["date"], reverse=True)
     todo = todo[:limit]
 

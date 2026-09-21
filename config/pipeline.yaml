@@ -40,6 +40,9 @@ output:
   # back at it. The long-form MUST publish first so its URL can be baked
   # into the short's description. This ordering is enforced in publish.py.
   clips_per_day: 1
+  # Global run budget. A failed case cannot silently start another full image
+  # batch after this many generated images have already been reported.
+  max_thumbnail_images_per_run: 9
   bank_extras: true          # qualifying runners-up go to out/bank/ for slow days
 
   longform:
@@ -48,9 +51,10 @@ output:
     # BOTH bounds are enforced in pipeline.produce(), before the encode.
     # They were documented here and enforced nowhere until 2026-08-17: a 33.9
     # minute long-form went through a 1200s cap. Under the floor the case is
-    # skipped; over the cap it is trimmed on a piece boundary, cutting
-    # mid-piece rather than dropping the last piece — dropping the last piece
-    # is what loses the ruling. (A dead `min_duration_s: 120` sat here until
+    # skipped; over the cap the STORY-PRESERVING planner (cap_fit below,
+    # src/boydclips/capfit.py, 2026-09-06) protects setup, money moment and
+    # ending and drops the material farthest from them — it no longer walks
+    # from the front and cuts the tail. (A dead `min_duration_s: 120` sat here until
     # 2026-09-01; PyYAML kept the later 360 silently. tools/hearing_measure.py
     # now refuses duplicate keys.)
     # 3480s = 58 min.
@@ -99,6 +103,19 @@ output:
     # Trials TV, which outperforms it two to one, runs a 16-minute median.
     min_duration_s: 360
     max_duration_s: 1200
+
+    # Story-preserving cap (2026-09-06, src/boydclips/capfit.py). When the
+    # dead-air-trimmed case is longer than max_duration_s, these regions are
+    # PROTECTED and survive whole; the rest of the budget goes to the material
+    # nearest the story (the money moment from editorial.money_moment_s, the
+    # short beats, the setup, the ending). If the protected regions alone
+    # exceed the cap the case is refused with the reason, never truncated.
+    cap_fit:
+      setup_s: 90              # first 90 s of the case: the call, who, why
+      payoff_lead_s: 30        # before the money moment
+      payoff_aftermath_s: 60   # after it: the reaction and what follows
+      ending_s: 45             # the last 45 s: the ruling / consequence
+      min_piece_s: 2.0         # never keep a sliver shorter than this
     pad_before_s: 4.0        # start slightly before the first word
     pad_after_s: 3.0
 
@@ -114,6 +131,21 @@ output:
     # Nathan's 2026-08-17 instruction governs; the spec should be amended.
     intro_enabled: true
     intro_path:              # blank = search the known brand folders
+
+    # R49 (Nathan, 2026-09-02): "add a 5 second or so clip of the hook or drama
+    # later in the vid in the beginning of long form and put 'Coming up...'".
+    # The daily route derives the span from the case's money moment
+    # (render.coldopen_span) and renders it before the sting. Skipped with a
+    # logged reason when the moment is inside the first 30 s or no 3-9 s
+    # sentence fits. tools/check_coldopen.py measures the rendered file.
+    coldopen_enabled: true
+
+    # After the cold open and sting, enter on Boyd calling the case instead of
+    # replaying the waiting room. If the exact line is absent near the start,
+    # preserve the planned body rather than guessing at a different sentence.
+    start_at_court_call: true
+    court_call_max_wait_s: 90
+    court_call_lead_s: 0.08
 
     # CONTENT_SPEC §2: "Dead air longer than 4 seconds is removed. Shorter gaps
     # stay — courtroom pauses carry weight and cutting them makes proceedings
@@ -142,18 +174,194 @@ output:
     silence_min_piece_s: 0.5 # stutter guard, looser than a short's deliberately
     resolution: [1920, 1080]
     fps: 30
-    crf: 20
+    # Preserve the already-soft 720p Zoom source through the 1080p delivery
+    # encode. Lanczos plus a restrained CAS pass recovers edge definition
+    # without plastic skin or halos; CRF 16 avoids adding visible softness.
+    crf: 16
+    preset: slow
+    # Shared upload encode policy. Long-form keeps the existing high-quality
+    # CRF 16 / slow path; render.encode_args also accepts average_bitrate for
+    # any future video format that needs a measured bitrate floor.
+    encode:
+      mode: crf
+      preset: slow
+      crf: 16
+    watermark: "D:/Boyd Clips/boyd-brand/watermarks_v2/wm_brand_halo_40.png"
+    watermark_opacity: 0.45
+    scale_flags: lanczos+accurate_rnd+full_chroma_int
+    clarity_filter: cas=strength=0.12
     audio_bitrate: "192k"
 
   short:
     # The hook clip, cut from *inside* the long-form range.
     min_duration_s: 25
     max_duration_s: 59       # stay under 60s for Shorts/Reels/TikTok
-    target_duration_s: 45
+    target_duration_s: 50
+
+    # SHORTS_EDITOR_V2 (2026-09-06). `editor: v2` plans the short as a
+    # mini-story — setup -> tension -> turn -> payoff — from the case's own
+    # transcript (src/boydclips/shorts_editor.py), scores it out of 100
+    # (hook 25 / clarity 20 / payoff 25 / escalation 15 / quote 10 / visual 5),
+    # refuses with a reason, and records the whole edit plan in the manifest.
+    # `legacy` restores the model-beat path (plan_short_segments) unchanged.
+    editor: v2
+    # THE FIXED COURTROOM LAYOUT (Nathan, 2026-09-06, third pass). A stable
+    # 50/50 split - defendant top, Boyd bottom per the case's tile map -
+    # with the divider at y=960 for the whole Short; each person centred in
+    # their 1080x960 slot from a MEASURED subject anchor (YuNet face, median
+    # over frames inside the kept ranges; geometric fallback recorded as
+    # such); a punch-in is a zoom inside the speaker's tile around that
+    # anchor. The 60/40 "weighted" focus layout is gone. src/boydclips/layout.py.
+    punch_zoom: 1.08          # motivated punch-in on the payoff (+ a hook question); 1.06-1.12
+    center_max_zoom: 1.15     # conservative: a slightly off-centre sharp face beats a centred 4x upscale
+                              #   (Nathan, 2026-09-06); the residual is reported in the plan
+    center_tolerance_px: 40   # residual accepted once the zoom cap is reached (recorded)
+    target_y_frac: 0.42       # face centre sits above the slot's middle: natural headroom
+    judge_tile: auto          # auto: recognise Boyd (tools/identity.py) on a frame
+                              #   from the case; left/right: force which SOURCE
+                              #   tile is hers (left is stacked on top)
+    judge_tile_default: right # when recognition is unavailable; recorded as unverified
+    master_audio: true        # tools/master_audio.py after the render: -14 LUFS,
+                              #   -1.5 dBTP, video copied; short_raw.mp4 kept beside
+
+    # THE "FULL VIDEO OUT NOW" CALL TO ACTION (Nathan, 2026-09-07, third
+    # brief - rebuilt from scratch). A compact lower-third, about 15-20 % of
+    # the frame width, low in the frame: two lines of small semi-condensed
+    # bold caps (Archivo 800 / width 75, off-white, one soft shadow) and a
+    # short clean stroke that leaves the side of the block, curves and
+    # points down at the related-video row; the small head eases in with a
+    # tiny overshoot, then ONE 2.5 px nudge toward the button. No end card,
+    # no freeze, no loop, no glow. src/boydclips/cta.py; composited after
+    # the watermark in the SAME ffmpeg pass (one encode); its box is part of
+    # the overlay layout's collision check.
+    #
+    # Placement: lower-left or lower-right of the BOTTOM slot, whichever the
+    # measured face (YuNet anchor grown by face_margin_frac - a hard veto),
+    # the body under it, the caption rail, the watermark, YouTube's own UI
+    # and the sampled picture leave clearest. Stable for the whole CTA. The
+    # decision and its scores are recorded in the build (cta.scores).
+    #
+    # Timing (output seconds): start_s auto = end-anchored so the CTA is on
+    # screen through the last frame with no fade (the video does not
+    # continue). A numeric start_s earlier than that fades out after the hold.
+    # Text ~280 ms (fade + 10 px rise + 98 -> 100 % scale, ease-out) ->
+    # stroke draws ~500 ms from 180 ms in -> head settles ~220 ms with a
+    # small overshoot -> ONE nudge -> hold ~3.7 s (about five seconds total).
+    #
+    # Sound: a soft UI tone as the text lands, a light swish under the draw,
+    # a tiny tick as the head settles - synthesised per render and
+    # level-matched by measurement to the kept dialogue (relative_db; the
+    # master's fixed gain keeps that relation).
+    cta:
+      enabled: true
+      text: "FULL VIDEO OUT NOW"
+      lines: 2                 # balanced wrap: FULL VIDEO / OUT NOW
+      start_s: auto            # auto | seconds (output time)
+      tail_s: 0.0              # auto: seconds between the CTA's end and the last frame (>0.05 fades)
+      enter_s: 0.28
+      rise_px: 10
+      scale_from: 0.98
+      arrow_delay_s: 0.18
+      draw_s: 0.50
+      head_settle_s: 0.22
+      head_overshoot_px: 3.0
+      nudge_delay_s: 0.12
+      nudge_s: 0.26
+      nudge_px: 2.5
+      hold_s: 3.7
+      fade_s: 0.35
+      side: auto               # auto | left | right
+      edge_margin_px: 56
+      text_top_frac: 0.75      # readable block above YouTube's lower-left related-video row
+      face_margin_frac: 0.30
+      scale: 1.0
+      opacity: 0.95
+      font: assets/fonts/Archivo-Var.ttf
+      font_weight: 800
+      font_width: 75           # semi-condensed
+      font_size: 52
+      tracking_em: 0.08
+      line_gap_frac: 0.30
+      color: "#F2EFE9"         # off-white
+      shadow: {opacity: 0.45, blur_px: 5, dy_px: 2}
+      backing: {opacity: 0.58, pad_x_px: 9, pad_y_px: 7, radius_px: 10}
+      arrow:                   # a short stroke beside the block that curves down to the button row
+        stroke_px: 6
+        head_len_px: 20
+        head_angle_deg: 30
+        gap_px: 18             # between the block and the stroke's start
+        reach_px: 28           # fallback sideways travel
+        drop_px: 110           # fallback drop to the tip
+        target: [0.36, 0.855]  # centre of YouTube's lower-left related-video pill
+      ui_reserved:
+        right_col_x: 0.815     # YouTube's like / comment / share column
+        right_col_y: [0.52, 0.93]
+        bottom_band_y: 0.885   # chip, channel row, title
+      sound:
+        enabled: true
+        relative_db: -20.0     # SFX loudness vs the measured dialogue
+        ui: true               # soft tone as the text lands
+        swish: true            # light swish under the draw
+        tick: true             # tiny tick as the head settles
+    planner:
+      min_duration_s: 15      # a complete story may be this short; nothing is padded
+      target_min_s: 45        # Nathan: aim around 50 seconds, preserving key story beats.
+      target_max_s: 55        # End on a truthful cliffhanger when it serves the full video.
+      min_score: 55           # under this a candidate is refused as weak, with the reason
+      allow_teaser: true      # cold open: the payoff line first, then in place —
+      teaser_max_s: 3.0       #   declared in the plan with its source range
+      # 2026-09-19: the TOTAL is no longer the only acceptance test. The opening
+      # beat is floored on its own dimension (hook/25), because the rejected
+      # dAKO7myCd-g:8929 cut shipped hook 7/25 on the back of payoff 20/25 and
+      # still passed every gate. A declared teaser satisfies the floor. 0 disables.
+      hook_min_score: 14
+      dead_gap_s: 1.2         # a pause longer than this inside the body is removed...
+      keep_gap_s: 0.35        #   ...down to this much on each side of the cut
+      max_window_s: 95        # how far back from the payoff the body may start (raw)
+      max_punch_ins: null     # editorially driven; meaningful beats and spacing govern use
+      punch_in_min_spacing_s: 3.0  # avoid adjacent push-ins and visual jitter
+      max_accents: 2          # flagged in the plan only — no accent assets exist yet
+      # THE CONTINUITY RULE (Nathan, 2026-09-06): the body is one contiguous
+      # stretch of the source; only dead air, acknowledgments, repeated
+      # wording and clearly procedural filler may be removed inside it, every
+      # interior join is audited (plan.interior_cuts) and a kept question is
+      # always followed on screen by its actual answer (plan.question_answer).
     resolution: [1080, 1920]
     fps: 30
-    crf: 20
+    # Encode (visual polish 2026-09-06): libx264 preset slow / crf 17, yuv420p
+    # (was medium / crf 20 -> ~3.5 Mbps; the source is soft, so the encode
+    # must not add its own softness). FPS unchanged.
+    crf: 17
+    preset: slow
+    # A fixed high upload target avoids the prior 5.67 Mbps Short.  12 Mbps
+    # leaves headroom above the 9 Mbps release floor without adding sharpening
+    # or any stronger picture processing.
+    encode:
+      mode: average_bitrate
+      preset: slow
+      video_bitrate: "12M"
+      minrate: "12M"
+      maxrate: "12M"
+      bufsize: "24M"
+      x264_params: "nal-hrd=cbr:force-cfr=1"
     audio_bitrate: "160k"
+    watermark: "D:/Boyd Clips/boyd-brand/watermarks_v2/wm_brand_halo_40.png"
+    watermark_opacity: 0.45
+
+    # Clarity (visual polish 2026-09-06): the tiles are 3x upscales of soft
+    # Zoom footage. Better scaler first (lanczos with accurate rounding and
+    # full chroma), then a restrained contrast-adaptive sharpen (cas) AFTER
+    # the scale, per camera - the defendant tile carries the larger upscale.
+    # Measured on Flores (tools: clarity_experiment/): cas 0.3-0.5 doubles
+    # the Laplacian variance of the eye region with no visible halo; unsharp
+    # 0.5 matches it but edges harder. Captions burn in after the stack, so
+    # they never pass through this. null/"" disables a role.
+    clarity:
+      enabled: true
+      scale_flags: lanczos+accurate_rnd+full_chroma_int
+      defendant: cas=strength=0.40
+      boyd: cas=strength=0.30
+      default: cas=strength=0.30
 
     # Zoom court is 16:9 with multiple participants, and the court's encoder
     # bakes black bars into its own frame. Cropping to 9:16 cuts people out;
@@ -231,9 +439,70 @@ output:
       # embeddings). Note "defendant" here means "not Boyd" — an attorney
       # speaking lands in the same slot, which is correct for placement even
       # though it is not literally the defendant.
-      slot_margins:
+      slot_margins:             # LEGACY path only; V2 captions live on the rail below
         defendant: 1020
         boyd: 700
+
+      # SHORTS_EDITOR_V2 KINETIC captions (Nathan, 2026-09-06, fifth pass):
+      # premium short-form captions, not subtitles. One line only, anchored
+      # on the divider (540, 960); a phrase never holds two speakers (the
+      # verified speaker label is an input constraint to the planner, so a
+      # cross-speaker card cannot exist); the phrase BUILDS word by word as
+      # it is spoken — the newest word warm yellow with a short pop-in
+      # (88 -> 105 -> 100 % over ~110 ms), earlier words white and never
+      # moving (the phrase is left-anchored, pre-centred on its measured
+      # width); a completed phrase holds briefly and clears; a speaker change
+      # starts from empty. Widths are measured with assets/fonts/Anton;
+      # a phrase wider than safe_width is split, never shrunk or wrapped.
+      # src/boydclips/captions.py, render.build_rail_ass. No end card.
+      rail:
+        preset: clean_phrase           # three named presets live in captions.py
+        mode: static                   # phrase-block timing; no single-word karaoke
+        rail_x: 540
+        rail_y: 960
+        font: "Anton"
+        font_size: 82                  # restrained, phone-readable phrase block
+                                       #   phrase like "YOU DON'T DO ANYTHING" is 840 px, 5 short words still fit
+        safe_width: 980                # 1080 - 2 x 50 px side margins (was 960); wider phrases split, never shrink
+        max_lines: 1
+        outline: 6
+        shadow: 2
+        primary_color: "&H00FFFFFF"
+        active_color: "&H003FD2FF"     # ASS BGR: warm yellow #FFD23F
+        speaker_colors:
+          boyd: "&H00FFFFFF"
+          defendant: "&H003FD2FF"      # saturated warm gold; used only to identify speaker
+        # The new chunk's entrance (visual polish 2026-09-06): an eased overshoot,
+        # 92 % -> 106 % at 55 ms (ease-out) -> 100 % at 110 ms (ease-in), with a
+        # 0 -> 100 % opacity rise over the first 60 ms. Only the new chunk moves.
+        pop_ms: 110
+        pop_from: 92
+        pop_peak: 106
+        pop_rise_ms: 55
+        pop_fade_ms: 60
+        ease_rise: 0.6
+        ease_settle: 1.3
+        ease_fade: 0.7
+        hold_s: 1.0
+        gap_ms: 60
+        target_words: 5.0
+        min_words: 3
+        max_words: 7
+        hard_max_words: 9
+        # Chunk build (sixth pass): a phrase is revealed in 1-3 natural
+        # micro-phrases, the new chunk yellow with the pop, about 1-2 visual
+        # changes per second on average; QC ceiling density_max.
+        max_chunks: 1
+        min_chunk_words: 2
+        density_target: 1.5
+        density_max: 2.5
+        # Display-only disfluency cleanup (audio untouched, audited per word
+        # in the plan): fillers, immediate repeats, pronoun restarts, a
+        # trailing abandoned stumble. Negation, numbers, names, answers and
+        # intentional emphasis are never omitted.
+        clean_disfluencies: true
+        planner: deterministic         # a registered provider name swaps the phrase planner;
+                                       #   unavailable/invalid -> deterministic
 
     # Colour grade, applied to the PICTURE only — before the captions burn in,
     # so caption white is never lifted or clipped.
@@ -245,9 +514,37 @@ output:
     # survive.
     color:
       enabled: true
+      # 2026-09-06: the daily renderer graded with the curve below while the
+      # shorts Nathan shipped came off the manual chain with the SHORT FLOOR
+      # grade (config/short_floor.json grade.eq, solved against
+      # SANCHEZ_SHORT_FINAL by tools/solve_grade.py). He read the first
+      # SHORTS_EDITOR_V2 render as "colour correction disappeared": the daily
+      # curve was there, the floor grade never was — in either daily path.
+      #   short_floor  read grade.eq from the floor (the one source for the
+      #                manual chain, the legacy daily path and V2); a missing
+      #                key fails, it does not default
+      #   short_floor_no_brightness
+      #                the floor's contrast and saturation without its global
+      #                brightness=-0.10 — Nathan, 2026-09-06 ("b"): the per-
+      #                camera curves below handle the highlights; the global
+      #                term only darkened the faces (measured 134 -> 105)
+      #   curve        the old daily block below, for reproducing old renders
+      #   none         no grade
+      source: short_floor_no_brightness
       curve: "0/0.02 0.25/0.31 0.5/0.57 0.75/0.80 1/0.97"
       saturation: 1.10
       contrast: 1.05
+      # PER-CAMERA correction (Nathan, 2026-09-06), applied to each tile
+      # BEFORE the 50/50 assembly (render.camera_grade_filter ->
+      # duo_punch_filter); the floor grade above runs on the assembled frame
+      # after. The defendant camera's fluorescent ceiling blows out: a luma
+      # curve holds shadows and midtones and rolls off the top ~15-20 % of
+      # the range with no hard clip. Boyd's camera is graded on its own
+      # numbers (tools/grade_probe.py measured both).
+      defendant:
+        curve: "0/0 0.25/0.25 0.5/0.49 0.65/0.62 0.75/0.69 0.85/0.75 1/0.82"
+      boyd:
+        curve: null
 
 transcription:
   # YouTube auto-captions are free and available on this channel. Whisper is
@@ -262,17 +559,60 @@ analysis:
   # format contract. Model IDs live here so you can swap tiers without edits.
   #
   # backend:
+  #   codex_cli   Runs authenticated `codex exec` with an explicit model,
+  #               read-only sandbox, tools disabled, and an output schema.
   #   claude_cli  Runs `claude -p` headless against your existing Claude Code
   #               login. No API key, no separate bill. Schema conformance is
   #               enforced client-side with a retry loop (see llm.py).
   #   sdk         Anthropic SDK. Needs ANTHROPIC_API_KEY or an `ant auth`
   #               profile. Gains API-enforced structured outputs and `effort`.
-  backend: claude_cli
+  backend: codex_cli
 
-  model: "claude-opus-5"
-  cli_timeout_s: 1800       # claude_cli only; a 3-hour docket is a long call
+  # WHICH BRAIN ANSWERS (updated 2026-09-19, Nathan: Astra orchestrates and
+  # DeepSeek 4.1 does the production work as cheaply as practical).
+  #
+  # gpt-5.6-sol is UNREACHABLE from this PC. Two independent checks:
+  #   - `codex login` -> "ChatGPT login is disabled. Use API key login instead."
+  #     so the ChatGPT-plan route that used to carry Sol is closed by the build;
+  #   - this machine's Codex CLI is configured for the deepseek provider, and
+  #     that endpoint answers gpt-5.6-sol with
+  #     "The supported API model names are deepseek-flash, deepseek-v4-pro".
+  # Claude Code is not an option either: `claude -p` returns
+  #   "Your organization has disabled Claude subscription access for Claude
+  #    Code" (403).
+  #
+  # Official DeepSeek docs expose V4.1 Flash through the stable API name
+  # `deepseek-flash`. The pipeline reaches it through the SAME isolated
+  # `codex exec` call with the same read-only sandbox, disabled tools and
+  # output-schema enforcement; only the provider and model name change. The
+  # provider block below is opt-in: delete it and the backend behaves exactly as
+  # it did before this date. Restore Sol by putting an OpenAI credential back on
+  # this machine and setting model back to "gpt-5.6-sol".
+  model: "deepseek-flash"
 
-  effort: "high"            # sdk only — the CLI has no effort parameter
+  # Non-default API provider for the isolated Codex CLI session. The key is
+  # read from the environment variable named here; config/.env (gitignored)
+  # supplies it. It is never written into the command line.
+  provider:
+    name: deepseek
+    base_url: "https://api.deepseek.com/"
+    wire_api: responses
+    env_key: DEEPSEEK_API_KEY
+
+  cli_timeout_s: 1800       # CLI backends; a 3-hour docket is a long call
+  # 2026-09-16 (the DeepSeek switch): one docket came back as malformed JSON and
+  # this value — one attempt per call — left it unscored. The retry path in
+  # src/boydclips/llm.py now carries the rejection back into the prompt, so a
+  # second attempt would be a real repair instead of a repeat, but the count
+  # stays at 1: the contract's "one attempt per call" is Nathan's cost policy,
+  # not a model detail, so raising it is his call. The prompt hint is dormant
+  # until he raises it.
+  cli_attempts: 1
+  max_model_calls_per_run: 20  # total model-call ceiling incl. analysis, Producer, and thumbnail sessions
+  producer_brain:
+    enabled: true           # one validated pre-edit plan; owns the A/B/C packaging pairs
+
+  effort: "high"            # DeepSeek Flash supports low/high/max; high is its documented default
   max_tokens: 32000         # sdk only
 
   # Cases scored per call. Each scored case emits five justifications, safety
@@ -300,14 +640,28 @@ analysis:
   # band for liberty decided on camera. 50 is set from that distribution.
   # Re-measure before moving it again — `boyd bank` shows the current spread.
   gates:
-    min_total_score: 50
+    # BOYD_EDITORIAL_V2 (2026-09-06). Order in analyze._check_gates: safety,
+    # then the editorial eligibility gate, then the score tier, then audio,
+    # then shortability. Tiers (src/boydclips/editorial.py):
+    #   85-100 A       exceptional
+    #   78-84  MAKE    good enough to make; must pass every hard gate
+    #   70-77  HOLD    manual review, ineligible_reason says what is missing
+    #   <70    SKIP    do not make a video because inventory is low
+    # The CALIBRATION NOTE above belongs to the retired 0-100-weighted rubric
+    # (best real case 57.0 under it). The new scale sums seven dimensions on
+    # their own maxima; see tools/editorial_eval.py for the re-measured set.
+    min_total_score: 78        # MAKE threshold
+    hold_threshold: 70         # HOLD band starts here; below it is SKIP
     safety_must_pass: true
+    # The model's editorial eligibility verdict (routine / no_story / no_payoff
+    # / context_dependency / fake_packaging / charge_severity / empty_conflict).
+    # A failed gate is a SKIP whatever the number says.
+    requires_editorial_gate: true
     min_audio_quality: 3       # 1-5, judged from transcript coherence
-    # Retired. The product is now one defendant across ALL their appearances,
-    # so a chapter that only makes sense beside the others is the format, not a
-    # defect. Replaced by requires_pushback: a compliant defendant is what
-    # actually kills a clip (present in 8/8 winners, 1/6 losers).
-    requires_pushback: true
+    # DEPRECATED, inert: requires_self_contained (retired 2026-08) and
+    # requires_pushback (retired 2026-09-06 — it rewarded volume and conflict
+    # over story; story_engine + clarity replace it). Neither is read.
+    requires_pushback: false
 
     # A long-form with no short gets no discovery traffic — the short is the
     # entire distribution mechanism. Cases that score well but cannot be cut
@@ -414,38 +768,52 @@ analysis:
     # it is the one that carries the score.
     require_all_safety_pass: true
 
-    # Rank multiplier applied to a qualifying repeat episode's total score
-    # when choosing the day's pick. 1.36 is the measured lift, used verbatim
-    # rather than rounded so its provenance stays obvious. Set to 1.0 to
-    # rank repeats level with one-offs.
-    rank_multiplier: 1.36
+    # DEPRECATED, inert (verified 2026-09-06: no code reads it). Kept so old
+    # configs still load. BOYD_EDITORIAL_V2 PART 5 replaces the multiplier
+    # with a TIE-BREAK: a repeat defendant may win only when the two totals
+    # are within tie_break_window points (editorial.prefer_repeat). A 79
+    # repeat never beats an 88 one-off.
+    rank_multiplier: 1.0
+    tie_break_window: 3
 
     # Hearings are always concatenated in chronological order across dockets.
     # Never reorder — the whole point of the format is watching someone come
     # back worse, and a reordered episode manufactures a story arc.
     chronological: true
 
-  # Weighted rubric. Must sum to 100. Mirrored in prompts/score_cases.md —
-  # if you change a weight here, change it there too or scoring drifts.
-  # Weights follow the winner-vs-loser counts in spec/SPEC.md §2, measured on
-  # @courtroomtime's top 8 videos against their bottom 6. Numbers in the
-  # comments are "videos containing this beat", winners of 8 / losers of 6.
+  # BOYD_EDITORIAL_V2 rubric (2026-09-06). Each dimension is scored on its
+  # own scale (0..max) and the total is the plain sum; the numbers below are
+  # the MAXIMA and must sum to 100. The single definition is
+  # src/boydclips/editorial.py DIMENSIONS; prompts/score_cases.md quotes the
+  # same maxima and tests/test_pipeline.py fails if any of the three drift.
   #
-  # These are a STARTING POSITION. No clip this pipeline made has a recorded
-  # view count yet, so re-fit them once the ledger has real outcomes.
+  # Replaced the winner/loser-count weights (pushback 30 / boyd_register 25 /
+  # receipt 20 / consequence 15 / hook_strength 10): they equated loud
+  # defendant, angry judge and serious charge with a good video. Nathan,
+  # 2026-09-06: the case needs a STORY ENGINE.
   rubric_weights:
-    pushback: 30               # 8/1 — someone contradicts Boyd. The single
-                               # strongest separator found. Their worst video
-                               # has tears, a remand and a life sentence and
-                               # died, because the defendant agreed with
-                               # everything. Compliance kills a clip.
-    boyd_register: 25          # 8/1 — sarcasm, mockery, the flat hammer.
-                               # "guess what" 21x in winners, 1x in losers.
-                               # NOT volume: she raises her voice in 1 of 8.
-    receipt: 20                # 6/0 — she quotes a document back at them.
-                               # Zero losers have it.
-    consequence: 15            # 6/2 — cuffs, custody, ejection, on camera.
-    hook_strength: 10          # is there a line that works at second 0
+    story_engine: 20           # setup -> escalation/reveal -> payoff, one-sentence explainable
+    payoff: 20                 # the footage delivers the receipt ON CAMERA
+    boyd_factor: 15            # her editorial contribution, not her presence or volume
+    stakes: 15                 # visible consequence tied to the story
+    clarity: 10                # who wants what, what went wrong, what happens next
+    packaging: 15              # several truthful, materially different title angles
+    thumbnail: 5               # a reaction / compact verified line; never rescues a dull case
+
+competitor:
+  # Daily lead feeds verified 2026-09-12. Leads never become source media:
+  # exact transcript overlap must resolve them to the original court stream.
+  enabled: true
+  per_channel: 4
+  max_leads_per_run: 6
+  min_transcript_overlap: 0.08
+  channels:
+    - name: AmericanJusticeFiles
+      url: "https://www.youtube.com/channel/UCPTKs2IWDUdDl_pgbb6YBYQ/videos"
+    - name: Court Of Justice
+      url: "https://www.youtube.com/channel/UCDXzqbmQZ5daphFQHNyQzKA/videos"
+    - name: Boyd's Bench
+      url: "https://www.youtube.com/channel/UCAwJ5TfKqjDMYxEQxPR0whw/videos"
 
 packaging:
   # ---- Thumbnail --------------------------------------------------------
@@ -459,6 +827,41 @@ packaging:
   # src/boydclips/thumbnail.py builds this from the video itself, so the daily
   # run reproduces the approved construction rather than a frame grab.
   thumbnail:
+    # thumbnail.mode (Nathan, 2026-09-06):
+    #   direct_gen  the finished thumbnails are GENERATED by the image model
+    #               from the real assets + the story through Codex orchestration
+    #               (tools/thumb_direct.py): three concept families per
+    #               case (A defendant-only control, B defendant + Judge Boyd
+    #               reaction, C strongest story-prop), bounded self-review,
+    #               deterministic QC, 3 x 1280x720 JPEG + manifest + sheet.
+    #               An incomplete session is refused by readiness checks.
+    #   legacy      the compositor construction below.
+    #
+    # 2026-09-16: direct_gen is OFF because it needs the Codex built-in
+    # `image_gen` tool, and the reachable brain (deepseek-flash) has no image
+    # generation. Running it would spend a full edit and then fail at the
+    # packaging stage. `legacy` is the local compositor in
+    # src/boydclips/thumbnail.py — the construction Nathan approved on
+    # Thompson, 2026-08-17 — built from the video itself, no image model. The
+    # direct block below is kept intact so flipping back is one line once an
+    # image route exists again.
+    mode: legacy
+    direct:
+      # 2026-09-16 (Nathan: "make DeepSeek the production brain"): the direction
+      # model is the reachable brain. It writes the Short-thumbnail recipe and
+      # the A/B/C meaning review. Image generation itself stays unavailable
+      # until an image route is restored, which is why `mode` above is legacy.
+      model: deepseek-flash
+      effort: high
+      budget: 9                  # also the global per-run image ceiling
+      retries: 2                 # per concept
+      identity_min: 0.55         # SFace cosine vs the source crop (measured 0.73-0.91 on real outputs)
+      min_variant_diff: 12.0     # feed-size difference between the three (he could not see 10.5, saw 12.5)
+      text_min_height_frac: 0.09
+      max_text_words: 12        # complete meaningful copy, including attribution; never cut a thought to fit seven
+      ocr_min_recall: 0.6
+      hero_face_min_frac: 0.28
+
     # Which half of the 2-up holds the judge. ASSUMPTION, not a measurement:
     # taken from JgvW7oCQxuI, where the right tile is the taller one (640x500
     # vs 640x360) and holds Boyd. If the court's Zoom layout ever flips, this
@@ -539,7 +942,7 @@ packaging:
       Charges are accusations only.
 
       {hashtags}
-    hashtags: "#judgeboyd #courtroom #court #bexarcounty #fyp"
+    hashtags: "#judgeboyd #courtroom #court #bexarcounty"
     end_card:
       enabled: true
       text: "FULL CASE IN DESCRIPTION"

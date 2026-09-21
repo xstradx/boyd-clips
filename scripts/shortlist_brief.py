@@ -1,4 +1,15 @@
-"""What the shortlisted episodes are actually about, hearing by hearing."""
+"""
+LEGACY — 2026-08-18 repeat-shortlist workflow. NOT on the daily path and not
+the current scoring definition. The live editorial layer is BOYD_EDITORIAL_V2
+(src/boydclips/editorial.py, prompts/score_cases.md); use tools/editorial_eval.py
+to re-score stored cases and `tools/banger_digest.py --editorial` on the manual
+path. Rows in the `rescores` table are keyed by rubric_version, so anything this
+workflow stored under the retired rubric is ignored under the current version.
+
+What the shortlisted episodes are actually about, hearing by hearing."""
+import sys as _sys
+_sys.stderr.write('[LEGACY] ' + __doc__.strip().splitlines()[0] + ' -- see the module docstring\n')
+
 import json, sys, textwrap
 from pathlib import Path
 
@@ -10,7 +21,7 @@ except Exception:
     pass
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from boydclips import repeats
+from boydclips import editorial, repeats
 from boydclips.config import load_config, prompt_text
 from boydclips.state import Store
 
@@ -34,6 +45,9 @@ W = 96
 for e in repeats.qualifying(store.conn, dict(cfg.get("analysis.repeat_defendant", {}) or {})):
     if not any(w in (e.defendant or "").lower() for w in WANT):
         continue
+    if not any(h["case_key"] in new for h in e.hearings):
+        print(f"  (no hearings of {e.defendant} re-scored under {version}; run scripts/rescore_repeats.py)")
+        continue
     best = max((new[h["case_key"]][0], h) for h in e.hearings if h["case_key"] in new)
     print("=" * W)
     print(f"{e.defendant}  —  {len(e.hearings)} hearings across {e.dockets} dockets, "
@@ -56,9 +70,9 @@ for e in repeats.qualifying(store.conn, dict(cfg.get("analysis.repeat_defendant"
         if hq:
             print(textwrap.fill(f'HOOK: "{hq.strip()}"', W - 3,
                                 initial_indent="   ", subsequent_indent="         "))
-        for dim in ("pushback", "boyd_register", "receipt", "consequence"):
+        for dim in [d for d in editorial.DIMENSIONS if d in (pay.get("scores") or {})]:
             d = (pay.get("scores") or {}).get(dim)
-            if d and d.get("score", 0) >= 40:
+            if d and d.get("score", 0) >= 0.6 * editorial.DIMENSIONS[dim]:   # v2: points on each dim's own max
                 print(textwrap.fill(f"{dim} {d['score']}: {d.get('justification','')}",
                                     W - 3, initial_indent="   * ",
                                     subsequent_indent="     "))

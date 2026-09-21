@@ -1,4 +1,12 @@
-"""The shortlist that actually decides what to build next.
+"""
+LEGACY — 2026-08-18 repeat-shortlist workflow. NOT on the daily path and not
+the current scoring definition. The live editorial layer is BOYD_EDITORIAL_V2
+(src/boydclips/editorial.py, prompts/score_cases.md); use tools/editorial_eval.py
+to re-score stored cases and `tools/banger_digest.py --editorial` on the manual
+path. Rows in the `rescores` table are keyed by rubric_version, so anything this
+workflow stored under the retired rubric is ignored under the current version.
+
+The shortlist that actually decides what to build next.
 
 Joins the three checks that each answer a different question:
 
@@ -16,6 +24,9 @@ gate — every hearing listed already passed it independently.
     python scripts/repeat_shortlist.py --all     # include failures, with reasons
 """
 from __future__ import annotations
+
+import sys as _sys
+_sys.stderr.write('[LEGACY] ' + __doc__.strip().splitlines()[0] + ' -- see the module docstring\n')
 
 import json
 import sys

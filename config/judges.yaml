@@ -1,0 +1,151 @@
+# ============================================================================
+#  BOYD CLIPS - MULTI-JUDGE SOURCE REGISTRY
+#  One profile per judge whose docket we may clip. This file is read by
+#  src/boydclips/judges.py, which validates it strictly and refuses to load a
+#  registry that could push unverified material into production.
+#
+#  REQUIRED PER PROFILE
+#    id                     stable lowercase slug; ids are never renumbered
+#    display_name           the name used in channel copy
+#    court                  the court the judge sits on
+#    jurisdiction           county and state, for legal posture
+#    discovery              non-empty list of discovery entries (below)
+#    production_enabled     true only when a court-owned direct source exists
+#    source_review_required true when no court-owned source has been verified
+#
+#  DISCOVERY ENTRIES
+#    kind: direct_url   - a known channel or listing URL
+#        url            required, http(s)
+#        source_owner   court | third_party
+#    kind: query        - a BOUNDED YouTube search
+#        query          required search text
+#        max_results    required, 1..50 - this is the bound
+#        source_owner   unverified - a search is not a source
+#    Every entry may carry a `note` in normal prose.
+#
+#  RULES THE LOADER ENFORCES
+#    * duplicate ids are rejected
+#    * a production_enabled profile must name at least one court-owned
+#      direct_url; a search is not a source
+#    * a source_review_required profile may not be production_enabled
+#    * third-party clip channels (for example the "Courtroom Justice TV" /
+#      @CourtroomFleischerTV and "Court Of Justice" edits already recorded in
+#      config/cases.json) are never production-ready
+#    * exactly one profile carries `primary: true`, it must be
+#      Judge Stephanie Boyd, and it must be production-enabled
+# ============================================================================
+
+judges:
+  # ---------------------------------------------------------------- primary
+  - id: stephanie_boyd
+    display_name: Judge Stephanie Boyd
+    court: 187th District Court, Bexar County, Texas
+    jurisdiction: Bexar County, Texas
+    primary: true
+    production_enabled: true
+    source_review_required: false
+    notes: >-
+      Primary production judge. The URL below is the same one the daily
+      pipeline already uses in config/pipeline.yaml (source.channel_url); this
+      registry records it, it does not replace it.
+    identity_reference:
+      kind: face_reference
+      path: config/boyd_reference.npy
+      note: >-
+        SFACE reference built from the APPROVED Boyd cutouts, used by
+        tools/identity.py to decide which half of the 2-up holds the judge.
+    discovery:
+      - kind: direct_url
+        url: https://www.youtube.com/@judgestephanieboyd4233/streams
+        source_owner: court
+        note: >-
+          The court's own channel. /streams is the reliable listing tab; the
+          /videos tab returns duplicate entries under some yt-dlp versions.
+      - kind: query
+        query: "Judge Stephanie Boyd 187th District Court full docket"
+        max_results: 25
+        source_owner: unverified
+        note: >-
+          Backfill search for dockets older than the discovery window (see
+          source.scan_depth and source.max_age_days in config/pipeline.yaml).
+          Results are leads only and must resolve to the court-owned channel.
+
+  # ------------------------------------------------------------ discovery only
+  - id: cedric_simpson
+    display_name: Judge J. Cedric Simpson
+    court: 14A District Court, Washtenaw County, Michigan
+    jurisdiction: Washtenaw County, Michigan
+    production_enabled: false
+    source_review_required: true
+    notes: >-
+      No court-owned YouTube channel for this docket has been verified in this
+      repo. Judge Simpson circulates on third-party compilation channels,
+      including the "Top 3 craziest court moments" edits recorded in
+      ct_meta.jsonl; those are edited competitor clips and are never production
+      material. The court string above is his public bench identity and is not
+      yet verified against a court-owned channel. Discovery below is bounded to
+      full docket, live and feed-length material until a court-owned source is
+      confirmed and reviewed.
+    discovery:
+      - kind: query
+        query: "Judge J. Cedric Simpson 14A District Court full hearing"
+        max_results: 25
+        source_owner: unverified
+        note: >-
+          Full hearing-length material only. Shorts and "best moments" edits
+          are excluded from consideration.
+      - kind: query
+        query: "14A District Court Washtenaw County Michigan live court stream"
+        max_results: 25
+        source_owner: unverified
+        note: >-
+          Looking for the court's own live/feed channel. A hit on a clip
+          channel accumulates no production authority.
+
+  - id: david_fleischer
+    display_name: Judge David Fleischer
+    court: Harris County Criminal Court at Law No. 5, Harris County, Texas
+    jurisdiction: Harris County, Texas
+    production_enabled: false
+    source_review_required: true
+    notes: >-
+      His court identity was verified against the Harris County Criminal
+      Courts at Law website on 2026-09-20. No court-owned YouTube source has
+      been verified. config/cases.json only records third-party clip channels
+      reposting him (@CourtroomFleischerTV, "Courtroom Justice TV"), and
+      data/channel_catalog.json carries #judgefleischer edits. Confirm the
+      court's own video source before any production use; nothing here is
+      production-ready.
+    discovery:
+      - kind: query
+        query: "Judge David Fleischer full hearing court"
+        max_results: 25
+        source_owner: unverified
+        note: >-
+          Full docket material only. @CourtroomFleischerTV and other edit
+          channels are leads to the original, not usable footage.
+      - kind: query
+        query: "Judge David Fleischer live court stream docket"
+        max_results: 25
+        source_owner: unverified
+        note: >-
+          Feed/livestream search. Requires source_review_required handling
+          before it could ever be promoted.
+
+  - id: raquel_west
+    display_name: Judge Raquel West
+    court: 252nd District Court, Jefferson County, Texas
+    jurisdiction: Jefferson County, Texas
+    production_enabled: false
+    source_review_required: false
+    notes: >-
+      Court-owned source verified 2026-09-20. Production remains disabled until
+      the Boyd-specific judge identity, framing and prompt gates are made
+      profile-aware and a Raquel West identity reference is reviewed.
+    discovery:
+      - kind: direct_url
+        url: https://www.youtube.com/channel/UCi6scjUsERAUv8P74BPM4_g/streams
+        source_owner: court
+        note: >-
+          The 252nd District Court's own channel. /streams is the listing tab
+          that matches the court's live and feed material.

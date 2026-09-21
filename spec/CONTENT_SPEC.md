@@ -22,7 +22,11 @@ The short is not a standalone product. It is a **routing device**: its entire
 job is to make someone watch the long-form. Every short must therefore:
 
 - be cut from a case that has a long-form version already rendered,
-- end with a card pointing at the full case,
+- end with a card pointing at the full case — **AMENDED 2026-09-06:** the
+  SHORTS_EDITOR_V2 short carries NO end card; it ends on the story's payoff
+  or reaction and nothing is drawn over the final spoken caption. A CTA, if
+  wanted, will be designed separately (Nathan). The legacy path keeps its
+  card,
 - carry the long-form URL in its description.
 
 **Ordering is load-bearing.** The long-form publishes first, returns a URL, and
@@ -75,6 +79,23 @@ Rules:
 - Trim only at the head and tail plus interior dead air. **Never reorder.**
   Reordering courtroom speech misrepresents a proceeding.
 
+  **AMENDED 2026-09-06 — the story-preserving cap (accepted).** A long-form
+  that still exceeds `output.longform.max_duration_s` after the trims above
+  may lose *interior* lower-value material, but only through the cap-fit
+  planner (`src/boydclips/capfit.py`), which:
+  - keeps an under-cap long-form exactly as the rules above produce it —
+    chronological, unchanged except for the existing head/tail/dead-air trims;
+  - protects the setup, the money-moment window and the ending
+    (`output.longform.cap_fit`) so they survive whole, and refuses the case
+    with the reason if even those do not fit — nothing is truncated silently;
+  - drops the free material farthest from the story first, never the run-up
+    to the payoff;
+  - places every interior cut on a transcript pause where one is available
+    within reach, never inside a word;
+  - never reorders — every kept range stays in source order;
+  - records the plan (protected, kept, dropped, money-moment source) in the
+    manifest under `outputs.longform.cap_fit`, so the edit is auditable.
+
 ---
 
 ## 3. Short structure
@@ -125,6 +146,56 @@ Rules for both forms:
   **not shortable** — render the long-form only and bank it.
 - Target 45s. Hard ceiling 59s.
 
+**AMENDED 2026-09-06 — SHORTS_EDITOR_V2 (implemented, awaiting Nathan's
+review of rendered output).** With `output.short.editor: v2` (the default)
+the daily short is planned by `src/boydclips/shorts_editor.py` instead of
+being taken from the model's beats; Form A / Form B above describe the legacy
+planner, which `editor: legacy` restores unchanged.
+
+- The short is a **mini-story from inside the one case**: setup → tension →
+  turn → payoff, plus a short reaction when the reaction is the point. It is
+  found around the editorial money moment (which wins a tie inside
+  `planner.money_moment_window` points), Boyd's documented tells, receipts
+  and answered excuses, and scored out of 100 (hook 25 / clarity 20 /
+  payoff 25 / escalation 15 / quote 10 / visual 5). Those are transcript
+  proxies that rank candidates; they do not prove a short is good.
+- **Duration:** 25–60 s is the target; the floor is `planner.min_duration_s`
+  (15 s), because a complete 18-second story ships as 18 seconds and nothing
+  is padded. The 59 s ceiling stands. Over it the planner drops setup, then
+  the reaction, then trims the claim from its front — the payoff line is
+  never cut. Under the floor it extends only with material that belongs to
+  the story (the rest of the payoff turn, the exchange just before the hook).
+- **Chronology holds, with one declared exception:** a cold-open teaser — the
+  payoff line, at most `planner.teaser_max_s` (3 s), played first and then
+  again in place. The plan records the teaser's source range, the manifest
+  carries `nonlinear: true`, and a plan whose order differs in any other way
+  is refused (`shorts_editor.verify_chronology`).
+- **THE CONTINUITY RULE (Nathan, 2026-09-06, after the first Flores render
+  cut his question to a line the defendant said twenty seconds later about
+  something else).** After the teaser, the body is ONE contiguous stretch of
+  the source: chronological order and actual conversational adjacency are
+  preserved. Inside it only dead air over `planner.dead_gap_s`,
+  acknowledgments, repeated wording and clearly procedural filler may be
+  removed; nothing substantive is ever jumped over. A kept sentence that
+  ends in a genuine question is followed on screen by the answer that
+  actually followed it in the source, or the clip starts elsewhere. Every
+  interior join is audited — the omitted transcript is recorded in the plan
+  (`interior_cuts`) and `question_answer` lists each kept question with what
+  follows it on screen and in the source; `shorts_editor.verify_continuity`
+  re-runs the audit right before the render and refuses a false join.
+  Chronological proximity, speaker alternation and score are never evidence
+  that two lines belong together. Main body = contiguous conversation with
+  compression, not a montage of semantically guessed lines.
+- Every cut lands in the silence around a word, never inside one, and two
+  continuous beats with the same framing are one segment (no jump cut for
+  nothing).
+- A case with no valid mini-story is **refused with the reason** —
+  `short_plan.txt` beside the render, `short_editor.refusal` in the manifest —
+  and the long-form still ships. The scorer's `shortable` flag is advisory;
+  disagreement is logged as MISMATCH. The full edit plan (beats, source
+  ranges, speaker, purpose, focus, punch-ins, accents, captions, QC gates)
+  is in `outputs.short.edit_plan`, with `source_case_key` beside it.
+
 ---
 
 ## 4. Vertical framing
@@ -150,6 +221,27 @@ same frame.
 └─────────────┘
 ```
 
+**AMENDED 2026-09-06 — the FIXED courtroom layout (SHORTS_EDITOR_V2, Nathan,
+third pass).** The blurred-fill treatment above is the fallback; the V2
+short is a stable 50/50 stack: defendant in the top 1080×960 slot, Judge
+Boyd in the bottom one (roles from recognition, `tools/identity.py`, fixed
+for the whole Short), divider at y = 960 that never moves — not for speaker
+focus, not for punch-ins. Each person is deliberately CENTRED in their slot
+from a measured subject anchor (YuNet face, median over frames inside the
+kept ranges — never the geometric centre of the source tile), with natural
+headroom and no cropped head, chin or shoulders (`layout.center_window`,
+zoom bounded by `center_max_zoom`, residual recorded). A punch-in is a zoom
+of about 1.06–1.12 (`punch_zoom`) INSIDE the speaker's tile around that
+anchor, at most about two per Short, on a pivotal question / contradiction /
+reveal / admission / consequence / reaction; the other tile and the divider
+stay exactly where they were. The earlier 60/40 "weighted focus" layout is
+gone. One overlay layout (`layout.overlay_layout`) knows every overlay's box
+before the render — caption block, watermark — and a collision between
+critical overlays refuses the render (`overlay_collision`). After the
+render, `render.visual_qc` writes a contact sheet (opening, first speaker
+change, first punch-in, middle, payoff, final) and the composition data for
+those frames, and measures the divider on each.
+
 ---
 
 ## 5. Captions
@@ -162,6 +254,67 @@ same frame.
 - Positioned in the lower blurred band, never over a participant's face.
 - **Captions are verbatim.** Auto-caption errors get corrected against what was
   actually said; they never get "improved," paraphrased, or punched up.
+
+**AMENDED 2026-09-06 — SHORTS_EDITOR_V2 captions live on the divider
+(Nathan, third pass).** Neither the first V2 phrase-DP ("AND SHE TOLD" / "ME
+THAT SHE" / "WAS") nor the legacy 3-word / 13-character grouping is what he
+wants; both produced arbitrary chunks. The V2 short now has ONE caption
+system (`src/boydclips/captions.py` + `render.build_rail_ass`):
+- **Position:** the caption block is anchored at centre (540, 960) — on the
+  dividing line between Boyd and the defendant, straddling it slightly —
+  and never moves with focus or punch-ins. Not on anyone's face, chest or
+  tile. The legacy per-speaker slots apply to the legacy path only.
+- **Phrasing:** cards are natural phrases chosen by a planner that returns
+  INDICES into the exact kept words (card boundaries, the line break, one
+  emphasised word) and never text: about 3–7 words as a preference (one
+  dramatic word or eight can be right); never split "Judge Boyd", "Your
+  Honor", auxiliary+verb, article+noun, preposition+object or an obvious
+  short noun phrase; do not end a card on a glue word unless the delivery
+  pauses; prefer punctuation, breath and semantic boundaries; two lines
+  max. A configured provider may propose the same indices; its proposal is
+  validated against the same rules and the deterministic plan is used when
+  it is unavailable or invalid. Cards are built from the words that survive
+  the edit, mapped through the render segments (`captions_from_kept_words`
+  gate); a cut sentence never reaches the screen.
+- **Style:** white, bold clean font (Anton), black outline, subtle shadow;
+  one genuinely important word per card in yellow when it earns it, never
+  on adjacent cards; no karaoke, no word-by-word motion, no boxes, no fade.
+  The courtroom is the visual; captions assist it.
+- **No end card** (see §1).
+
+**AMENDED 2026-09-06 — kinetic chunk-build captions (Nathan, fifth and
+sixth passes).** Supersedes the "no word-by-word motion" style line above
+and qualifies "captions are verbatim" (`src/boydclips/captions.py`,
+CAPTIONS_V3_KINETIC; `docs/CAPTIONS-V3-CHUNK-BUILD-2026-09-06.md`):
+- **One line only** on the fixed rail (540, 960), widths measured with the
+  font file; a phrase that does not fit is split, never wrapped or shrunk.
+- **Hard speaker boundaries:** phrases are planned inside one verified
+  speaker run; a speaker change clears the rail and the next speaker starts
+  from empty. Structural, not a post-check.
+- **Caption for meaning:** the audio is untouched; the DISPLAY may omit
+  non-semantic disfluencies — fillers, immediate accidental repetitions,
+  pronoun restarts ("I just I don't" → "I just don't"), a trailing
+  abandoned stumble at the end of a speaker run. Never omitted: negation,
+  numbers, names, admissions, denials, intentional emphatic repeats. Every
+  displayed word maps to its source word and every omission is audited in
+  the plan (`caption_audit`); nothing is ever invented or paraphrased.
+- **Chunk build:** a phrase reveals in 1–3 natural micro-phrases, the new
+  chunk warm yellow with one 88 → 105 → 100 % pop (~110 ms), earlier
+  text white and unmoving, the left anchor fixed per phrase; about 1–2
+  visual changes per second on average (QC `DENSITY`). A completed phrase
+  holds briefly, then clears before the next thought.
+- **Readable phrases:** 2–6 words typically, complete units; no sentence
+  end inside a phrase; no dangling glue or subject pronoun unless the
+  delivery pauses; particle verbs and titles never split; no flicker.
+- **Size and centring (visual polish, 2026-09-06):** the rail font is a
+  96 px em (Anton; libass Fontsize = em × 1.7334 because Fontsize is the
+  cell height — `render.ass_font_scale`), safe width 980 px; a completed
+  phrase is centred on its VISUAL box (ink + outline + shadow) at x = 540,
+  verified by rendering the ASS on a black canvas and measuring
+  (`caption_visual_center_error_px`, target ≤ 10 px), and the block of
+  capitals is centred on the divider by one uniform offset. The new chunk
+  enters with an eased overshoot (92 → 106 → 100 %, 110 ms) and a 60 ms
+  opacity rise; nothing already visible moves.
 
 ---
 

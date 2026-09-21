@@ -101,6 +101,52 @@ class Segment:
         return self.end_s - self.start_s
 
 
+def align_body_to_court_call(
+    words: Sequence[Word],
+    segments: list[Segment],
+    max_wait_s: float = 90.0,
+    lead_s: float = 0.08,
+) -> tuple[list[Segment], float | None]:
+    """Start a Boyd long-form body at the first "court is calling" line.
+
+    The cold open and sting already supply the setup. Keeping the Zoom room
+    before Boyd calls the case leaves a long, silent second opening after the
+    branded intro. Only align when the exact three-word phrase occurs inside
+    the opening window and inside a kept segment; otherwise preserve the
+    editor's original start unchanged.
+    """
+    if not segments:
+        return segments, None
+    first = min(s.start_s for s in segments)
+    deadline = first + max(0.0, float(max_wait_s))
+
+    def token(word: str) -> str:
+        return re.sub(r"[^a-z0-9']+", "", word.lower())
+
+    opening = [w for w in words if first <= float(w.t) <= deadline]
+    target = ("court", "is", "calling")
+    call_s: float | None = None
+    for i in range(len(opening) - len(target) + 1):
+        sample = opening[i:i + len(target)]
+        if tuple(token(w.w) for w in sample) != target:
+            continue
+        if float(sample[-1].t) - float(sample[0].t) > 2.5:
+            continue
+        t = float(sample[0].t)
+        if any(s.start_s <= t < s.end_s for s in segments):
+            call_s = max(first, t - max(0.0, float(lead_s)))
+            break
+    if call_s is None:
+        return segments, None
+
+    aligned: list[Segment] = []
+    for seg in segments:
+        if seg.end_s <= call_s:
+            continue
+        aligned.append(Segment(max(seg.start_s, call_s), seg.end_s))
+    return aligned, call_s
+
+
 def _run(cmd: Sequence[str], cwd: Path | None = None, timeout: int = 3600) -> None:
     proc = subprocess.run(
         list(cmd), cwd=str(cwd) if cwd else None,
@@ -307,7 +353,10 @@ def _gray_stack(source: Path, samples_per_s: float):
     if n == 0:
         return None, src_w, src_h
     buf = np.frombuffer(proc.stdout[: n * fb], dtype=np.uint8)
-    return buf.reshape(n, src_h, src_w).astype(np.float32), src_w, src_h
+    # uint8, not float32: the float copy of a 28-minute 720p section was a
+    # 1.2 GiB allocation that failed under load (Diaz, 2026-09-06) and a 1080p
+    # section would be 2.8 GiB. Consumers convert the slice they measure.
+    return buf.reshape(n, src_h, src_w), src_w, src_h
 
 
 def _spans(mask, min_len: int = 1) -> list[tuple[int, int]]:
@@ -426,7 +475,7 @@ def detect_tile_grid(
         hs = sorted(b[idx][3] for b in agreeing)
         mid = len(agreeing) // 2
         x, y, w, h = xs[mid], ys[mid], ws[mid], hs[mid]
-        act = float(stack[:, y:y + h, x:x + w].std(axis=0).mean())
+        act = float(stack[:, y:y + h, x:x + w].astype(np.float32).std(axis=0).mean())
         tiles.append({"x": int(x), "y": int(y), "w": int(w), "h": int(h),
                       "activity": round(act, 2)})
     return tiles
@@ -765,6 +814,19 @@ def download_section(
     if out_path.exists():
         return out_path, section_start
 
+    # Local full-docket cut (2026-09-06). yt-dlp's --download-sections hands
+    # the transfer to ffmpeg as a ranged HTTP fetch, which googlevideo served
+    # at ~110 KB/s that day: a 54-minute span would have taken hours. A full
+    # docket fetched with the normal fragment downloader (tools/fetch_docket.py)
+    # arrives at line speed, and the section is then cut here with a
+    # frame-accurate re-encode (-ss before -i, video and audio both decoded),
+    # so the file's t=0 is section_start exactly as the cached-file contract
+    # above requires. Same name, same offset semantics, same downstream.
+    full = full_docket_path(video_id, out_path.parent)
+    if full.exists():
+        cut_section(full, section_start, section_end, out_path)
+        return out_path, section_start
+
     last_error: RuntimeError | None = None
     for client in SECTION_PLAYER_CLIENTS:
         try:
@@ -826,6 +888,34 @@ def download_section(
         f"section download produced no file for {video_id} "
         f"(tried {', '.join(SECTION_PLAYER_CLIENTS)})"
     ) from last_error
+
+
+def full_docket_path(video_id: str, work_dir: Path) -> Path:
+    """Where tools/fetch_docket.py puts the complete stream for a docket."""
+    return work_dir / f"{video_id}.full.mp4"
+
+
+CUT_SECTION_ARGS = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "14", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart"]
+
+
+def cut_section(full: Path, section_start: float, section_end: float, out_path: Path) -> Path:
+    """Frame-accurate cut of [section_start, section_end) from a local file.
+
+    `-ss` before `-i` with a re-encode: ffmpeg seeks to the preceding keyframe
+    and decodes forward, so the first output frame is the frame at
+    section_start (not the keyframe). CRF 14 keeps the intermediate visually
+    lossless ahead of the render's own encode.
+    """
+    tmp = out_path.with_name(out_path.stem + ".cut.part.mp4")
+    _run([
+        "ffmpeg", "-y", "-hide_banner", "-nostats", "-loglevel", "error",
+        "-ss", f"{section_start:.3f}", "-i", str(full),
+        "-t", f"{max(0.0, section_end - section_start):.3f}",
+        *CUT_SECTION_ARGS, str(tmp),
+    ])
+    tmp.replace(out_path)
+    return out_path
 
 
 # ------------------------------------------------------------------ captions
@@ -914,6 +1004,92 @@ def _ass_time(seconds: float) -> str:
     return f"{h}:{m:02d}:{s:05.2f}"
 
 
+def caption_cards(
+    words: list[Word],
+    timeline_offset_s: float,
+    style: dict[str, Any],
+    turns: list[tuple[float, str]] | None = None,
+) -> list[dict[str, Any]]:
+    """The caption cards a short carries — ONE grouping for every path.
+
+    This is the grouping the approved Thompson short shipped with and the
+    daily path has always used: words grouped inside a speaker's run by
+    `group_words` (max_words_per_card, max_chars_per_line, max_lines), each
+    card on the slot its speaker's turn label maps to in `slot_margins`.
+    SHORTS_EDITOR_V2's first render replaced it with a phrase-DP that cut
+    1–4-word cards ("AND SHE TOLD" / "ME THAT SHE" / "WAS") and Nathan
+    refused it; the planner now calls THIS for its audit record and
+    build_ass draws exactly these cards.
+
+    `words` are in source time; `timeline_offset_s` converts them to the
+    output clip (pass words already mapped through map_words_to_timeline
+    with offset 0.0 for an edited short). `turns` is [(output_time, label)]
+    ascending; a label is looked up in style["slot_margins"], so a caller
+    may key it by anything it likes ("boyd|bottom").
+
+    Returns one dict per card: words [(output_t, token)], tokens (censored,
+    cased as drawn), lines, text, margin_v, slot, start_s, end_s.
+    """
+    words = [
+        type(w)(t=w.t, w=strip_caption_artifact(w.w))
+        for w in words
+        if strip_caption_artifact(w.w)
+    ]
+    max_chars = style.get("max_chars_per_line", 22)
+    max_lines = style.get("max_lines", 2)
+    upper = style.get("uppercase", True)
+    slot_margins: dict[str, int] = style.get("slot_margins") or {}
+    default_margin = int(style.get("margin_v", 420))
+
+    def speaker_at(t: float) -> str | None:
+        if not turns:
+            return None
+        who = None
+        for turn_t, name in turns:
+            if turn_t <= t + 1e-9:
+                who = name
+            else:
+                break
+        return who
+
+    # Cards are grouped within a speaker's run, never across a change. A
+    # card holding the end of one person's sentence and the start of the
+    # other's would have to sit in one slot or the other and would be wrong
+    # beside whichever it chose.
+    runs: list[list[Word]] = []
+    for word in words:
+        who = speaker_at(word.t - timeline_offset_s)
+        if runs and speaker_at(runs[-1][0].t - timeline_offset_s) == who:
+            runs[-1].append(word)
+        else:
+            runs.append([word])
+
+    max_words = style.get("max_words_per_card")
+    out: list[dict[str, Any]] = []
+    for run in runs:
+        slot = speaker_at(run[0].t - timeline_offset_s)
+        marginv = int(slot_margins.get(slot or "", default_margin))
+        for g in group_words(run, max_chars, max_lines, max_words):
+            # CONTENT_SPEC §9: the audio ships as recorded, every text
+            # surface is censored.
+            tokens = [censor(w.w.strip()) for w in g]
+            if upper:
+                tokens = [t.upper() for t in tokens]
+            line_map = _wrap(tokens, max_chars)
+            lines = [" ".join(tokens[j] for j in line) for line in line_map]
+            out.append({
+                "words": [(round(w.t - timeline_offset_s, 3), w.w) for w in g],
+                "tokens": tokens,
+                "lines": lines,
+                "text": " ".join(tokens),
+                "margin_v": marginv,
+                "slot": slot,
+                "start_s": round(g[0].t - timeline_offset_s, 3),
+                "end_s": round(g[-1].t - timeline_offset_s + 0.45, 3),
+            })
+    return out
+
+
 def build_ass(
     words: list[Word],
     timeline_offset_s: float,
@@ -934,10 +1110,6 @@ def build_ass(
     kperreau/wordsubgen (`generator.go`). None of the three uses `\\move`.
 
       plain      one event per card, no per-word treatment, short fade in/out.
-                 What editors doing serious/broadcast work default to — the
-                 r/editors thread on a CNN captioning workflow treats
-                 "professional captioning" and "capcut adhd style captions" as
-                 two different jobs.
       pop        card re-rendered per word, active word scales 112 -> 100 over
                  70ms and stays white. Motion without colour.
       pop_color  as pop, plus the active word recoloured. The mainstream 2026
@@ -945,32 +1117,12 @@ def build_ass(
       highlight  colour change only, no motion. The original behaviour, kept so
                  old renders stay reproducible.
 
-    Which of these is right is a taste call and it is not settled: the same
-    search that found the pop mechanism also found the field mocking it —
-    "flashing words at someone rapidly is optimized for being annoying and
-    attention grabbing, not for readability" (r/mildlyinfuriating, 2026-05-08),
-    and "big yellow subtitles... when mom and dad are doing it, it's not cool
-    anymore" (r/smallbusiness, 2026-07-27). So all four are buildable and the
-    choice is made by looking at rendered output, not by argument.
-
-    One event per word for the animated modes rather than karaoke (\\k) tags:
-    far more predictable across libass versions, and it is what the three
-    reference implementations do.
+    The cards themselves come from caption_cards() — the legacy grouping —
+    so what this draws is exactly what the planner recorded.
 
     timeline_offset_s converts absolute source timestamps into output-clip time.
     """
-    # Cleaned before grouping, not at render time: the artifacts change token
-    # lengths, so stripping them afterwards would wrap the lines against text
-    # that is not what ends up on screen.
-    words = [
-        type(w)(t=w.t, w=strip_caption_artifact(w.w))
-        for w in words
-        if strip_caption_artifact(w.w)
-    ]
-
     max_chars = style.get("max_chars_per_line", 22)
-    max_lines = style.get("max_lines", 2)
-    upper = style.get("uppercase", True)
     primary = style.get("primary_color", "&H00FFFFFF")
     highlight = style.get("highlight_color", "&H0000D7FF")
 
@@ -990,44 +1142,13 @@ Style: Card,{style.get('font', 'Arial Black')},64,{highlight},{highlight},&H0000
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
-    # Speaker-anchored caption slots. `turns` is [(output_time, speaker)]
-    # sorted ascending; `slot_margins` maps a speaker to the MarginV that puts
-    # the text beside them. ASS carries MarginV per Dialogue line, so this
-    # needs no second Style and no \pos — the alignment stays \an2 and only the
-    # distance from the bottom changes.
-    slot_margins: dict[str, int] = style.get("slot_margins") or {}
-    default_margin = int(style.get("margin_v", 420))
-
-    def speaker_at(t: float) -> str | None:
-        if not turns:
-            return None
-        who = None
-        for turn_t, name in turns:
-            if turn_t <= t + 1e-9:
-                who = name
-            else:
-                break
-        return who
-
-    def margin_at(t: float) -> int:
-        return slot_margins.get(speaker_at(t) or "", default_margin)
-
     anim = style.get("animation", "highlight")
     pop_scale = int(style.get("pop_scale", 112))
     pop_ms = int(style.get("pop_ms", 70))
     card_fade_ms = int(style.get("card_fade_ms", 80))
 
     def active(token: str) -> str:
-        """The active word's markup for the chosen treatment.
-
-        `pop` and `pop_color` scale ONE word inside a line that libass then
-        re-lays-out, so the whole block shifts. Measured on short_v3_slots.mp4
-        by rendering its own .ass over black and taking the ink box per frame:
-        on a word change the line moved 33px left and grew 65px, then snapped
-        back over two frames — every word, all the way through. That is the
-        jitter, and it is why `card_punch` exists: the scale moves to the card
-        as a whole, where it cannot reflow anything relative to anything else.
-        """
+        """The active word's markup for the chosen treatment."""
         if anim == "pop":
             return (f"{{\\fscx{pop_scale}\\fscy{pop_scale}"
                     f"\\t(0,{pop_ms},\\fscx100\\fscy100)}}{token}{{\\r}}")
@@ -1043,44 +1164,21 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         return (f"{{\\fscx{pop_scale}\\fscy{pop_scale}"
                 f"\\t(0,{pop_ms},\\fscx100\\fscy100)}}")
 
-    # Cards are grouped within a speaker's run, never across a change. A card
-    # holding the end of one person's sentence and the start of the other's
-    # would have to sit in one slot or the other and would be wrong beside
-    # whichever it chose.
-    runs: list[list[Word]] = []
-    for word in words:
-        who = speaker_at(word.t - timeline_offset_s)
-        if runs and speaker_at(runs[-1][0].t - timeline_offset_s) == who:
-            runs[-1].append(word)
-        else:
-            runs.append([word])
-
-    max_words = style.get("max_words_per_card")
-    cards: list[tuple[list[Word], int]] = []
-    for run in runs:
-        slot = margin_at(run[0].t - timeline_offset_s)
-        for g in group_words(run, max_chars, max_lines, max_words):
-            cards.append((g, slot))
+    cards = caption_cards(words, timeline_offset_s, style, turns)
 
     timed: list[tuple[float, float, str, int]] = []
-    for group, marginv in cards:
-        # CONTENT_SPEC §9: the audio ships as recorded, every text surface is
-        # censored. Captions are a text surface — they get indexed and read
-        # without the footage around them.
-        tokens = [censor(w.w.strip()) for w in group]
-        if upper:
-            tokens = [t.upper() for t in tokens]
+    for card in cards:
+        tokens = card["tokens"]
+        marginv = card["margin_v"]
+        group = card["words"]                       # [(output_t, token)]
         line_map = _wrap(tokens, max_chars)
         plain_text = "\\N".join(
             " ".join(tokens[j] for j in line) for line in line_map
         )
 
         if anim == "plain":
-            # One event for the whole card. Nothing moves inside it, so
-            # re-emitting it per word would only give libass more chances to
-            # collide with itself.
-            start = group[0].t - timeline_offset_s
-            end = group[-1].t - timeline_offset_s + 0.45
+            start = group[0][0]
+            end = group[-1][0] + 0.45
             if end > 0 and start < total_duration_s:
                 start = max(0.0, start)
                 end = min(total_duration_s, max(end, start + 0.05))
@@ -1088,13 +1186,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 timed.append((start, end, fade + plain_text, marginv))
             continue
 
-        for i, word in enumerate(group):
-            start = word.t - timeline_offset_s
-            end = (
-                group[i + 1].t - timeline_offset_s
-                if i + 1 < len(group)
-                else start + 0.45
-            )
+        for i, (word_t, _tok) in enumerate(group):
+            start = word_t
+            end = group[i + 1][0] if i + 1 < len(group) else start + 0.45
             if end <= 0 or start >= total_duration_s:
                 continue
             start = max(0.0, start)
@@ -1112,10 +1206,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     # A card's last word had no successor to end against, so it ran for a flat
     # 0.45s — straight over the start of the next card. libass does not discard
-    # a collision, it stacks it: two 2-line cards became FOUR lines on screen,
-    # which is what the shipped Thompson short opens on (events 0:01.27-1.72 and
-    # 0:01.39-1.75). Clamping every event against its successor is the general
-    # fix; the last-word case was only where it showed.
+    # a collision, it stacks it. Clamping every event against its successor is
+    # the general fix.
     timed.sort(key=lambda e: e[0])
     events: list[str] = []
     for i, (start, end, text, marginv) in enumerate(timed):
@@ -1140,7 +1232,497 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return out_path
 
 
+_FONT_SCALE_CACHE: dict[str, float] = {}
+
+
+def ass_font_scale(font: str) -> float:
+    """libass (like VSFilter) treats the ASS Fontsize as the font's CELL
+    height — OS/2 usWinAscent + usWinDescent — not the em size, so a face
+    is rendered at em = Fontsize / ((winAscent + winDescent) / unitsPerEm).
+    For Anton that factor is 1.7334: "Fontsize 84" rendered as a 48 px em
+    (measured 2026-09-06: cap height 42 px, ink widths 0.577 x the PIL
+    widths the planner measured — which is also why the captions sat left
+    of centre). The planner measures widths in em pixels; this factor turns
+    the intended em into the Fontsize libass needs. 1.0 when the font file
+    cannot be read."""
+    if font in _FONT_SCALE_CACHE:
+        return _FONT_SCALE_CACHE[font]
+    import struct
+    fonts_dir = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+    k = 1.0
+    for cand in (fonts_dir / f"{font}-Regular.ttf", fonts_dir / f"{font}.ttf", fonts_dir / f"{font}-Var.ttf"):
+        if not cand.exists():
+            continue
+        try:
+            data = cand.read_bytes()
+            num = struct.unpack(">H", data[4:6])[0]
+            tables = {}
+            for i in range(num):
+                off = 12 + 16 * i
+                tag = data[off:off + 4].decode("latin-1")
+                toff, tlen = struct.unpack(">II", data[off + 8:off + 16])
+                tables[tag] = toff
+            upem = struct.unpack(">H", data[tables["head"] + 18:tables["head"] + 20])[0]
+            os2 = tables["OS/2"]
+            win_asc, win_desc = struct.unpack(">HH", data[os2 + 74:os2 + 78])
+            if upem and (win_asc + win_desc):
+                k = (win_asc + win_desc) / float(upem)
+            else:
+                h = tables["hhea"]
+                asc, desc = struct.unpack(">hh", data[h + 4:h + 8])
+                k = (asc - desc) / float(upem)
+        except Exception:  # noqa: BLE001
+            k = 1.0
+        break
+    _FONT_SCALE_CACHE[font] = k
+    return k
+
+
+def build_rail_ass(
+    cards: Sequence[dict[str, Any]],
+    style: dict[str, Any],
+    total_duration_s: float,
+    out_path: Path,
+) -> Path:
+    """KINETIC captions on the DIVIDER RAIL (SHORTS_EDITOR_V2, 2026-09-06).
+
+    One phrase at a time, one line, built in 1–3 natural CHUNKS as it is
+    spoken (captions.plan_captions decides the phrases, the display cleanup
+    and the reveal chunks). Each reveal is one Dialogue event whose text is
+    the words revealed so far: the earlier chunks white and unmoving, the
+    newest chunk in the active colour with one short pop-in (pop_from →
+    pop_peak → 100 % over pop_ms).
+
+    Why the phrase is LEFT-anchored: with a centred anchor every change of
+    width — a new word, the pop — re-centres the whole line and the earlier
+    words slide (measured 33 px on short_v3_slots.mp4). So each phrase is
+    placed at `\\an4\\pos(x_left, rail_y)` with x_left = rail_x − width/2 of
+    the COMPLETED phrase (width measured with the font file), and words
+    only ever appear to the right of what is already there; the finished
+    phrase sits centred on the rail. A phrase clears at its `clear_s`; a new
+    speaker's phrase starts from empty by construction.
+
+    mode "static" draws each phrase whole and white (the fallback). No
+    boxes, no fade, no end card.
+    """
+    font = style.get("font", "Anton")
+    size = int(style.get("font_size", 96))
+    size_ass = round(size * ass_font_scale(str(font)), 1)      # em px -> libass Fontsize (see ass_font_scale)
+    primary = style.get("primary_color", "&H00FFFFFF")
+    active = style.get("active_color", "&H003FD2FF")
+    outline_color = style.get("outline_color", "&H00000000")
+    outline = style.get("outline", 6)
+    shadow = style.get("shadow", 2)
+    rail_x = int(style.get("rail_x", 540))
+    # the anchor line is the divider; rail_y_offset (set by the calibration
+    # from a measurement) centres the ink block on it — one value for all
+    rail_y = int(round(int(style.get("rail_y", 960)) + float(style.get("rail_y_offset", 0.0))))
+    mode = str(style.get("mode", "kinetic")).lower()
+    speaker_colors = dict(style.get("speaker_colors") or {})
+    pop_ms = int(style.get("pop_ms", 110))
+    pop_from = int(style.get("pop_from", 92))
+    pop_peak = int(style.get("pop_peak", 106))
+    rise = int(style.get("pop_rise_ms", max(20, int(pop_ms * 0.5))))
+    fade_ms = int(style.get("pop_fade_ms", 60))
+    ease_rise = float(style.get("ease_rise", 0.6))
+    ease_settle = float(style.get("ease_settle", 1.3))
+    ease_fade = float(style.get("ease_fade", 0.7))
+
+    header = f"""[Script Info]
+ScriptType: v4.00+
+; Rail captions: em {size} px rendered as Fontsize {size_ass} (libass Fontsize = winAscent + winDescent)
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Rail,{font},{size_ass},{primary},{primary},{outline_color},&H80000000,-1,0,0,0,100,100,0,0,1,{outline},{shadow},4,0,0,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+    # The new chunk's entrance (visual polish 2026-09-06): scale 92 % ->
+    # 106 % over pop_rise_ms with an ease-out (\t accel 0.6), then 106 % ->
+    # 100 % with an ease-in (accel 1.3) — one smooth overshoot, no bounce —
+    # while its opacity rises 0 -> 100 % over pop_fade_ms (accel 0.7). Only
+    # the chunk inside this override block animates; the words before it are
+    # plain text at the same origin and never move.
+    pop_tag = (f"\\fscx{pop_from}\\fscy{pop_from}\\alpha&HFF&"
+               + (f"\\t(0,{fade_ms},{ease_fade:g},\\alpha&H00&)" if fade_ms > 0 else "\\alpha&H00&")
+               + f"\\t(0,{rise},{ease_rise:g},\\fscx{pop_peak}\\fscy{pop_peak})"
+               f"\\t({rise},{pop_ms},{ease_settle:g},\\fscx100\\fscy100)")
+    events: list[str] = []
+    for c in cards:
+        toks = list(c["tokens"])
+        # the origin of the COMPLETED phrase, centred on its visual box
+        # (captions.caption_origin, calibrated by calibrate_caption_positions);
+        # every reveal state of the phrase uses it
+        if c.get("x_left") is not None:
+            x_left = int(c["x_left"])
+        else:
+            x_left = int(round(rail_x - float(c.get("width_px", 0.0)) / 2.0))
+        pos = f"{{\\an4\\pos({x_left},{rail_y})}}"
+        if mode == "static":
+            start = max(0.0, float(c["start_s"]))
+            end = min(float(total_duration_s), float(c["clear_s"]))
+            if end - start >= 0.05:
+                speaker_color = speaker_colors.get(str(c.get("speaker") or ""))
+                color = f"{{\\c{speaker_color}}}" if speaker_color else ""
+                events.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Rail,,0,0,0,,{pos}{color}{' '.join(toks)}")
+            continue
+        for ev in c["events"]:
+            start = max(0.0, float(ev["t"]))
+            end = min(float(total_duration_s), float(ev["end"]))
+            if end - start < 0.02:
+                continue
+            la, lb = int(ev["new_range"][0]), int(ev["new_range"][1])
+            before = " ".join(toks[:la])
+            newest = f"{{\\c{active}{pop_tag}}}{' '.join(toks[la:lb])}{{\\r}}"
+            text = f"{before} {newest}" if before else newest
+            events.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Rail,,0,0,0,,{pos}{text}")
+    out_path.write_text(header + "\n".join(events) + "\n", encoding="utf-8")
+    return out_path
+
+
+def measure_caption_centering(ass_path: Path, cards: Sequence[dict[str, Any]], style: dict[str, Any],
+                              w: int = 1080, h: int = 1920, fps: int = 50) -> list[dict[str, Any]]:
+    """MEASURE where each completed phrase actually lands: render the ASS on
+    a black canvas with the same libass + fonts the short uses, grab one
+    frame per phrase after its last chunk has settled, and take the bounding
+    box of the bright (fill) pixels on the rail. Returns per-card
+    {index, text, t, ink_left, ink_right, center, error_px} (error = centre −
+    rail_x); cards whose life is too short to settle are reported with
+    error None."""
+    import numpy as np
+    rail_x = float(style.get("rail_x", 540))
+    rail_y = int(style.get("rail_y", 960))
+    pop_s = float(style.get("pop_ms", 110)) / 1000.0
+    picks: list[tuple[int, float]] = []
+    for k, c in enumerate(cards):
+        evs = c.get("events") or []
+        if not evs:
+            continue
+        last_t = float(evs[-1]["t"])
+        t = min(last_t + pop_s + 0.06, float(c["clear_s"]) - 0.03)
+        if t < last_t + pop_s + 0.01:
+            continue
+        picks.append((k, t))
+    out: list[dict[str, Any]] = [{"index": k, "text": c["text"], "t": None, "ink_left": None, "ink_right": None,
+                                  "center": None, "error_px": None} for k, c in enumerate(cards)]
+    if not picks:
+        return out
+    frames = sorted({int(round(t * fps)) for _k, t in picks})
+    sel = "+".join(f"eq(n\\,{n})" for n in frames)
+    fonts_dir = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+    rel = os.path.relpath(fonts_dir, ass_path.parent).replace("\\", "/")
+    dur = max(t for _k, t in picks) + 0.5
+    proc = subprocess.run(
+        ["ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"color=c=black:s={w}x{h}:r={fps}:d={dur:.2f}",
+         "-vf", f"ass={ass_path.name}:fontsdir='{rel}',select='{sel}'", "-fps_mode", "passthrough",
+         "-frames:v", str(len(frames)), "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+        capture_output=True, cwd=ass_path.parent)
+    if proc.returncode != 0 or len(proc.stdout) < w * h:
+        raise RuntimeError("caption centering measurement failed: " + proc.stderr.decode("utf-8", "replace")[-300:])
+    buf = np.frombuffer(proc.stdout, dtype=np.uint8)
+    got = len(buf) // (w * h)
+    imgs = buf[: got * w * h].reshape(got, h, w)
+    by_frame = {n: imgs[i] for i, n in enumerate(frames[:got])}
+    y0, y1 = max(0, rail_y - 160), min(h, rail_y + 160)
+    for k, t in picks:
+        n = int(round(t * fps))
+        if n not in by_frame:
+            continue
+        band = by_frame[n][y0:y1]
+        cols = np.where((band > 100).any(axis=0))[0]
+        rows = np.where((band > 100).any(axis=1))[0]
+        if cols.size == 0:
+            continue
+        left, right = float(cols[0]), float(cols[-1] + 1)
+        top, bottom = float(rows[0] + y0), float(rows[-1] + 1 + y0)
+        center = (left + right) / 2.0
+        out[k].update({"t": round(t, 3), "ink_left": left, "ink_right": right, "center": round(center, 1),
+                       "error_px": round(center - rail_x, 1),
+                       "ink_top": top, "ink_bottom": bottom, "center_y": round((top + bottom) / 2.0, 1),
+                       "error_y_px": round((top + bottom) / 2.0 - rail_y, 1)})
+    return out
+
+
+def calibrate_caption_positions(cards: Sequence[dict[str, Any]], style: dict[str, Any], total_duration_s: float,
+                                ass_path: Path, w: int = 1080, h: int = 1920, tolerance_px: float = 1.0,
+                                rounds: int = 2) -> dict[str, Any]:
+    """TRUE VISUAL CENTRING (visual polish 2026-09-06). Write the rail ASS
+    from the predicted origins, measure each completed phrase's rendered
+    ink centre on a black canvas, shift any phrase that is off by more than
+    tolerance_px by its measured error (the whole phrase, so no reveal state
+    moves relative to another), rewrite, re-measure. Returns
+    {predicted_max_error_px, measured_before, measured_after, max_error_px,
+    mean_error_px, per_card} and leaves the calibrated ASS at ass_path with
+    card["x_left"] / card["center_error_px"] updated in place."""
+    build_rail_ass(cards, style, total_duration_s, ass_path)
+    before = measure_caption_centering(ass_path, cards, style, w, h)
+    summary: dict[str, Any] = {
+        "predicted_max_error_px": round(max((abs(float(c.get("predicted_center", 540)) - float(style.get("rail_x", 540)))
+                                              for c in cards), default=0.0), 1),
+        "measured_before": {"max_error_px": _max_abs(before), "mean_error_px": _mean_abs(before)},
+        "rounds": 0,
+    }
+    current = before
+    for _r in range(rounds):
+        moved = 0
+        for m in current:
+            if m["error_px"] is None or abs(m["error_px"]) <= tolerance_px:
+                continue
+            cards[m["index"]]["x_left"] = int(cards[m["index"]]["x_left"]) - int(round(m["error_px"]))
+            moved += 1
+        if not moved:
+            break
+        summary["rounds"] += 1
+        build_rail_ass(cards, style, total_duration_s, ass_path)
+        current = measure_caption_centering(ass_path, cards, style, w, h)
+    # vertical: the ink block (capitals) sits lower in the cell than its
+    # middle, so centre the MEAN ink block on the rail with one uniform
+    # offset for every phrase (the rail stays one line at one height)
+    ys = [float(m["error_y_px"]) for m in current if m.get("error_y_px") is not None]
+    y_off = round(sum(ys) / len(ys), 1) if ys else 0.0
+    if abs(y_off) > 1.0:
+        style = dict(style, rail_y_offset=float(style.get("rail_y_offset", 0.0)) - y_off)
+        build_rail_ass(cards, style, total_duration_s, ass_path)
+        current = measure_caption_centering(ass_path, cards, style, w, h)
+    summary["rail_y_offset"] = float(style.get("rail_y_offset", 0.0))
+    ys2 = [float(m["error_y_px"]) for m in current if m.get("error_y_px") is not None]
+    summary["vertical_error_px"] = {"before": y_off, "after_mean": round(sum(ys2) / len(ys2), 1) if ys2 else 0.0,
+                                    "after_max": round(max(abs(v) for v in ys2), 1) if ys2 else 0.0}
+    for m in current:
+        cards[m["index"]]["center_error_px"] = m["error_px"]
+        cards[m["index"]]["measured_center"] = m["center"]
+        cards[m["index"]]["center_error_y_px"] = m.get("error_y_px")
+    summary["measured_after"] = {"max_error_px": _max_abs(current), "mean_error_px": _mean_abs(current)}
+    summary["max_error_px"] = summary["measured_after"]["max_error_px"]
+    summary["mean_error_px"] = summary["measured_after"]["mean_error_px"]
+    summary["measured_phrases"] = sum(1 for m in current if m["error_px"] is not None)
+    summary["per_card"] = current
+    return summary
+
+
+def _max_abs(ms: Sequence[dict[str, Any]]) -> float:
+    vals = [abs(float(m["error_px"])) for m in ms if m.get("error_px") is not None]
+    return round(max(vals), 1) if vals else 0.0
+
+
+def _mean_abs(ms: Sequence[dict[str, Any]]) -> float:
+    vals = [abs(float(m["error_px"])) for m in ms if m.get("error_px") is not None]
+    return round(sum(vals) / len(vals), 2) if vals else 0.0
+
+
+def _gray_frame(path: Path, t: float, vf: str) -> "np.ndarray | None":
+    try:
+        import numpy as np
+    except Exception:  # pragma: no cover - numpy is a hard dependency elsewhere
+        return None
+    proc = subprocess.run(
+        ["ffmpeg", "-v", "error", "-ss", f"{max(0.0, t):.3f}", "-i", str(path), "-frames:v", "1",
+         "-vf", vf, "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+        capture_output=True,
+    )
+    if proc.returncode != 0 or not proc.stdout:
+        return None
+    return np.frombuffer(proc.stdout, dtype=np.uint8)
+
+
+def measure_divider_y(path: Path, t: float, w: int = 1080, h: int = 1920,
+                      band: tuple[int, int] = (900, 1020), margin_px: int = 50) -> float | None:
+    """The row of the strongest horizontal edge around the expected divider,
+    measured on the OUTER columns only (the caption block sits in the
+    middle of the frame and would otherwise dominate). None if the frame
+    cannot be read."""
+    try:
+        import numpy as np
+    except Exception:  # pragma: no cover
+        return None
+    lo, hi = band
+    buf = _gray_frame(path, t, f"scale={w}:{h}")
+    if buf is None or buf.size < w * h:
+        return None
+    img = buf[: w * h].reshape(h, w).astype(float)
+    cols = np.concatenate([img[:, :margin_px], img[:, w - margin_px:]], axis=1)
+    diff = np.abs(np.diff(cols, axis=0)).mean(axis=1)       # diff[r] = |row r+1 - row r|
+    seg = diff[lo:hi]
+    r = int(np.argmax(seg)) + lo
+    return float(r + 1)
+
+
+def visual_qc(
+    sh_path: Path,
+    plan: dict[str, Any],
+    comp: dict[str, Any],
+    overlay: dict[str, Any],
+    checks: list[dict[str, Any]],
+    out_dir: Path,
+    extra_frames: Sequence[tuple[str, float]] | None = None,
+) -> dict[str, Any]:
+    """The review contact sheet and the deterministic composition record for
+    ONE short: frames at the opening, the first speaker change, the first
+    punch-in, the middle, the payoff and the last frame, tiled into
+    visual_qc_contact.jpg; visual_qc.json with the per-frame composition
+    data (divider, caption centre, subject anchors, punch scale, overlay
+    boxes), the layout checks, and the divider measured on every frame —
+    it must sit at the same row on normal and punched frames.
+
+    A vision-capable reviewer can be plugged in later on the same inputs
+    (the sheet + this JSON); it is not required for the checks here.
+    """
+    duration = float(plan.get("duration_s", 0.0))
+    segments = plan.get("segments") or []
+    focus = plan.get("segment_focus") or []
+    punch = plan.get("segment_punch") or []
+    offsets: list[float] = []
+    acc = 0.0
+    for a, b in segments:
+        offsets.append(acc)
+        acc += float(b) - float(a)
+
+    def out_time(t_src: float) -> float | None:
+        for (a, b), off in zip(segments, offsets):
+            if float(a) - 1e-6 <= t_src <= float(b) + 1e-6:
+                return off + (t_src - float(a))
+        return None
+
+    frames: list[tuple[str, float]] = [("opening", min(0.3, max(0.0, duration - 0.1)))]
+    for i in range(1, len(segments)):
+        if focus[i] != focus[i - 1]:
+            frames.append(("first_speaker_change", offsets[i] + 0.3))
+            break
+    for i, p in enumerate(punch):
+        if p:
+            frames.append(("first_punch_in", offsets[i] + 0.4))
+            break
+    frames.append(("middle", duration / 2.0))
+    payoff = next((b for b in plan.get("beats") or [] if b.get("role") == "payoff"), None)
+    if payoff and payoff.get("ranges"):
+        ot = out_time(float(payoff["ranges"][0][0]))
+        if ot is not None:
+            frames.append(("payoff", ot + 0.4))
+    frames.append(("final", max(0.0, duration - 0.15)))
+    # e.g. the CTA's before / entrance / mid-draw / hold (cta.review_frame_times)
+    frames += [(str(lab), float(t)) for lab, t in (extra_frames or [])]
+    frames = [(lab, min(max(0.0, t), max(0.0, duration - 0.05))) for lab, t in frames]
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pngs: list[Path] = []
+    records: list[dict[str, Any]] = []
+    seg_layouts = comp.get("segments") or []
+    for k, (label, t) in enumerate(frames):
+        png = out_dir / f"_vqc_{k}_{label}.png"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.3f}", "-i", str(sh_path),
+                        "-frames:v", "1", "-vf", "scale=360:640", str(png)], capture_output=True)
+        if png.exists():
+            pngs.append(png)
+        seg_idx = 0
+        for i, off in enumerate(offsets):
+            if off <= t + 1e-6:
+                seg_idx = i
+        lay = seg_layouts[seg_idx] if seg_idx < len(seg_layouts) else {}
+        measured = measure_divider_y(sh_path, t)
+        records.append({
+            "label": label, "t_s": round(t, 3), "segment": seg_idx,
+            "divider_y": lay.get("divider_y"), "measured_divider_y": measured,
+            "caption_center": overlay.get("caption_center"),
+            "top_subject": [lay.get("top", {}).get("subject_x"), lay.get("top", {}).get("subject_y")],
+            "bottom_subject": [lay.get("bottom", {}).get("subject_x"),
+                               (lay.get("bottom", {}).get("subject_y") or 0) + int(comp.get("divider_y", 960))],
+            "punch": lay.get("punch", ""), "punch_scale": lay.get("punch_scale", 1.0),
+            "overlay_boxes": overlay.get("boxes"),
+        })
+    sheet = out_dir / "visual_qc_contact.jpg"
+    if pngs:
+        inputs: list[str] = []
+        for png in pngs:
+            inputs += ["-i", str(png)]
+        subprocess.run(["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex",
+                        "".join(f"[{i}]" for i in range(len(pngs))) + f"hstack=inputs={len(pngs)}",
+                        "-q:v", "3", str(sheet)], capture_output=True)
+        for png in pngs:
+            try:
+                png.unlink()
+            except OSError:
+                pass
+    measured = [r["measured_divider_y"] for r in records if r["measured_divider_y"] is not None]
+    div_checks: list[dict[str, Any]] = []
+    if measured:
+        want = int(comp.get("divider_y", 960))
+        div_checks.append({"check": "divider_measured_at_960", "ok": all(abs(m - want) <= 8 for m in measured),
+                           "value": measured, "want": want})
+        div_checks.append({"check": "divider_stable_normal_vs_punch", "ok": (max(measured) - min(measured)) <= 6,
+                           "value": [min(measured), max(measured)]})
+    else:
+        div_checks.append({"check": "divider_measured_at_960", "ok": False, "value": None, "want": 960})
+    all_checks = list(checks) + div_checks
+    report = {
+        "contact_sheet": str(sheet) if sheet.exists() else None,
+        "frames": records,
+        "checks": all_checks,
+        "ok": all(c["ok"] for c in all_checks),
+        "reviewer": "deterministic (a vision reviewer may be attached to the same sheet + json later)",
+    }
+    (out_dir / "visual_qc.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report
+
+
 # ------------------------------------------------------------------ renderers
+
+
+SHORT_FLOOR_PATH = Path(__file__).resolve().parents[2] / "config" / "short_floor.json"
+DAILY_CURVE = "0/0.02 0.25/0.31 0.5/0.57 0.75/0.80 1/0.97"
+
+
+def short_grade_filter(cfg: dict[str, Any]) -> str:
+    """The short's colour correction — ONE source for every short renderer.
+
+    `config/short_floor.json` `grade.eq` is the house grade: solved by
+    tools/solve_grade.py against SANCHEZ_SHORT_FINAL.mp4 (the short Nathan
+    named as the one that looks right — "save everything as the normal floor
+    when making future shorts", 2026-08-31) and applied to both tiles by the
+    manual chain (tools/short_engine.py / make_short.py). The daily renderer
+    carried its own curves+eq instead (config output.short.color), so a
+    daily short — legacy or SHORTS_EDITOR_V2 — never received the treatment
+    the shipped shorts had. Traced 2026-09-06 on the first Flores render:
+    both daily graphs contained the daily curve and neither contained the
+    floor grade.
+
+    color.source: short_floor (default) reads the floor and FAILS if the key
+    is missing (the manual chain does the same — no silent default);
+    short_floor_no_brightness reads the floor and drops its brightness term
+    (the per-camera curves handle the highlights; see below); curve keeps
+    the old daily block for reproducing earlier renders; none disables
+    grading. Returns the filter fragment without a leading comma.
+    """
+    color = dict(cfg.get("color") or {})
+    if not color.get("enabled", True):
+        return ""
+    source = str(color.get("source", "short_floor")).lower()
+    if source == "none":
+        return ""
+    if source == "curve":
+        curve = color.get("curve", DAILY_CURVE)
+        return (f"curves=all='{curve}'"
+                f",eq=saturation={float(color.get('saturation', 1.10)):.3f}"
+                f":contrast={float(color.get('contrast', 1.05)):.3f}")
+    floor = json.loads(SHORT_FLOOR_PATH.read_text(encoding="utf-8"))
+    eq = floor["grade"]["eq"]                      # KeyError on purpose
+    if not isinstance(eq, str) or not eq.startswith("eq="):
+        raise ValueError(f"short_floor.json grade.eq is not an eq filter: {eq!r}")
+    if source == "short_floor_no_brightness":
+        # Nathan, 2026-09-06 ("b"): with each camera's highlights rolled off
+        # BEFORE assembly (camera_grade_filter), the floor's global
+        # brightness=-0.10 only darkens the faces — measured on Flores,
+        # defendant face p50 134 -> 105, Boyd 116 -> 80. The common stage
+        # keeps the floor's contrast and saturation, derived from the floor
+        # file so the numbers stay its numbers, and drops the brightness term.
+        params = [kv for kv in eq[len("eq="):].split(":") if not kv.strip().startswith("brightness=")]
+        return "eq=" + ":".join(params) if params else ""
+    return eq
 
 
 def _concat_filter(
@@ -1174,6 +1756,110 @@ def _concat_filter(
     pairs = "".join(f"[v{i}][a{i}]" for i in range(len(segments)))
     concat = f"{pairs}concat=n={len(segments)}:v=1:a=1[vc][ac]"
     return ";".join(parts), concat, "[vc]"
+
+
+def camera_grade_filter(color_cfg: dict[str, Any] | None, role: str) -> str:
+    """The PER-CAMERA correction for one tile, applied to that tile before
+    the two are assembled (Nathan, 2026-09-06: the defendant camera's
+    fluorescent ceiling blows out; the two cameras do not share exposure).
+
+    `output.short.color.<role>` is either a filter fragment string or a dict
+    with `curve` (a `curves=all=` point list — the same mechanism the daily
+    grade used, so shadows and midtones can be held while the top of the
+    range is rolled off) and/or `eq` (an `eq=` string, the floor's
+    convention). Missing or empty → no per-camera stage. The common floor
+    grade (short_grade_filter) still runs on the assembled frame afterwards.
+    """
+    spec = (color_cfg or {}).get(role)
+    if not spec:
+        return ""
+    if isinstance(spec, str):
+        return spec.strip().strip(",")
+    parts: list[str] = []
+    curve = spec.get("curve")
+    if curve:
+        parts.append(f"curves=all='{curve}'")
+    eq = spec.get("eq")
+    if eq:
+        parts.append(str(eq) if str(eq).startswith("eq=") else f"eq={eq}")
+    return ",".join(parts)
+
+
+def camera_clarity_filter(clarity_cfg: dict[str, Any] | None, role: str | None) -> str:
+    """The per-tile POST-SCALE clarity chain (visual polish 2026-09-06).
+    output.short.clarity: {scale_flags, defendant, boyd, default} — each
+    role maps to an ffmpeg filter fragment (e.g. cas=strength=0.35) or
+    null/"" for none. The defendant tile carries the larger upscale, so it
+    may take a modestly stronger pass than Boyd's. Applied after the tile
+    scale and before the stack; captions burn in after the stack."""
+    if not clarity_cfg or not clarity_cfg.get("enabled", True):
+        return ""
+    key = (role or "").lower()
+    val = clarity_cfg.get(key, clarity_cfg.get("default"))
+    return str(val) if val else ""
+
+
+def duo_punch_filter(
+    segments: list[Segment],
+    offset_s: float,
+    windows: Sequence[tuple[str, str]],
+    w: int,
+    h: int,
+    join_fade_s: float = 0.015,
+    tile_filters: tuple[str, str] | None = None,
+    scale_flags: str = "",
+    tile_post: tuple[str, str] | None = None,
+) -> str:
+    """Per-segment picture for the FIXED 50/50 stack (layout.compose).
+
+    `scale_flags` are swscale flags for the tile upscale (visual polish
+    2026-09-06: lanczos+accurate_rnd+full_chroma_int instead of the default
+    bicubic); `tile_post` = (top, bottom) chains applied AFTER the scale —
+    the per-tile clarity (camera_clarity_filter). Captions are burned in
+    later, after the stack, so they never pass through the clarity filter.
+
+    `windows[i]` is (top_crop, bottom_crop) for segments[i] — the subject-
+    centred base windows, or the punched window on the speaker's tile. Every
+    segment scales both windows to w × h/2 and stacks them, so the divider is
+    at h/2 on every frame and a punch-in is a zoom INSIDE a tile, never a
+    change of the split. `tile_filters` = (top, bottom) per-camera grades
+    (camera_grade_filter), applied to each tile BEFORE it is scaled and
+    stacked. Same trims and 15 ms audio fades as _concat_filter, so the cut
+    points are identical to the unpunched render.
+
+    Returns the whole chain ending in [vv] (video) and [ac] (audio).
+    """
+    half = h // 2
+    n = len(segments)
+    tf_top, tf_bottom = tile_filters or ("", "")
+    tf_top = f"{tf_top}," if tf_top else ""
+    tf_bottom = f"{tf_bottom}," if tf_bottom else ""
+    sf = f":flags={scale_flags}" if scale_flags else ""
+    tp_top, tp_bottom = tile_post or ("", "")
+    tp_top = f",{tp_top}" if tp_top else ""
+    tp_bottom = f",{tp_bottom}" if tp_bottom else ""
+    parts: list[str] = []
+    for i, seg in enumerate(segments):
+        a = max(0.0, seg.start_s - offset_s)
+        b = max(a + 0.05, seg.end_s - offset_s)
+        fade = ""
+        if join_fade_s > 0:
+            d = min(join_fade_s, (b - a) / 4.0)
+            fade = (f",afade=t=in:st=0:d={d:.3f}"
+                    f",afade=t=out:st={b - a - d:.3f}:d={d:.3f}")
+        parts.append(f"[0:a]atrim=start={a:.3f}:end={b:.3f},asetpts=PTS-STARTPTS{fade}[a{i}]")
+        top, bottom = windows[i]
+        parts.append(
+            f"[0:v]trim=start={a:.3f}:end={b:.3f},setpts=PTS-STARTPTS,split=2[l{i}][r{i}];"
+            f"[l{i}]{top},{tf_top}scale={w}:{half}{sf}{tp_top},setsar=1[lt{i}];"
+            f"[r{i}]{bottom},{tf_bottom}scale={w}:{half}{sf}{tp_bottom},setsar=1[rt{i}];"
+            f"[lt{i}][rt{i}]vstack=inputs=2[vv{i}]"
+        )
+    vpairs = "".join(f"[vv{i}]" for i in range(n))
+    apairs = "".join(f"[a{i}]" for i in range(n))
+    return (";".join(parts)
+            + f";{vpairs}concat=n={n}:v=1:a=0[vv]"
+            + f";{apairs}concat=n={n}:v=0:a=1[ac]")
 
 
 # The brand folder was moved into a per-project Desktop folder at some point
@@ -1232,23 +1918,24 @@ def _watermark_chain(
 
     Top-right because YouTube's own player controls and branding watermark both
     live bottom-right, and the progress bar eats the bottom edge on hover. The
-    mark file already carries its opacity and halo baked in, so this only scales
-    and places it — no alpha maths here, which keeps the one chosen file the
-    single source of truth.
+    The asset may carry its own alpha, but every enabled render also applies the
+    configured opacity multiplier.  This keeps the logo faint even when a new
+    source asset is more opaque than the current TTT mark.
 
-    When disabled or missing, returns a `null` pass-through on the same labels so
-    a missing asset degrades to "no watermark" rather than failing a render that
-    is otherwise fine.
+    Explicitly disabled marks use a null pass-through. A configured missing
+    asset is an error so a render cannot silently lose required branding.
     """
     raw = cfg.get("watermark", DEFAULT_WATERMARK)
     if raw in (None, False, ""):
         return [], f"[{in_label}]null[{out_label}]"
     path = Path(raw)
     if not path.is_file():
-        log.warning("watermark not found, rendering without it: %s", path)
-        return [], f"[{in_label}]null[{out_label}]"
+        raise FileNotFoundError(f"configured watermark not found: {path}")
 
     frac = float(cfg.get("watermark_width_frac", width_frac))
+    opacity = float(cfg.get("watermark_opacity", 0.45))
+    if not 0.0 < opacity < 1.0:
+        raise ValueError("watermark_opacity must be greater than 0 and less than 1")
     margin = int(round(w * float(cfg.get("watermark_margin_frac", 0.035))))
     wm_w = int(round(w * frac))
     # `y` places the mark inside the PICTURE rather than inside the canvas. The
@@ -1278,12 +1965,14 @@ def _watermark_chain(
     if len(tops) == 1:
         return (
             ["-i", str(path.resolve())],
-            f"[{wm_index}:v]scale={wm_w}:-1[wm];"
+            f"[{wm_index}:v]scale={wm_w}:-1,format=rgba,"
+            f"colorchannelmixer=aa={opacity:.4f}[wm];"
             f"[{in_label}][wm]overlay={x_expr}:{tops[0]}[{out_label}]",
         )
 
     n = len(tops)
-    parts = [f"[{wm_index}:v]scale={wm_w}:-1,split={n}"
+    parts = [f"[{wm_index}:v]scale={wm_w}:-1,format=rgba,"
+             f"colorchannelmixer=aa={opacity:.4f},split={n}"
              + "".join(f"[wm{i}]" for i in range(n))]
     src = in_label
     for i, top in enumerate(tops):
@@ -1307,6 +1996,59 @@ COLDOPEN_MIN_S, COLDOPEN_MAX_S = 3.0, 9.0   # "5 second or so"
 # "later in the vid": the hook must come from at least this far into the body,
 # or it is the opening shown twice, not a tease.
 COLDOPEN_MIN_AHEAD_S = 30.0
+COLDOPEN_WORD_TAIL_S = 0.9      # a word's end when the next word is far away
+COLDOPEN_LEAD_S = 0.15          # breath before the first word
+_SENTENCE_END = (".", "?", "!")
+_TRAIL_PUNCT = "\"')]"
+
+
+def coldopen_span(words: Sequence[Word], moment_s: float | None, pieces: Sequence[Segment],
+                  min_s: float = COLDOPEN_MIN_S, max_s: float = COLDOPEN_MAX_S,
+                  ahead_s: float = COLDOPEN_MIN_AHEAD_S) -> tuple[tuple[float, float] | None, str]:
+    """The R49 cold-open span for the daily route: (start, end) in source
+    seconds, or (None, why).
+
+    Starts a breath before the word at `moment_s` and runs to the first
+    sentence end that is at least `min_s` away, never past `max_s`, never past
+    the long-form piece that holds the moment, and never earlier than
+    `ahead_s` into the body (render_longform refuses those, so they are
+    refused here with a reason instead of a crash mid-render). Word ends are
+    the next word's start, capped at COLDOPEN_WORD_TAIL_S, because the
+    transcript carries start times only.
+    """
+    if moment_s is None:
+        return None, "no money moment on the case"
+    m = float(moment_s)
+    piece = next((p for p in pieces if p.start_s <= m <= p.end_s), None)
+    if piece is None:
+        return None, f"money moment {m:.1f}s is not inside a long-form piece"
+    body0 = min(p.start_s for p in pieces)
+    if m - body0 < ahead_s:
+        return None, f"money moment is {m - body0:.1f}s into the body; needs >= {ahead_s:.0f}s"
+    ws = sorted((float(w.t), str(w.w)) for w in words if piece.start_s <= float(w.t) <= piece.end_s)
+    if not ws:
+        return None, "no transcript words inside the piece"
+    k0 = max((i for i, (t, _) in enumerate(ws) if t <= m), default=0)
+    c0 = max(piece.start_s, ws[k0][0] - COLDOPEN_LEAD_S, body0 + ahead_s)
+    limit = min(piece.end_s, c0 + max_s)
+    best = None          # first sentence end inside [min_s, max_s]
+    last_ok = None       # last word end inside max_s
+    for i in range(k0, len(ws)):
+        t, txt = ws[i]
+        nxt = ws[i + 1][0] if i + 1 < len(ws) else piece.end_s
+        end = min(nxt, t + COLDOPEN_WORD_TAIL_S, limit)
+        if end <= c0:
+            continue
+        if end - c0 > max_s + 1e-6 or t >= limit:
+            break
+        last_ok = end
+        if txt.rstrip(_TRAIL_PUNCT).endswith(_SENTENCE_END) and end - c0 >= min_s:
+            best = end
+            break
+    c1 = best if best is not None else last_ok
+    if c1 is None or c1 - c0 < min_s:
+        return None, f"could not fit {min_s:.0f}s of speech after {m:.1f}s inside the piece"
+    return (round(c0, 3), round(c1, 3)), "ok"
 
 
 def _ff_escape(text: str) -> str:
@@ -1388,9 +2130,11 @@ def render_longform(
         c0, c1 = float(coldopen[0]), float(coldopen[1])
         if intro is None:
             raise ValueError("cold open needs the intro sting behind it")
-        if not (COLDOPEN_MIN_S <= c1 - c0 <= COLDOPEN_MAX_S):
+        cold_min = float(cfg.get("coldopen_min_s", COLDOPEN_MIN_S))
+        cold_max = float(cfg.get("coldopen_max_s", COLDOPEN_MAX_S))
+        if not (cold_min <= c1 - c0 <= cold_max):
             raise ValueError(f"cold open {c1 - c0:.2f}s is outside "
-                             f"{COLDOPEN_MIN_S:.0f}-{COLDOPEN_MAX_S:.0f}s")
+                             f"{cold_min:.0f}-{cold_max:.0f}s")
         body0 = min(sg.start_s for sg in segments)
         body1 = max(sg.end_s for sg in segments)
         if not (body0 <= c0 and c1 <= body1):
@@ -1437,8 +2181,13 @@ def render_longform(
                    "-i", str(source)]
 
     fps = cfg.get("fps", 30)
+    scale_flags = str(cfg.get("scale_flags", "")).strip()
+    scale_suffix = f":flags={scale_flags}" if scale_flags else ""
+    clarity = str(cfg.get("clarity_filter", "")).strip().strip(",")
+    clarity_suffix = f",{clarity}" if clarity else ""
     chain = (
-        f"{vlabel}{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
+        f"{vlabel}{pre}scale={w}:{h}:force_original_aspect_ratio=decrease{scale_suffix}"
+        f"{clarity_suffix},"
         f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,"
         f"fps={fps}[vbase]"
     )
@@ -1487,7 +2236,8 @@ def render_longform(
                 cwm = "[cbase]null[cwm]"
             parts.append(
                 f"[{cold_idx}:v]trim=start=0:end={cdur:.3f},setpts=PTS-STARTPTS,"
-                f"{pre}scale={w}:{h}:force_original_aspect_ratio=decrease,"
+                f"{pre}scale={w}:{h}:force_original_aspect_ratio=decrease{scale_suffix}"
+                f"{clarity_suffix},"
                 f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:color=black,fps={fps}[cbase]"
             )
             parts.append(cwm)
@@ -1509,7 +2259,7 @@ def render_longform(
         "ffmpeg", "-y", *inputs,
         "-filter_complex", ";".join(parts),
         "-map", "[vout]", "-map", amap,
-        "-c:v", "libx264", "-preset", "medium", "-crf", str(cfg.get("crf", 20)),
+        *encode_args(cfg),
         "-c:a", "aac", "-b:a", cfg.get("audio_bitrate", "192k"),
         "-movflags", "+faststart",
         str(out_path),
@@ -1553,7 +2303,19 @@ def render_short(
     crop: str | None = None,
     bg_crop: str | None = None,
     tile_crops: tuple[str, str] | None = None,
+    duo_punch: Sequence[tuple[str, str]] | None = None,
+    duo_punch_filters: tuple[str, str] | None = None,
+    duo_punch_post: tuple[str, str] | None = None,
+    cta: dict[str, Any] | None = None,
 ) -> float:
+    """Render the short. `duo_punch` (SHORTS_EDITOR_V2) gives per-segment
+    (top, bottom) windows for the fixed 50/50 stack from layout.compose —
+    subject-centred, with the speaker's tile zoomed on a punched segment.
+    Without it the render is exactly the static duo_fill / legacy path.
+
+    `cta` is the record cta.build_assets returned: the "FULL VIDEO" call to
+    action's PNG sequence (and its sound) composited AFTER the watermark in
+    this same pass — one encode, no second re-encode of the picture."""
     w, h = cfg.get("resolution", [1080, 1920])
     fps = cfg.get("fps", 30)
     trims, concat, vlabel = _concat_filter(segments, offset_s)
@@ -1652,8 +2414,29 @@ def render_short(
             f"[bgb][fgs]overlay=(W-w)/2:(H-h)/2[vv]"
         )
 
+    # SHORTS_EDITOR_V2: per-segment windows on the fixed 50/50 stack. Same
+    # trims, same cut points; the divider never moves.
+    punched = bool(mode == "duo_fill" and duo_punch)
+    punch_chain = ""
+    if punched:
+        if len(duo_punch) != len(segments):
+            raise ValueError("duo_punch needs one (top, bottom) window per segment")
+        clarity_cfg = cfg.get("clarity") or {}
+        punch_chain = duo_punch_filter(segments, offset_s, duo_punch, w, h, tile_filters=duo_punch_filters,
+                                       scale_flags=str(clarity_cfg.get("scale_flags", "") or ""),
+                                       tile_post=duo_punch_post)
+
     tail = f"[vv]fps={fps}"
 
+    # Colour correction — the SHORT FLOOR grade, one source for the legacy
+    # and the V2 path alike (see short_grade_filter). It grades the PICTURE
+    # before the captions burn in, so caption white is never lifted.
+    grade = short_grade_filter(cfg)
+    if grade:
+        tail += "," + grade
+
+    # The paragraphs below describe the daily curve that this block applied
+    # until 2026-09-06; it is still available as color.source: curve.
     # Colour grade the PICTURE, before the captions are burned in.
     #
     # Order is the whole point. Grading after `ass=` would lift the caption
@@ -1669,20 +2452,6 @@ def render_short(
     # A curve fixes that: lift the shadows and midtones hard, then pull the
     # top end DOWN to 0.97 so the highlights roll off instead of clipping.
     # Brighter picture, whites intact.
-    if cfg.get("color", {}).get("enabled", True):
-        c = cfg.get("color", {})
-        curve = c.get(
-            "curve",
-            # x/y control points. 0.25 -> 0.31 and 0.5 -> 0.57 is the lift;
-            # 1.0 -> 0.97 is the highlight rolloff that protects the whites.
-            "0/0.02 0.25/0.31 0.5/0.57 0.75/0.80 1/0.97",
-        )
-        tail += (
-            f",curves=all='{curve}'"
-            f",eq=saturation={float(c.get('saturation', 1.10)):.3f}"
-            f":contrast={float(c.get('contrast', 1.05)):.3f}"
-        )
-
     if ass_path is not None:
         # ffmpeg's filter parser mangles Windows drive letters and backslashes,
         # so run with cwd set to the file's directory and reference it by name.
@@ -1704,26 +2473,81 @@ def render_short(
     # castillo_FINAL.mp4 carries it over her tile, so both is the house look.
     wm_margin = int(round(w * float(cfg.get("watermark_margin_frac", 0.035))))
     wm_y: int | list[int] | None = None
-    if mode == "duo_fill" and cfg.get("watermark_per_tile", True):
+    # SHORTS_EDITOR_V2 keeps ONE mark in its reserved top-right box
+    # (layout.watermark_box): the second, seam-pinned mark of the legacy stack
+    # would sit inside the caption rail on the divider.
+    if mode == "duo_fill" and cfg.get("watermark_per_tile", True) and not punched:
         wm_y = [wm_margin, h // 2 + wm_margin]
     wm_in, wm_filter = _watermark_chain(cfg, w, h, "vbase", "vwm", 0.11,
                                         y=wm_y)
     post = "[vwm]format=yuv420p[vout]"
 
-    filter_complex = f"{trims};{concat};{vertical};{tail};{wm_filter};{post}"
+    # The call to action (src/boydclips/cta.py) rides on top of the marked
+    # frame: last overlay in, so nothing grades or sharpens its edges. Its
+    # sound is mixed under the concatenated dialogue at the measured gain.
+    cta_in: list[str] = []
+    cta_filters = ""
+    audio_out = "[ac]"
+    if cta:
+        from . import cta as _cta
+        next_idx = 1 + len(wm_in) // 2
+        cta_in, cta_v, cta_a = _cta.ffmpeg_chain(cta, next_idx, "vwm", "vcta", "ac", "acta")
+        cta_filters = ";" + cta_v
+        post = "[vcta]format=yuv420p[vout]"
+        if cta_a:
+            cta_filters += ";" + cta_a
+            audio_out = "[acta]"
+
+    if punched:
+        filter_complex = f"{punch_chain};{tail};{wm_filter}{cta_filters};{post}"
+    else:
+        filter_complex = f"{trims};{concat};{vertical};{tail};{wm_filter}{cta_filters};{post}"
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     cwd = ass_path.parent if ass_path is not None else None
     _run([
-        "ffmpeg", "-y", "-i", str(source.resolve()), *wm_in,
+        "ffmpeg", "-y", "-i", str(source.resolve()), *wm_in, *cta_in,
         "-filter_complex", filter_complex,
-        "-map", "[vout]", "-map", "[ac]",
-        "-c:v", "libx264", "-preset", "medium", "-crf", str(cfg.get("crf", 20)),
+        "-map", "[vout]", "-map", audio_out,
+        *encode_args(cfg),
         "-c:a", "aac", "-b:a", cfg.get("audio_bitrate", "160k"),
         "-movflags", "+faststart",
         str(out_path.resolve()),
     ], cwd=cwd)
     return probe_duration(out_path)
+
+
+def encode_args(cfg: dict[str, Any]) -> list[str]:
+    """Return the shared upload encode policy for any pipeline video.
+
+    ``encode.mode: average_bitrate`` gives Shorts a measurable upload target;
+    ``encode.mode: crf`` preserves the long-form CRF workflow.  Legacy top-level
+    ``preset``/``crf`` keys remain valid so old fixtures and saved configs render
+    reproducibly.
+    """
+    policy = dict(cfg.get("encode") or {})
+    mode = str(policy.get("mode", "crf")).strip().lower()
+    preset = str(policy.get("preset", cfg.get("preset", "medium")))
+    args = ["-c:v", "libx264", "-preset", preset]
+    if mode == "average_bitrate":
+        bitrate = str(policy.get("video_bitrate", "")).strip()
+        if not bitrate:
+            raise ValueError("average_bitrate encode mode needs video_bitrate")
+        args += ["-b:v", bitrate]
+        if policy.get("minrate"):
+            args += ["-minrate", str(policy["minrate"])]
+        if policy.get("maxrate"):
+            args += ["-maxrate", str(policy["maxrate"])]
+        if policy.get("bufsize"):
+            args += ["-bufsize", str(policy["bufsize"])]
+        if policy.get("x264_params"):
+            args += ["-x264-params", str(policy["x264_params"])]
+    elif mode == "crf":
+        args += ["-crf", str(policy.get("crf", cfg.get("crf", 20)))]
+    else:
+        raise ValueError(f"unknown encode mode: {mode}")
+    args += ["-pix_fmt", "yuv420p"]
+    return args
 
 
 def extract_thumbnail(source: Path, at_s: float, out_path: Path) -> Path:

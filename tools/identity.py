@@ -17,9 +17,10 @@ The fact that actually settles it: **Boyd is the same person in every case.**
 So recognise her. That removes `expression_side`, `judge_crop` and `plate_crop`
 from the hand-authored set at once, and it cannot be inverted by a layout change.
 
-The reference is built from her face in the five APPROVED judge crops - the only
-place in this repo where "that is definitely Boyd" is established by Nathan
-rather than asserted by me.
+The reference is built from the five checked-in APPROVED Boyd cutouts - the only
+stable place in this repo where "that is definitely Boyd" is established by
+Nathan rather than asserted by the pipeline.  Their index stores the approved
+face box, so a stray small face in a background cannot contaminate the model.
 """
 import os
 import sys
@@ -35,6 +36,8 @@ SFACE = os.path.join(ROOT, "models", "sface.onnx")
 import thumb_pipeline as _P  # noqa: E402
 YUNET = _P.YUNET
 REF = os.path.join(ROOT, "config", "boyd_reference.npy")
+APPROVED_INDEX = os.path.join(
+    ROOT, "assets", "harvest", "reactions", "boyd", "index.json")
 
 # OpenCV's documented cosine threshold for SFace is 0.363 for "same person".
 # It is NOT used as a hard gate here - the judge is chosen as the BEST match
@@ -118,36 +121,42 @@ def find_other(bgr, judge_row):
     return max(rows, key=lambda r: r[3])
 
 
+def _approved_faces():
+    """Yield (case, image, Boyd face row) from stable approved cutouts."""
+    import json
+
+    if not os.path.exists(APPROVED_INDEX):
+        raise SystemExit(f"build_reference: missing approved index {APPROVED_INDEX}")
+    with open(APPROVED_INDEX, encoding="utf-8") as f:
+        items = json.load(f)
+    for item in items:
+        path = item.get("file") or ""
+        if not os.path.isabs(path):
+            path = os.path.join(ROOT, path)
+        if not os.path.exists(path):
+            path = os.path.join(os.path.dirname(APPROVED_INDEX),
+                                os.path.basename(path))
+        im = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        if im is None:
+            raise SystemExit(f"build_reference: unreadable approved cutout {path}")
+        if im.ndim == 3 and im.shape[2] == 4:
+            im = cv2.cvtColor(im, cv2.COLOR_BGRA2BGR)
+        rows = faces_in(im)
+        x, y, w, h = [float(v) for v in item["face_box"]]
+        inside = [r for r in rows
+                  if x <= r[0] + r[2] / 2 <= x + w
+                  and y <= r[1] + r[3] / 2 <= y + h]
+        if not inside:
+            raise SystemExit(
+                f"build_reference: approved face not detected for {item['case']}")
+        yield item["case"], im, max(inside, key=lambda r: r[3])
+
+
 def build_reference(out=REF, verbose=True):
-    """Boyd's reference embeddings, taken from the APPROVED judge crops only.
-
-    One view per case. Using the hand-typed `judge_crop` as the source is the
-    point: those are the regions Nathan signed off on, so they are the only
-    ground truth in the repo for what she looks like.
-    """
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import thumb_pipeline as P
-    import tiles as T
-
+    """Build Boyd embeddings from the checked-in approved face assets."""
     vecs, names = [], []
-    for name, c in P.cases().items():
-        if not c.get("judge_crop"):
-            continue
-        v = os.path.join(ROOT, c["video"])
-        if not os.path.exists(v):
-            continue
-        t = c["judge_t"] - c.get("offset", 0)
-        fr = T.frame_at(v, t)
-        if fr is None:
-            continue
-        cw, ch, cx, cy = [int(x) for x in c["judge_crop"].split(":")]
-        sub = fr[cy:cy + ch, cx:cx + cw]
-        rows = faces_in(sub)
-        if not rows:
-            if verbose:
-                print(f"  {name}: no face in approved judge_crop - skipped")
-            continue
-        vecs.append(embed(sub, max(rows, key=lambda r: r[3])))
+    for name, im, row in _approved_faces():
+        vecs.append(embed(im, row))
         names.append(name)
     if not vecs:
         raise SystemExit("build_reference: no approved judge crops yielded a face")
@@ -164,38 +173,26 @@ def build_reference(out=REF, verbose=True):
 
 
 def selftest():
-    """Known answer: on every approved case the judge is the face inside the
-    hand-typed judge_crop and the defendant is the one inside plate_crop.
-
-    Leave-one-out - a case is never scored against a reference built from
-    itself, or this measures memorisation instead of recognition.
-    """
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import thumb_pipeline as P
-    import tiles as T
-
+    """Leave each approved view out, then identify it from the other four."""
     arr, names = build_reference(verbose=True)
     print()
     ok = True
     hits = 0
     total = 0
-    for i, name in enumerate(names):
-        c = P.cases()[name]
-        v = os.path.join(ROOT, c["video"])
-        t = c["judge_t"] - c.get("offset", 0)
-        fr = T.frame_at(v, t)
+    approved = list(_approved_faces())
+    for i, (name, im, expected) in enumerate(approved):
         loo = np.delete(arr, i, axis=0)          # leave THIS case out
-        row, sc = find_judge(fr, ref=loo)
-        cw, ch, cx, cy = [int(x) for x in c["judge_crop"].split(":")]
+        row, sc = find_judge(im, ref=loo)
         total += 1
         if row is None:
             print(f"  {name:9} FAIL no face found"); ok = False; continue
-        fcx, fcy = row[0] + row[2] / 2, row[1] + row[3] / 2
-        inside = (cx <= fcx <= cx + cw) and (cy <= fcy <= cy + ch)
-        hits += inside
-        print(f"  {name:9} picked face at ({fcx:6.0f},{fcy:5.0f})  cos={sc:.3f}  "
-              f"{'INSIDE approved judge_crop' if inside else 'OUTSIDE - WRONG PERSON'}")
-        if not inside:
+        picked = tuple(np.round(row[:4]).astype(int))
+        want = tuple(np.round(expected[:4]).astype(int))
+        match = picked == want and sc >= COSINE_SAME
+        hits += match
+        print(f"  {name:9} cosine={sc:.3f}  "
+              f"{'APPROVED FACE' if match else 'WRONG OR BELOW THRESHOLD'}")
+        if not match:
             ok = False
     print(f"\n  {hits}/{total} leave-one-out identifications correct")
     print("SELFTEST_PASS identity" if ok else "SELFTEST_FAIL identity")

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from .config import Config
+from . import readiness
 from .state import Store
 
 YOUTUBE_SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
@@ -219,19 +220,9 @@ def publish_pair(
     a clip with a broken promise in the caption.
     """
     mode = cfg.require("autonomy.mode")
-    report: dict[str, Any] = {"mode": mode, "longform": {}, "short": {}, "skipped": []}
-
-    # Re-publishing uploads a second copy and, because record_publication is an
-    # upsert on (clip_id, platform), overwrites the first one's URL — leaving a
-    # public video with no row pointing at it. SAFETY_RULES R7 depends on that
-    # row existing to action a takedown, so this guard is a safety control, not
-    # just tidiness.
-    for clip in (longform, short):
-        if clip and store.publication_url(clip["clip_id"], "youtube"):
-            report["skipped"].append(
-                f"{clip['clip_id']} is already published — refusing to upload a duplicate"
-            )
-            return report
+    report: dict[str, Any] = {
+        "mode": mode, "longform": {}, "short": {}, "skipped": [], "complete": False,
+    }
 
     if mode == "manual":
         report["skipped"].append(
@@ -259,12 +250,25 @@ def publish_pair(
         )
         return report
 
+    if mode == "auto":
+        gate = cfg.require("autonomy.promotion_gate")
+        ready, why = store.promotion_ready(
+            gate["min_consecutive_approvals"], gate["max_safety_rejects"]
+        )
+        if not ready:
+            report["skipped"].append(f"REFUSING auto publication: {why}")
+            return report
+
+    # One strict boundary owns manifest, source, QC, thumbnail selection,
+    # decodability, hashes and artifact-bound approval.
+    evidence = readiness.validate_publish_bundle(longform or {}, short or {}, store=store)
+
     publishers = build_publishers(cfg)
     if not publishers:
         report["skipped"].append("no platforms enabled in publish.*")
         return report
 
-    longform_url = ""
+    longform_url = store.publication_url(longform["clip_id"], "youtube") if longform else None
 
     if longform:
         yt = publishers.get("youtube")
@@ -272,24 +276,32 @@ def publish_pair(
             report["skipped"].append(
                 "long-form has no destination — YouTube is the only long-form platform"
             )
+        elif longform_url:
+            report["longform"] = {
+                "platform": "youtube", "url": longform_url, "reused": True,
+            }
         else:
             privacy = privacy_for(cfg, "youtube", mode)
-            # The house-style thumbnail sits beside the clip; scripts/make_thumbnail.py
-            # writes it there. Falls back to nothing if it was never generated.
-            thumb = Path(longform["file_path"]).parent / "thumbnail_quote.jpg"
-            result = yt.publish(
-                Path(longform["file_path"]),
-                longform["title"],
-                longform["description"],
-                privacy,
-                tags=cfg.get("packaging.longform.tags", []),
-                thumbnail=thumb if thumb.is_file() else None,
-            )
-            store.record_publication(
-                longform["clip_id"], result.platform, result.remote_id, result.url, result.privacy
-            )
-            longform_url = result.url
-            report["longform"] = {"platform": "youtube", "url": result.url, "privacy": privacy}
+            try:
+                result = yt.publish(
+                    Path(longform["file_path"]),
+                    longform["title"],
+                    longform["description"],
+                    privacy,
+                    tags=longform.get("tags") or cfg.get("packaging.longform.tags", []),
+                    thumbnail=Path(evidence["thumbnail"]),
+                )
+                store.record_publication(
+                    longform["clip_id"], result.platform, result.remote_id, result.url, result.privacy
+                )
+                longform_url = result.url
+                report["longform"] = {
+                    "platform": "youtube", "url": result.url, "privacy": privacy, "reused": False,
+                }
+            except Exception as exc:
+                report["longform"] = {
+                    "error": f"{type(exc).__name__}: {str(exc).splitlines()[0]}"
+                }
 
     if short:
         if not longform_url:
@@ -308,6 +320,10 @@ def publish_pair(
         store.set_clip_description(short["clip_id"], description)
 
         for name, publisher in publishers.items():
+            existing = store.publication_url(short["clip_id"], name)
+            if existing:
+                report["short"][name] = {"url": existing, "reused": True}
+                continue
             try:
                 privacy = privacy_for(cfg, name, mode)
                 result = publisher.publish(
@@ -316,7 +332,9 @@ def publish_pair(
                 store.record_publication(
                     short["clip_id"], result.platform, result.remote_id, result.url, result.privacy
                 )
-                report["short"][name] = {"url": result.url, "privacy": privacy}
+                report["short"][name] = {
+                    "url": result.url, "privacy": privacy, "reused": False,
+                }
             except Exception as exc:
                 # One platform must not take down the others — and the failure
                 # that matters most is a real API error (googleapiclient's
@@ -328,4 +346,9 @@ def publish_pair(
                     "error": f"{type(exc).__name__}: {str(exc).splitlines()[0]}"
                 }
 
+    destinations = set(publishers)
+    short_complete = bool(short) and destinations and all(
+        report["short"].get(name, {}).get("url") for name in destinations
+    )
+    report["complete"] = bool(longform_url) and bool(short_complete)
     return report
